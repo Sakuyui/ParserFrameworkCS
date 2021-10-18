@@ -77,7 +77,7 @@ namespace YaccLexCS.ycomplier.automata
             foreach (var node in CurrentStateCollection)
             {
                 var e = _nodeNext[node];
-                foreach (var edge in e.Where(edge => edge.IsCanTrans()))
+                foreach (var edge in e.Where(edge => edge.IsCanTrans.Judge(null, null)))
                 {
                     set.Add(edge.ToNode.NodeId);
                 }
