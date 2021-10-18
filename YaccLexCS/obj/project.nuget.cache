@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "634qhHApcoTIi+B+WWh3e/FL/qtnzLvasydA74x2FDW5isvSDu1hzB9Yf+wr8FUvp1gL2evi5lMWBPK8OAOWwA==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Sakuyui39\\RiderProjects\\YaccLexCS\\YaccLexCS\\YaccLexCS.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Sakuyui39\\.nuget\\packages\\system.codedom\\6.0.0-rc.2.21480.5\\system.codedom.6.0.0-rc.2.21480.5.nupkg.sha512"
+  ],
+  "logs": []
+}
