@@ -8,21 +8,21 @@ namespace YaccLexCS.ycomplier
 
         public string TokenText
         {
-            get => (string) this["attr_tokenSourceText"];
-            set => this["attr_tokenSourceText"] = value;
+            get => (string) this["v_tokenSourceText"];
+            set => this["v_tokenSourceText"] = value;
         }
           
 
         public dynamic TokenVal
         {
-            get => this["attr_tokenVal"];
-            set => this["attr_tokenVal"] = value;
+            get => this["v_tokenVal"];
+            set => this["v_tokenVal"] = value;
         }
 
         public ParserContext()
         {
-            this["attr_tokenSourceText"] = "";
-            this["attr_tokenVal"] = null!;
+            this["v_tokenSourceText"] = "";
+            this["v_tokenVal"] = null!;
         }
         public object this[string key]
         {

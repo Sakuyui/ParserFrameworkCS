@@ -8,7 +8,7 @@
         public AutomataNode FromNode;
         public AutomataNode ToNode;
         
-        public delegate object InTransEvent(params object[] objs);
+        public delegate object? InTransEvent(object input, params object[] objs);
        // public delegate bool TransStrategy(AutomataContext ctx, AutomataEdge edge, params object[] objs);
 
         public InTransEvent EventTransInEdge;

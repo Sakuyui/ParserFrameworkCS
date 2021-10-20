@@ -9,6 +9,13 @@ namespace YaccLexCS.ycomplier.automata
     public class AutomataContext
     {
         public dynamic CurInput;
+        private Dictionary<object, object> _kvMemory = new();
+
+        public object this[object obj]
+        {
+            get => _kvMemory[obj];
+            set => _kvMemory[obj] = value;
+        }
         public void ResetContext()
         {
             
@@ -29,13 +36,60 @@ namespace YaccLexCS.ycomplier.automata
         private Dictionary<object, AutomataNode> _nodeMap = new(); //map node id -> node
 
 
-        protected AutomataContext _context = new();
+        public readonly AutomataContext Context = new();
         public Automata SetStartState(params object[] idSet)
         {
             StartState = new HashSet<object>(idSet);
             return this;
         }
-        
+
+        public void ParseFromCurrentStates(object input)
+        {
+            $">> get input {input}".PrintToConsole();
+            var transEdges = CurrentStateCollection.SelectMany(e => 
+                _nodeNext[e].Where(edge => edge.IsCanTrans.Judge(Context, input, null))).ToArray();
+
+            foreach (var node in transEdges)
+            {
+                $"can trans from {node.FromNode.NodeId} -> {node.ToNode.NodeId}".PrintToConsole();
+            }
+            
+            CurrentStateCollection.Clear();
+            foreach (var e in transEdges)
+            {
+                e.EventTransInEdge?.Invoke(input, Context);
+                CurrentStateCollection.Add(e.ToNode.NodeId);
+            }
+            
+            $"get non-closure state = {CurrentStateCollection.GetMultiDimensionString()}".PrintToConsole();
+            //closure
+            ApplyClosure();
+            $"after closure state = {CurrentStateCollection.GetMultiDimensionString()}".PrintToConsole();
+            $"<< process {input} finish.\n".PrintToConsole();
+        }
+        public bool ParseFromCurrentStates(IEnumerable<object> input)
+        {
+            $">> parse {input.GetMultiDimensionString()}".PrintToConsole();
+            $"cur state = {CurrentStateCollection.GetMultiDimensionString()} and apply closure.".PrintToConsole();
+            ApplyClosure();
+            $"cur state = {CurrentStateCollection.GetMultiDimensionString()} after closure.\n".PrintToConsole();
+            
+            foreach (var e in input)
+            {
+                $"try input {e} from {CurrentStateCollection.GetMultiDimensionString()}".PrintToConsole();
+                ParseFromCurrentStates(e);
+                $"after input state = {CurrentStateCollection.GetMultiDimensionString()}".PrintToConsole();
+                
+                if (!CurrentStateCollection.Any())
+                {
+                    $"Parse error after input {e}".PrintToConsole();
+                    return false;
+                }
+                "".PrintToConsole();
+            }
+
+            return true;
+        }
         public Automata SetAcceptState(params object[] idSet)
         {
             AcceptState = new HashSet<object>(idSet);
@@ -49,23 +103,30 @@ namespace YaccLexCS.ycomplier.automata
 
         public Automata ResetAutomata()
         {
-            _context.ResetContext();
+            Context.ResetContext();
             CurrentStateCollection.Clear();
             foreach (var s in StartState)
                 CurrentStateCollection.Add(s);
             return this;
         }
 
-        public void AddNode(AutomataNode node)
+        public Automata AddNode(AutomataNode node)
         {
             if (_nodeMap.ContainsKey(node.NodeId))
                 throw new Exception("Repeat same node id");
             _nodeNext[node.NodeId] = new List<AutomataEdge>();
             _nodeMap[node.NodeId] = node;
             Nodes.Add(node);
+            return this;
         }
 
-
+        public void AddNodes(IEnumerable<AutomataNode> node)
+        {
+            foreach (var n in node)
+            {
+                AddNode(n);
+            }
+        }
 
         public bool IsAccepted()
         {
@@ -73,17 +134,24 @@ namespace YaccLexCS.ycomplier.automata
         }
         public void ApplyClosure()
         {
-            var set = new HashSet<object>(CurrentStateCollection);
-            foreach (var node in CurrentStateCollection)
+            var set = CurrentStateCollection.ToList();
+            
+            foreach (var edge in set.Select(node => _nodeNext[node])
+                .SelectMany(e => e.Where(edge => edge.IsCanTrans.Judge(null, null))))
             {
-                var e = _nodeNext[node];
-                foreach (var edge in e.Where(edge => edge.IsCanTrans.Judge(null, null)))
-                {
-                    set.Add(edge.ToNode.NodeId);
-                }
+                edge.EventTransInEdge?.Invoke(null, Context);
+                CurrentStateCollection.Add(edge.ToNode.NodeId);
             }
 
-            CurrentStateCollection = set;
+            
+        }
+
+        public void AddEdges(IEnumerable<AutomataEdge> edge)
+        {
+            foreach (var e in edge)
+            {
+                AddEdge(e);
+            }
         }
         public void AddEdge(AutomataEdge edge)
         {
@@ -108,7 +176,7 @@ namespace YaccLexCS.ycomplier.automata
         public override string ToString()
         {
             var str = "===============================================\n";
-            str += $"[Cur state: {CurrentStateCollection.Aggregate((a, b) => a + ", " + b)}]\n";
+            str += $"[Cur state: {CurrentStateCollection.Aggregate("", (a, b) => a + ", " + b)}]\n";
             str += $"start from node_id {StartState.Aggregate((a, b) => a + ", " + b)}\n";
             var i = 0;
             foreach(var node in Nodes)

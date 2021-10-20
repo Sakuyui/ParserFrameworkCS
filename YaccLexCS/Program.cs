@@ -23,9 +23,9 @@ namespace YaccLexCS
         [TokenDefinition("SUB", "-")]
         [TokenDefinition("MUL", "*")]
         [TokenDefinition("DIV", "/")]
-        public static void Operator()
+        public static void Operator(ParserContext content)
         {
-            $"meet operator".PrintToConsole();
+            $"meet operator {content.TokenText}".PrintToConsole();
         }
 
         [TokenDefinition("CR", "\n")]
@@ -39,7 +39,7 @@ namespace YaccLexCS
         [TokenDefinition("Skip", @"[ \t]", true)]
         public static void Skip(){}
         
-        [TokenDefinition("DOUBLE_LITERAL", @"^(([0-9]+\.[0-9]+)|([1-9][0-9]*)|0)", true)]
+        [TokenDefinition("DOUBLE_LITERAL", @"(([0-9]+\.[0-9]+)|([1-9][0-9]*)|0)", true)]
         public static void DoubleLiteral(ParserContext context)
         {
             $"DOUBLE_LITERAL with val = {context.TokenText}".PrintToConsole();
@@ -138,10 +138,12 @@ namespace YaccLexCS
             }
         }
 
-        public static void BuildAutomataFromTopExp(string exp)
-        {
-            $">> Build {exp}".PrintToConsole();
-        }
+
+
+
+       
+       
+        
 
         public static string ConcatAutomata(string a1, string a2)
         {
@@ -165,7 +167,8 @@ namespace YaccLexCS
             //register
             var cur = "";
             var orExp = new List<string>();
-            
+
+            var lastResult = "";
             void ShowStrStack()
             {
                 $"current stack: len = {strStack.Count}, content = {strStack.ToEnumerationString()}".PrintToConsole();
@@ -194,7 +197,7 @@ namespace YaccLexCS
                     $"\n meet ), merge cur string and all element in or stack".PrintToConsole();
                     orExp.Add(cur);
                     
-                    BuildAutomataFromTopExp(cur);
+                    ReAutomata.BuildAutomataFromTopExp(cur);
 
                     var result = OrMergeAutomata(orExp);
                     $"build finish..begin merge result = {result}".PrintToConsole();
@@ -212,7 +215,8 @@ namespace YaccLexCS
                     
                     
                     var r = ConcatAutomata(cur, result);
-                    
+                    lastResult = result;
+                    $"last result = {lastResult}".PrintToConsole();
                     cur = r;
                 }
                 else if (c == '|')
@@ -222,7 +226,11 @@ namespace YaccLexCS
                     cur ="";
                     ShowOrStack();
                 }
-                else
+                else if (cur == "" && (c == '+' || c == '*'))
+                {
+                    $"meet {c}, build ({lastResult}){c}".PrintToConsole();
+                    cur += c;
+                }else
                 {
                     cur += c;
                     
@@ -231,82 +239,17 @@ namespace YaccLexCS
             }
             $"final = {cur}".PrintToConsole();
         }
-        public static void TryParse(string s)
-        {
-            var sb = new StringBuilder(s);
-            //stack
-            var bStack = new Stack<char>();
-            var strStack = new Stack<string>();
-            var orExpStack = new Stack<List<string>>();
-            
-            //register
-            var cur = "";
-            var orExp = new List<string>();
-            
-            void ShowStrStack()
-            {
-                $"current stack: len = {strStack.Count}, content = {strStack.ToEnumerationString()}".PrintToConsole();
-                
-            }
-            void ShowOrStack()
-            {
-                $"current stack: len = {orExp.Count}, content = {orExp.ToEnumerationString()}".PrintToConsole();
-                
-            }
-            while (sb.Length > 0)
-            {
-                var c = sb[0];
-                sb.Remove(0, 1);
-                if (c == '(')
-                {
-                    $"meet (, begin a new exp, save cur = {cur} to stack".PrintToConsole();
-                    bStack.Push('(');
-                    strStack.Push(cur);
-                    orExpStack.Push(orExp);
-                    orExp = new List<string>();
-                    cur = "";
-                    ShowStrStack();
-                }else if (c == ')')
-                {
-                    $"\n meet ), merge cur string and all element in or stack".PrintToConsole();
-                    orExp.Add(cur);
-                    var result = "[exp :" + orExp.Aggregate("", (a, b) => a + " | " + b) + "]";
-                    result.PrintToConsole();
-                    orExp.Clear();
-                    orExp = orExpStack.Pop();
-                    
-                    
-                    if (!bStack.Any())
-                        throw new Exception("brace exception");
-                    bStack.Pop();
-                    cur = strStack.Pop();
-                    $"restore str = {cur}".PrintToConsole();
-                    var r = cur + result;
-                    $"concat {cur} with {result} = ".PrintToConsole();
-                    cur = r;
-                }
-                else if (c == '|')
-                {
-                    $"meet |, cur str = {cur}, save to 'or stack' ".PrintToConsole();
-                    orExp.Add(cur);
-                    cur ="";
-                    ShowOrStack();
-                }
-                else
-                {
-                    cur += c;
-                    
-                }
-                
-            }
-            $"final = {cur}".PrintToConsole();
-        }
+   
         public static void Main()
         {
 
+    
+            
+            
             ReAutomata reAutomata = new();
             //TryParse("((ab|cd|ef)|aaabc|((ag)(ge)))");
-            AutomataFrom(@"(([0-9]+\.[0-9]+)|([1-9][0-9]*)|0)");
+            //AutomataFrom(@"(([0-9]+\.[0-9]+)|([1-9][0-9]*)|0)");
+            ReAutomata.BuildAutomataFromExp("a(bc)+");
             // var tclassType = typeof(TokenList);
             // ReflectionUtil.GetAllTokenDefinition(typeof(TokenList)).PrintEnumerationToConsole();
             // "".PrintToConsole();
