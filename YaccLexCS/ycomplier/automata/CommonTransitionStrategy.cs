@@ -19,7 +19,7 @@ namespace YaccLexCS.ycomplier.automata
 
             public bool Judge(AutomataContext? ctx, object? tryInputItem, params object[]? objs)
             {
-                return true;
+                return tryInputItem == null;
             }
         }
 

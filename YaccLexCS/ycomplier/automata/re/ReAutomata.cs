@@ -27,7 +27,7 @@ namespace YaccLexCS.ycomplier.automata
     public class ReAutomata : Automata
     {
         public static Automata TopRegexAutomata = new Lazy<Automata>(BuildTopLevelParserAutomata).Value;
-        public static Automata RegexAutomata = new Lazy<Automata>(ReAutomataConstruction.BuildReParserAutomata()).Value;
+        public static Automata RegexAutomata = new Lazy<Automata>(ReParserBuilder.BuildReParserAutomata).Value;
         public static Automata BuildTopLevelParserAutomata()
         {
             var a = new Automata();

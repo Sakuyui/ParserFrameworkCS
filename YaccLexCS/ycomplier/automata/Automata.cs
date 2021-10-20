@@ -24,7 +24,7 @@ namespace YaccLexCS.ycomplier.automata
     public class Automata
     {
         public IEnumerable<object> StartState = new HashSet<object>();
-        public IEnumerable<object> AcceptState = new HashSet<object>();
+        public HashSet<object> AcceptState = new HashSet<object>();
         public HashSet<object> CurrentStateCollection = new();
         
         public HashSet<object> StartNodes => StartState.ToHashSet();
@@ -32,8 +32,8 @@ namespace YaccLexCS.ycomplier.automata
         public List<AutomataNode> Nodes = new(); //节点集合
         public List<AutomataEdge> Edges = new(); //边集合
         
-        private Dictionary<object, List<AutomataEdge>> _nodeNext = new(); // map node id -> edges that from this node
-        private Dictionary<object, AutomataNode> _nodeMap = new(); //map node id -> node
+        public Dictionary<object, List<AutomataEdge>> NodeNext = new(); // map node id -> edges that from this node
+        public Dictionary<object, AutomataNode> NodeMap = new(); //map node id -> node
 
 
         public readonly AutomataContext Context = new();
@@ -47,7 +47,7 @@ namespace YaccLexCS.ycomplier.automata
         {
             $">> get input {input}".PrintToConsole();
             var transEdges = CurrentStateCollection.SelectMany(e => 
-                _nodeNext[e].Where(edge => edge.IsCanTrans.Judge(Context, input, null))).ToArray();
+                NodeNext[e].Where(edge => edge.IsCanTrans.Judge(Context, input, null))).ToArray();
 
             foreach (var node in transEdges)
             {
@@ -112,10 +112,10 @@ namespace YaccLexCS.ycomplier.automata
 
         public Automata AddNode(AutomataNode node)
         {
-            if (_nodeMap.ContainsKey(node.NodeId))
+            if (NodeMap.ContainsKey(node.NodeId))
                 throw new Exception("Repeat same node id");
-            _nodeNext[node.NodeId] = new List<AutomataEdge>();
-            _nodeMap[node.NodeId] = node;
+            NodeNext[node.NodeId] = new List<AutomataEdge>();
+            NodeMap[node.NodeId] = node;
             Nodes.Add(node);
             return this;
         }
@@ -136,7 +136,7 @@ namespace YaccLexCS.ycomplier.automata
         {
             var set = CurrentStateCollection.ToList();
             
-            foreach (var edge in set.Select(node => _nodeNext[node])
+            foreach (var edge in set.Select(node => NodeNext[node])
                 .SelectMany(e => e.Where(edge => edge.IsCanTrans.Judge(null, null))))
             {
                 edge.EventTransInEdge?.Invoke(null, Context);
@@ -156,14 +156,14 @@ namespace YaccLexCS.ycomplier.automata
         public void AddEdge(AutomataEdge edge)
         {
             Edges.Add(edge);
-            if(!_nodeMap.ContainsKey(edge.FromNode.NodeId))
-                _nodeMap.Add(edge.FromNode.NodeId, edge.FromNode);
-            if(!_nodeMap.ContainsKey(edge.ToNode.NodeId))
-                _nodeMap.Add(edge.ToNode.NodeId, edge.ToNode);
-            if (!_nodeNext.ContainsKey(edge.FromNode.NodeId))
-                _nodeNext.Add(edge.FromNode.NodeId, new List<AutomataEdge>());
-            if(!_nodeNext[edge.FromNode.NodeId].Contains(edge))
-                _nodeNext[edge.FromNode.NodeId].Add(edge);
+            if(!NodeMap.ContainsKey(edge.FromNode.NodeId))
+                NodeMap.Add(edge.FromNode.NodeId, edge.FromNode);
+            if(!NodeMap.ContainsKey(edge.ToNode.NodeId))
+                NodeMap.Add(edge.ToNode.NodeId, edge.ToNode);
+            if (!NodeNext.ContainsKey(edge.FromNode.NodeId))
+                NodeNext.Add(edge.FromNode.NodeId, new List<AutomataEdge>());
+            if(!NodeNext[edge.FromNode.NodeId].Contains(edge))
+                NodeNext[edge.FromNode.NodeId].Add(edge);
         }
         
         public Automata()
@@ -177,12 +177,12 @@ namespace YaccLexCS.ycomplier.automata
         {
             var str = "===============================================\n";
             str += $"[Cur state: {CurrentStateCollection.Aggregate("", (a, b) => a + ", " + b)}]\n";
-            str += $"start from node_id {StartState.Aggregate((a, b) => a + ", " + b)}\n";
+            str += $"start from node_id {StartState.Aggregate((a, b) => a + ", " + b)}\n end state = {AcceptState.GetMultiDimensionString()}\n";
             var i = 0;
             foreach(var node in Nodes)
             {
                 str += $"*** Node ID = {node.NodeId}:\n";
-                str = _nodeNext[node.NodeId].Aggregate(str, (current, e) => current + $"\t* Edge_{i++}: {e}\n");
+                str = NodeNext[node.NodeId].Aggregate(str, (current, e) => current + $"\t* Edge_{i++}: {e}\n");
                 
                 str += "\n";
             }
@@ -191,7 +191,7 @@ namespace YaccLexCS.ycomplier.automata
 
         public AutomataNode GetNode(object id)
         {
-            return _nodeMap[id];
+            return NodeMap[id];
         }
     }
 }

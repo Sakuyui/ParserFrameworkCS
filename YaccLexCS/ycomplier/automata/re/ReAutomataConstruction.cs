@@ -6,60 +6,37 @@ namespace YaccLexCS.ycomplier.automata
 {
     public class ReAutomataConstruction
     {
-        public static Automata BuildReParserAutomata()
+   
+
+        public static object? EnterPlusChar(object input, object[] objs)
         {
-             var a = new Automata();
-            var node0 = new AutomataNode(0);
-            var node1 = new AutomataNode(1);
-            var node2 = new AutomataNode(2);
-            var node3 = new AutomataNode(3);
-            var node4 = new AutomataNode(4);
-
-
-           
-
-            var e1 = new ReEdge(node0, node0, AddSingleCharCompareNode ,CommonTransitionStrategy.NormalCharacterTrans.Instance);
-            var e2 = new ReEdge(node0, node0, new CommonTransitionStrategy.EqualJudgeTrans<char>('+'));
-            var e3 = new ReEdge(node0, node0, new CommonTransitionStrategy.EqualJudgeTrans<char>('*'));
-            var e4 = new ReEdge(node0, node0, new CommonTransitionStrategy.EqualJudgeTrans<char>('.'));
-            var e5 = new ReEdge(node0, node0, EnterLeftBrace, new CommonTransitionStrategy.EqualJudgeTrans<char>('('));
-            var e6 = new ReEdge(node0, node0, EnterRightBrace,new CommonTransitionStrategy.EqualJudgeTrans<char>(')'));
-            var e7 = new ReEdge(node0, node1, new CommonTransitionStrategy.EqualJudgeTrans<char>('['));
-            var e8 = new ReEdge(node0, node2, new CommonTransitionStrategy.EqualJudgeTrans<char>('{'));
+            var context = (AutomataContext) objs[0];
+         
+            var bStack = (Stack<char>)context["stack_Brace"];
             
-            var e9 = new ReEdge(node2, node2, new CommonTransitionStrategy.CharacterRangeTrans('1', '9'));
-            var e10 = new ReEdge(node2, node0, new CommonTransitionStrategy.EqualJudgeTrans<char>('}'));
             
-           
-            var e11 = new ReEdge(node1, node1, new CommonTransitionStrategy.EqualJudgeTrans<char>('^'));
-            var e12 = new ReEdge(node1, node1, new CommonTransitionStrategy.EqualJudgeTrans<char>('-'));
-            var e13 = new ReEdge(node1, node1, CommonTransitionStrategy.NormalCharacterTrans.Instance);
-            var e14 = new ReEdge(node1, node3, new CommonTransitionStrategy.EqualJudgeTrans<char>('\\'));
+            var strStack = (Stack<string>)context["tmp_strStack"];
+            var andStack = (Stack<Automata>) context["stack_AndAutomata"];
             
-            var e15 = new ReEdge(node1, node0, new CommonTransitionStrategy.EqualJudgeTrans<char>(']'));
-           
+            var cur = (string) context["tmp_cur"];
+            var curAutomata = (Automata) context["automata"];
+            $"meet +, cur automata = \n {curAutomata}".PrintToConsole();
             
-            var e16 = new ReEdge(node0, node1, new CommonTransitionStrategy.EqualJudgeTrans<char>('\\'));
-            var e17 = new ReEdge(node1, node4, new CommonTransitionStrategy.CharacterRangeTrans((char)0, (char)255));
             
-            var e18 = new ReEdge(node4, node0, 
-                new CommonTransitionStrategy.CustomTrans((ctx, item, _) => 
-                    item == null && ctx["stateStack"] is Stack<object> s && s.Any() && (int)s.Peek() == 0));
-
-            var e19 = new ReEdge(node4, node1, 
-                new CommonTransitionStrategy.CustomTrans((ctx, item, _) => 
-                    item == null && ctx["stateStack"] is Stack<object> s && s.Any() && (int)s.Peek() == 1));
-
-
-            //var e15 = new ReEdge(node4, node0, CommonTransitionStrategy.EpsilonTrans.Instance);
-
+            var orExpAutomataStack =  (Stack<List<Automata>>) context["stack_OrAutomata"];
+            var orExpAutomata = (List<Automata>) context["orExpAutomata"];
+            var orExpStack =  (Stack<List<string>>) context["tmp_OrExpStack"];
+            var orExp = (List<string>) context["tmp_OrExp"];
+            var lastNodeStack = (Stack<AutomataNode>) context["stack_lastNode"];
+            var lastNode = (AutomataNode) context["lastNode"];
             
-            a.AddNodes(new []{node0, node1, node2, node3, node4});
-            a.AddEdges(new []{e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13, e14, e15, e16, e17, e18, e19});
-            a.SetStartState(0).InitState();
-            return a;
+            var lastResult = (AutomataNode) context["lastResult"];
+            $"lastResult Node = {lastResult.NodeId}".PrintToConsole();
+            $"last Node = {lastNode.NodeId}".PrintToConsole();
+            curAutomata.AddEdge(new ReEdge(lastNode, lastResult, CommonTransitionStrategy.EpsilonTrans.Instance));
+            curAutomata.PrintToConsole();
+            return null;
         }
-
         public static object? EnterRightBrace(object input, object[] objs)
         {
             var context = (AutomataContext) objs[0];
@@ -82,11 +59,12 @@ namespace YaccLexCS.ycomplier.automata
             var lastNodeStack = (Stack<AutomataNode>) context["stack_lastNode"];
             var lastNode = (AutomataNode) context["lastNode"];
             
-           
             
             orExp.Add(cur);
+            orExpAutomata.Add(curAutomata);
             var result = OrMergeAutomata(orExp);
             var resultAutomata = OrMergeAutomata(orExpAutomata);
+            
             $"build finish..begin merge result = {result}".PrintToConsole();
             
             orExp.Clear();
@@ -102,7 +80,11 @@ namespace YaccLexCS.ycomplier.automata
             curAutomata = andStack.Pop();
             context["automata"] = curAutomata;
             var r = ConcatAutomata(cur, result);
-            ConcatAutomata(curAutomata, resultAutomata);
+            context["lastResult"] = curAutomata.NodeMap[curAutomata.AcceptState.First()];
+            resultAutomata = ConcatAutomata(curAutomata, resultAutomata);
+            context["lastNode"] = resultAutomata.NodeMap[resultAutomata.Nodes.Count - 1];
+            $"lastResultNode = {((AutomataNode)context["lastResult"]).NodeId}".PrintToConsole();
+            
             //         // orExp.Add(cur);
             //         //
             //         // ReAutomata.BuildAutomataFromTopExp(cur);
@@ -130,7 +112,8 @@ namespace YaccLexCS.ycomplier.automata
             return null;
         }
 
-        private static Automata OrMergeAutomata(List<Automata> orExpAutomata)
+        
+        private static Automata OrMergeAutomata(IReadOnlyCollection<Automata> orExpAutomata)
         {
             if (!orExpAutomata.Any())
             {
@@ -149,18 +132,27 @@ namespace YaccLexCS.ycomplier.automata
                 var c = a.Nodes.Count;
                 foreach (var node in a.Nodes)
                 {
+                    var es = a.NodeNext[node.NodeId];
                     automata.AddNode(new AutomataNode((int) node.NodeId + c));
+                    
                 }
                 endSet.Add(c + a.Nodes.Count);
                 foreach (var e in a.Edges)
                 {
-                    var e2 = e;
-                    e2.FromNode += c;
-                    automata.AddEdge();
+                    automata.AddEdge(new ReEdge(automata.NodeMap[(int)e.FromNode.NodeId + c]
+                        , automata.NodeMap[(int)e.ToNode.NodeId + c], e.EventTransInEdge, e.IsCanTrans));
                 }
             }
-            
-            
+
+            var end = automata.Nodes.Count;
+            automata.AddNode(new AutomataNode(end));
+            foreach (var e in endSet)
+            {
+                automata.AddEdge(new ReEdge(automata.NodeMap[e], automata.NodeMap[end], 
+                    CommonTransitionStrategy.EpsilonTrans.Instance));
+            }
+            return automata;
+
         }
 
         public static string ConcatAutomata(string a1, string a2)
@@ -168,14 +160,41 @@ namespace YaccLexCS.ycomplier.automata
             $"Concat {a1} with {a2}".PrintToConsole();
             return a1 + a2;
         }
-        public static Automata ConcatAutomata(Automata a1, Automata a2)
+        public static Automata? ConcatAutomata(Automata? a1, Automata? a2)
         {
+            if (a1 == null)
+                return a2;
+            if (a2 == null)
+                return a1;
+            
             $"Concat {a1} \n with {a2}\n".PrintToConsole();
             var c = a1.Nodes.Count;
-            var newNodes = a2.Nodes.Select(e => new AutomataNode(c + (int) e.NodeId));
-            a1.Nodes.AddRange(newNodes);
+            var newNodes = a2.Nodes.Select(e => new AutomataNode(c + (int) e.NodeId)).ToArray();
+            
+            a1.AddNodes(newNodes);
+            foreach(var node in newNodes)
+            {
+                var es = a2.NodeNext[(int) node.NodeId - c];
+                foreach (var e in es)
+                {
+                    a1.AddEdge(new ReEdge(a1.NodeMap[(int)e.FromNode.NodeId + c], a1.NodeMap[(int)e.ToNode.NodeId + c]
+                        , e.EventTransInEdge, e.IsCanTrans));
+                }
+                
+            }
+
+            foreach (var acc in a1.AcceptState)
+            {
+                foreach (var s in a2.StartNodes)
+                {
+                    a1.AddEdge(new ReEdge(a1.NodeMap[acc], a1.NodeMap[c + (int)s], CommonTransitionStrategy.EpsilonTrans.Instance));
+                }
+                
+            }
+            a1.AcceptState.Clear();
+            a1.AcceptState.Add(a1.Nodes.Count - 1);
             a1.PrintToConsole();
-            return null;
+            return a1;
         }
         public static string OrMergeAutomata(IEnumerable<string> automatas)
         {
@@ -194,7 +213,8 @@ namespace YaccLexCS.ycomplier.automata
             
             var cur = (string) context["tmp_cur"];
             var curAutomata = (Automata) context["automata"];
-            
+
+            curAutomata.SetAcceptState(curAutomata.NodeMap[curAutomata.Nodes.Count - 1].NodeId);
             strStack.Push(cur);
             andStack.Push(curAutomata);
             
