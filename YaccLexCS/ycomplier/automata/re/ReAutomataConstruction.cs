@@ -35,6 +35,133 @@ namespace YaccLexCS.ycomplier.automata
             $"last Node = {lastNode.NodeId}".PrintToConsole();
             curAutomata.AddEdge(new ReEdge(lastNode, lastResult, CommonTransitionStrategy.EpsilonTrans.Instance));
             curAutomata.PrintToConsole();
+            context["lastResult"] = lastNode;
+            
+            return null;
+        }
+
+        public static object? EnterLeftMBrace(object input, object[] objs)
+        {
+            var context = (AutomataContext) objs[0];
+            $"meet [, begin a new exp, to get char range state".PrintToConsole();
+            context["v_charRange_desc"] = "";
+            var curAutomata = (Automata) context["automata"];
+            context["lastResult"] = curAutomata.NodeMap[curAutomata.Nodes.Count - 1];
+            //var bStack = (Stack<char>)context["stack_Brace"];
+            //bStack.Push('(');
+            
+            return null;
+        }
+
+        public static object? ProcessSlashReturn(object input, object[] objs)
+        {
+            var context = (AutomataContext) objs[0];
+            var stack = (Stack<object>) context["stateStack"];
+            stack.Pop();
+            return null;
+        }
+
+        public static object? ProcessSlashChar(object input, object[] objs)
+        {
+            var context = (AutomataContext) objs[0];
+            var stack = (Stack<object>) context["stateStack"];
+            if ((int)stack.Peek() == 1)
+            {
+                context["v_charRange_desc"] = context["v_charRange_desc"] + "" + input;
+                $"now = {context["v_charRange_desc"]}".PrintToConsole();
+            }else if ((int) stack.Peek() == 0)
+            {
+                context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
+                AddSingleCharCompareNode(input, objs);
+                ((Automata) context["automata"]).PrintToConsole();
+            }
+
+            return null;
+        }
+        public static object? ProcessCharsSet(object input, object[] objs)
+        {
+            var context = (AutomataContext) objs[0];
+            $"\n process {context["v_charRange_desc"]}".PrintToConsole();
+            var desc = (string)context["v_charRange_desc"];
+            List<(char f, char e)> ranges = new();
+            HashSet<char> singleChar = new();
+            for (var i = 0; i < desc.Length;)
+            {
+                if (i == desc.Length - 1)
+                {
+                    singleChar.Add(desc[i++]);
+                }else if (i < desc.Length - 1 && desc[i + 1] != '-')
+                {
+                    singleChar.Add(desc[i++]);
+                }
+                else
+                {
+                    if (!(i < desc.Length - 2))
+                        throw new Exception("error format in [...]");
+                    ranges.Add((desc[i], desc[i + 2]));
+                    i += 3;
+                }
+            }
+            
+
+            var targetRange = new List<(int start, int end)>();
+            //区间合并
+            foreach (var r in ranges.OrderBy(e => e.f))
+            {
+                if (targetRange.Count == 0)
+                {
+                    targetRange.Add(r);
+                }
+                else
+                {
+                    var last = targetRange[^1];
+                    if (last.end < r.f)
+                    {
+                        targetRange.Add(r);
+                    }
+                    else
+                    {
+                        targetRange[^1] = (targetRange[^1].start, r.e); //merge
+                    }
+                }
+            }
+            //创建迁移判断策略
+            var customTrans = new CommonTransitionStrategy.CustomTrans(delegate(AutomataContext? ctx, object? item, object[] objects)
+                {
+                    if (item == null) return false;
+                    return singleChar.Contains((char) item) || targetRange.Any(r => (char) item >= r.start && (char) item <= r.end);
+                });
+            
+            targetRange.PrintEnumerationToConsole();
+            singleChar.PrintEnumerationToConsole();
+            
+            //connect
+            var lastNode = (AutomataNode) context["lastNode"];
+            var automata = (Automata) context["automata"];
+
+            var node = new AutomataNode(automata.Nodes.Count);
+            automata.AddNode(node);
+            automata.AddEdge(new ReEdge(lastNode, node, customTrans));
+            context["lastNode"] = node;
+
+            $"add a char set {desc}".PrintToConsole();
+
+            context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
+            automata.PrintToConsole();
+
+            return null;
+
+        }
+        public static object? InReadingCharSet(object input, object[] objs)
+        {
+            var context = (AutomataContext) objs[0];
+            $"get char {input} (reading char set state)".PrintToConsole();
+            context["v_charRange_desc"] = context["v_charRange_desc"] + "" + input;
+            context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
+            $"now = {context["v_charRange_desc"]}".PrintToConsole();
+            //var bStack = (Stack<char>)context["stack_Brace"];
+            //bStack.Push('(');
+            
             return null;
         }
         public static object? EnterRightBrace(object input, object[] objs)

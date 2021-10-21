@@ -95,26 +95,7 @@ namespace YaccLexCS.ycomplier.automata
          public static void BuildAutomataFromExp(string exp)
          {
              var sb = new StringBuilder(exp);
-            //stack
-            //var bStack = new Stack<char>();
-            //var strStack = new Stack<string>();
-            //var orExpStack = new Stack<List<string>>();
             
-            //register
-            //var cur = "";
-            //var orExp = new List<string>();
-
-            //var lastResult = "";
-            // void ShowStrStack()
-            // {
-            //     $"current stack: len = {strStack.Count}, content = {strStack.ToEnumerationString()}".PrintToConsole();
-            //     
-            // }
-            // void ShowOrStack()
-            // {
-            //     $"current stack: len = {orExp.Count}, content = {orExp.ToEnumerationString()}".PrintToConsole();
-            //     
-            // }
             
             var automata = RegexAutomata;
             automata.ResetAutomata();

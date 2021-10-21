@@ -11,6 +11,10 @@ namespace YaccLexCS.ycomplier.automata
         public dynamic CurInput;
         private Dictionary<object, object> _kvMemory = new();
 
+        public bool IsInclude(object key)
+        {
+            return _kvMemory.ContainsKey(key);
+        }
         public object this[object obj]
         {
             get => _kvMemory[obj];
@@ -128,6 +132,7 @@ namespace YaccLexCS.ycomplier.automata
             }
         }
 
+        
         public bool IsAccepted()
         {
             return CurrentStateCollection.Any(s => AcceptState.Contains(s));
@@ -137,7 +142,7 @@ namespace YaccLexCS.ycomplier.automata
             var set = CurrentStateCollection.ToList();
             
             foreach (var edge in set.Select(node => NodeNext[node])
-                .SelectMany(e => e.Where(edge => edge.IsCanTrans.Judge(null, null))))
+                .SelectMany(e => e.Where(edge => edge.IsCanTrans.Judge(Context, null))))
             {
                 edge.EventTransInEdge?.Invoke(null, Context);
                 CurrentStateCollection.Add(edge.ToNode.NodeId);

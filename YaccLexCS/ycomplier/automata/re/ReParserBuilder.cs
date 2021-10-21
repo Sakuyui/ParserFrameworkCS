@@ -23,30 +23,47 @@ namespace YaccLexCS.ycomplier.automata
             var e4 = new ReEdge(node0, node0, new CommonTransitionStrategy.EqualJudgeTrans<char>('.'));
             var e5 = new ReEdge(node0, node0, ReAutomataConstruction.EnterLeftBrace, new CommonTransitionStrategy.EqualJudgeTrans<char>('('));
             var e6 = new ReEdge(node0, node0, ReAutomataConstruction.EnterRightBrace,new CommonTransitionStrategy.EqualJudgeTrans<char>(')'));
-            var e7 = new ReEdge(node0, node1, new CommonTransitionStrategy.EqualJudgeTrans<char>('['));
+            var e7 = new ReEdge(node0, node1, ReAutomataConstruction.EnterLeftMBrace,new CommonTransitionStrategy.EqualJudgeTrans<char>('['));
             var e8 = new ReEdge(node0, node2, new CommonTransitionStrategy.EqualJudgeTrans<char>('{'));
             
             var e9 = new ReEdge(node2, node2, new CommonTransitionStrategy.CharacterRangeTrans('1', '9'));
             var e10 = new ReEdge(node2, node0, new CommonTransitionStrategy.EqualJudgeTrans<char>('}'));
             
            
-            var e11 = new ReEdge(node1, node1, new CommonTransitionStrategy.EqualJudgeTrans<char>('^'));
-            var e12 = new ReEdge(node1, node1, new CommonTransitionStrategy.EqualJudgeTrans<char>('-'));
-            var e13 = new ReEdge(node1, node1, CommonTransitionStrategy.NormalCharacterTrans.Instance);
-            var e14 = new ReEdge(node1, node3, new CommonTransitionStrategy.EqualJudgeTrans<char>('\\'));
+            var e11 = new ReEdge(node1, node1, ReAutomataConstruction.InReadingCharSet, new CommonTransitionStrategy.EqualJudgeTrans<char>('^'));
+            var e12 = new ReEdge(node1, node1, ReAutomataConstruction.InReadingCharSet, new CommonTransitionStrategy.EqualJudgeTrans<char>('-'));
+            var e13 = new ReEdge(node1, node1, ReAutomataConstruction.InReadingCharSet, 
+                new CommonTransitionStrategy.CustomTrans((ctx, item, objs) => 
+                    item != null && CommonTransitionStrategy.NormalCharacterTrans.Instance.Judge(ctx, item, objs) && (char) item != '-'));
             
-            var e15 = new ReEdge(node1, node0, new CommonTransitionStrategy.EqualJudgeTrans<char>(']'));
+            var e14 = new ReEdge(node1, node3, delegate(object input, object[] objs)
+            {
+                var context = (AutomataContext) objs[0];
+                if (!context.IsInclude("stateStack"))
+                    context["stateStack"] = new Stack<object>();
+                ((Stack<object>)context["stateStack"]).Push(1);
+                return null;
+            },new CommonTransitionStrategy.EqualJudgeTrans<char>('\\'));
+            
+            var e15 = new ReEdge(node1, node0, ReAutomataConstruction.ProcessCharsSet, new CommonTransitionStrategy.EqualJudgeTrans<char>(']'));
            
             
-            var e16 = new ReEdge(node0, node1, new CommonTransitionStrategy.EqualJudgeTrans<char>('\\'));
-            var e17 = new ReEdge(node1, node4, new CommonTransitionStrategy.CharacterRangeTrans((char)0, (char)255));
+            var e16 = new ReEdge(node0, node3, delegate(object input, object[] objs) {
+                    var context = (AutomataContext) objs[0];
+                    if (!context.IsInclude("stateStack"))
+                        context["stateStack"] = new Stack<object>();
+                    ((Stack<object>)context["stateStack"]).Push(0);
+                    return null;
+                },new CommonTransitionStrategy.EqualJudgeTrans<char>('\\'));
+          
             
-            var e18 = new ReEdge(node4, node0, 
-                new CommonTransitionStrategy.CustomTrans((ctx, item, _) => 
+            var e17 = new ReEdge(node3, node4, ReAutomataConstruction.ProcessSlashChar, new CommonTransitionStrategy.CharacterRangeTrans((char)0, (char)255));
+            
+            //return
+            var e18 = new ReEdge(node4, node0, ReAutomataConstruction.ProcessSlashReturn,new CommonTransitionStrategy.CustomTrans((ctx, item, _) => 
                     item == null && ctx["stateStack"] is Stack<object> s && s.Any() && (int)s.Peek() == 0));
 
-            var e19 = new ReEdge(node4, node1, 
-                new CommonTransitionStrategy.CustomTrans((ctx, item, _) => 
+            var e19 = new ReEdge(node4, node1, ReAutomataConstruction.ProcessSlashReturn,  new CommonTransitionStrategy.CustomTrans((ctx, item, _) => 
                     item == null && ctx["stateStack"] is Stack<object> s && s.Any() && (int)s.Peek() == 1));
 
 
@@ -54,7 +71,7 @@ namespace YaccLexCS.ycomplier.automata
 
             
             a.AddNodes(new []{node0, node1, node2, node3, node4});
-            a.AddEdges(new []{e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13, e14, e15, e16, e17, e18, e19});
+            a.AddEdges(new []{e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13, e14, e15, e16,e17, e18, e19});
             a.SetStartState(0).InitState();
             return a;
         }
