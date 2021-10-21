@@ -249,7 +249,8 @@ namespace YaccLexCS
             ReAutomata reAutomata = new();
             //TryParse("((ab|cd|ef)|aaabc|((ag)(ge)))");
             //AutomataFrom(@"(([0-9]+\.[0-9]+)|([1-9][0-9]*)|0)");
-            ReAutomata.BuildAutomataFromExp(@"[0-9]+\.[0-9]+");
+            ReAutomata.BuildAutomataFromExp(@"[0-9]+\.[0-9]+|0");
+            
             // var tclassType = typeof(TokenList);
             // ReflectionUtil.GetAllTokenDefinition(typeof(TokenList)).PrintEnumerationToConsole();
             // "".PrintToConsole();

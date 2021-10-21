@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace YaccLexCS.ycomplier.automata.re
@@ -28,45 +29,63 @@ namespace YaccLexCS.ycomplier.automata.re
         private static readonly Automata RegexAutomata = new Lazy<Automata>(ReParserBuilder.BuildReParserAutomata).Value;
         
         //ensure the expression provided is a top level expression
-    
 
+        private static object EndParse(Automata regexBuilderAutomata)
+        {
+            var context = regexBuilderAutomata.Context;
+            var strStack = (Stack<string>)context["tmp_strStack"];
+            var andStack = (Stack<Automata>) context["stack_AndAutomata"];
+            
+            var cur = (string) context["tmp_cur"];
+            var curAutomata = (Automata) context["automata"];
+            var orExpAutomataStack =  (Stack<List<Automata>>) context["stack_OrAutomata"];
+            var orExpAutomata = (List<Automata>) context["orExpAutomata"];
+            var orExpStack =  (Stack<List<string>>) context["tmp_OrExpStack"];
+            var orExp = (List<string>) context["tmp_OrExp"];
+            $"======= Try End Parse ====".PrintToConsole();
+            var a = orExpAutomata.Append(curAutomata);
+            var finalAutomata = ReAutomataConstruction.OrMergeAutomata(a);
+            return null;
+        }
          public static void BuildAutomataFromExp(string exp)
          {
              var sb = new StringBuilder(exp);
             
             
-            var automata = RegexAutomata;
-            automata.ResetAutomata();
+            var regexBuilderAutomata = RegexAutomata;
+            regexBuilderAutomata.ResetAutomata();
              
             var initNode = new AutomataNode(0);
             var targetAutomata = new Automata();
             targetAutomata.AddNode(initNode);
             targetAutomata.SetStartState(0);
              
-            automata.Context["initNode"] = initNode;
-            automata.Context["lastNode"] = initNode;
-            automata.Context["automata"] = targetAutomata; // The automata current in building process.
-            automata.Context["preContNode"] = null!;
-            automata.Context["lastResult"] = null!;
-            automata.Context["orExpAutomata"] = new List<Automata>();
+            regexBuilderAutomata.Context["initNode"] = initNode;
+            regexBuilderAutomata.Context["lastNode"] = initNode;
+            regexBuilderAutomata.Context["automata"] = targetAutomata; // The automata current in building process.
+            regexBuilderAutomata.Context["preContNode"] = null!;
+            regexBuilderAutomata.Context["lastResult"] = null!;
+            regexBuilderAutomata.Context["orExpAutomata"] = new List<Automata>();
 
-            automata.Context["stack_lastNode"] = new Stack<AutomataNode>();
-            automata.Context["stack_OrAutomata"] = new Stack<List<Automata>>();
-            automata.Context["stack_AndAutomata"] = new Stack<Automata>();
-            automata.Context["stack_Brace"] = new Stack<char>();
+            regexBuilderAutomata.Context["stack_lastNode"] = new Stack<AutomataNode>();
+            regexBuilderAutomata.Context["stack_OrAutomata"] = new Stack<List<Automata>>();
+            regexBuilderAutomata.Context["stack_AndAutomata"] = new Stack<Automata>();
+            regexBuilderAutomata.Context["stack_Brace"] = new Stack<char>();
             
-            automata.Context["tmp_cur"] = "";
-            automata.Context["tmp_strStack"] = new Stack<string>();
-            automata.Context["tmp_OrExp"] = new List<string>();
-            automata.Context["tmp_OrExpStack"] = new Stack<List<string>>();
+            regexBuilderAutomata.Context["tmp_cur"] = "";
+            regexBuilderAutomata.Context["tmp_strStack"] = new Stack<string>();
+            regexBuilderAutomata.Context["tmp_OrExp"] = new List<string>();
+            regexBuilderAutomata.Context["tmp_OrExpStack"] = new Stack<List<string>>();
             
             while (sb.Length > 0)
             {
                 var c = sb[0];
                 sb.Remove(0, 1);
-                automata.ParseFromCurrentStates(c);
+                regexBuilderAutomata.ParseFromCurrentStates(c);
             }
             
+            regexBuilderAutomata.Context["automata"].PrintToConsole();
+            EndParse(regexBuilderAutomata);
             // while (sb.Length > 0)
             // {
             //     var c = sb[0];

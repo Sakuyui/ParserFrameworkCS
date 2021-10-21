@@ -7,7 +7,38 @@ namespace YaccLexCS.ycomplier.automata.re
     public static class ReAutomataConstruction
     {
    
-
+        public static object? EnterStarChar(object input, object[] objs)
+        {
+            var context = (AutomataContext) objs[0];
+         
+            var bStack = (Stack<char>)context["stack_Brace"];
+            
+            
+            var strStack = (Stack<string>)context["tmp_strStack"];
+            var andStack = (Stack<Automata>) context["stack_AndAutomata"];
+            
+            var cur = (string) context["tmp_cur"];
+            var curAutomata = (Automata) context["automata"];
+            $"meet *, cur automata = \n {curAutomata}".PrintToConsole();
+            
+            
+            var orExpAutomataStack =  (Stack<List<Automata>>) context["stack_OrAutomata"];
+            var orExpAutomata = (List<Automata>) context["orExpAutomata"];
+            var orExpStack =  (Stack<List<string>>) context["tmp_OrExpStack"];
+            var orExp = (List<string>) context["tmp_OrExp"];
+            var lastNodeStack = (Stack<AutomataNode>) context["stack_lastNode"];
+            var lastNode = (AutomataNode) context["lastNode"];
+            
+            var lastResult = (AutomataNode) context["lastResult"];
+            $"lastResult Node = {lastResult.NodeId}".PrintToConsole();
+            $"last Node = {lastNode.NodeId}".PrintToConsole();
+            curAutomata.AddEdge(new ReEdge(lastResult, lastNode, CommonTransitionStrategy.EpsilonTrans.Instance));
+            curAutomata.PrintToConsole();
+            context["lastResult"] = lastNode;
+            
+            context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
+            return null;
+        }
         public static object? EnterPlusChar(object input, object[] objs)
         {
             var context = (AutomataContext) objs[0];
@@ -37,6 +68,7 @@ namespace YaccLexCS.ycomplier.automata.re
             curAutomata.PrintToConsole();
             context["lastResult"] = lastNode;
             
+            context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
             return null;
         }
 
@@ -47,6 +79,7 @@ namespace YaccLexCS.ycomplier.automata.re
             context["v_charRange_desc"] = "";
             var curAutomata = (Automata) context["automata"];
             context["lastResult"] = curAutomata.NodeMap[curAutomata.Nodes.Count - 1];
+            context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
             //var bStack = (Stack<char>)context["stack_Brace"];
             //bStack.Push('(');
             
@@ -76,7 +109,37 @@ namespace YaccLexCS.ycomplier.automata.re
             ((Stack<object>)context["stateStack"]).Push(0);
             return null;
         }
-        
+
+       
+        public static object? ProcessOr(object input, object[] objs)
+        {
+            var context = (AutomataContext) objs[0];
+            $"meet |, begin a new exp, save cur = {context["tmp_cur"]} to stack".PrintToConsole();
+            var bStack = (Stack<char>)context["stack_Brace"];
+            //bStack.Push('(');
+            
+            var strStack = (Stack<string>)context["tmp_strStack"];
+            var andStack = (Stack<Automata>) context["stack_AndAutomata"];
+            
+            var cur = (string) context["tmp_cur"];
+            var curAutomata = (Automata) context["automata"];
+            var orExpAutomataStack =  (Stack<List<Automata>>) context["stack_OrAutomata"];
+            var orExpAutomata = (List<Automata>) context["orExpAutomata"];
+            var orExpStack =  (Stack<List<string>>) context["tmp_OrExpStack"];
+            var orExp = (List<string>) context["tmp_OrExp"];
+            
+            orExp.Add(cur);
+            context["tmp_cur"] = "";
+            orExpAutomata.Add(curAutomata);
+            var initNode = new AutomataNode(0);
+            $"save current automata = \n {curAutomata}".PrintToConsole();
+            $"now or automata list len = {orExpAutomata.Count}".PrintToConsole();
+            context["automata"] = new Automata().AddNode(initNode).SetStartState(0);
+            context["lastNode"] = initNode;
+            context["lastResult"] = null;
+          
+            return null;
+        }
         public static object? ProcessSlashChar(object input, object[] objs)
         {
             var context = (AutomataContext) objs[0];
@@ -87,7 +150,7 @@ namespace YaccLexCS.ycomplier.automata.re
                 $"now = {context["v_charRange_desc"]}".PrintToConsole();
             }else if ((int) stack.Peek() == 0)
             {
-                context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
+                
                 AddSingleCharCompareNode(input, objs);
                 ((Automata) context["automata"]).PrintToConsole();
             }
@@ -228,72 +291,67 @@ namespace YaccLexCS.ycomplier.automata.re
             context["lastNode"] = resultAutomata.NodeMap[resultAutomata.Nodes.Count - 1];
             $"lastResultNode = {((AutomataNode)context["lastResult"]).NodeId}".PrintToConsole();
             
-            //         // orExp.Add(cur);
-            //         //
-            //         // ReAutomata.BuildAutomataFromTopExp(cur);
-            //         //
-            //         // var result = OrMergeAutomata(orExp);
-            //         // $"build finish..begin merge result = {result}".PrintToConsole();
-            //         //
-            //         // result.PrintToConsole();
-            //         // orExp.Clear();
-            //         // orExp = orExpStack.Pop();
-            //         //
-            //         //
-            //         // if (!bStack.Any())
-            //         //     throw new Exception("brace exception");
-            //         // bStack.Pop();
-            //         // cur = strStack.Pop();
-            //         // $"restore str = {cur}\n".PrintToConsole();
-            //         //
-            //         //
-            //         // var r = ConcatAutomata(cur, result);
-            //         // lastResult = result;
-            //         // $"last result = {lastResult}".PrintToConsole();
-            //         // cur = r;
+          
             
             return null;
         }
 
         
-        private static Automata OrMergeAutomata(IReadOnlyCollection<Automata> orExpAutomata)
+        public static Automata OrMergeAutomata(IEnumerable<Automata> orExpAutomata)
         {
+            orExpAutomata = orExpAutomata.Where(a => a.Nodes.Count > 1);
+            $"Try merge {orExpAutomata.Count()} automata".PrintToConsole();
+           
+            
             if (!orExpAutomata.Any())
             {
                 return null;
             }
 
-            if (orExpAutomata.Count == 1)
+            if (orExpAutomata.Count() == 1)
                 return orExpAutomata.First();
 
             var automata = new Automata();
             var iNode = new AutomataNode(0);
-            automata.AddNode(iNode);
+            automata.AddNode(iNode).SetStartState(0);
             var endSet = new List<int>();
+            var startSet = new List<int>();
             foreach (var a in orExpAutomata)
             {
-                var c = a.Nodes.Count;
+                $"try add \n {a}".PrintToConsole();
+                var c = automata.Nodes.Count;
+                startSet.Add(c);
                 foreach (var node in a.Nodes)
                 {
                     var es = a.NodeNext[node.NodeId];
                     automata.AddNode(new AutomataNode((int) node.NodeId + c));
                     
                 }
-                endSet.Add(c + a.Nodes.Count);
+                endSet.Add(c + a.Nodes.Count - 1);
                 foreach (var e in a.Edges)
                 {
                     automata.AddEdge(new ReEdge(automata.NodeMap[(int)e.FromNode.NodeId + c]
                         , automata.NodeMap[(int)e.ToNode.NodeId + c], e.EventTransInEdge, e.IsCanTrans));
                 }
+                automata.PrintToConsole();
+                
+                
             }
-
+            
             var end = automata.Nodes.Count;
             automata.AddNode(new AutomataNode(end));
+            foreach (var s in startSet)
+            {
+                automata.AddEdge(new ReEdge(automata.NodeMap[0], automata.NodeMap[s], 
+                    CommonTransitionStrategy.EpsilonTrans.Instance));
+            }
             foreach (var e in endSet)
             {
                 automata.AddEdge(new ReEdge(automata.NodeMap[e], automata.NodeMap[end], 
                     CommonTransitionStrategy.EpsilonTrans.Instance));
             }
+            automata.PrintToConsole();
+            throw new Exception();
             return automata;
 
         }

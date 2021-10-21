@@ -181,7 +181,7 @@ namespace YaccLexCS.ycomplier.automata
         {
             var str = "===============================================\n";
             str += $"[Cur state: {CurrentStateCollection.Aggregate("", (a, b) => a + ", " + b)}]\n";
-            str += $"start from node_id {StartState.Aggregate((a, b) => a + ", " + b)}\n end state = {AcceptState.GetMultiDimensionString()}\n";
+            str += $"start from node_id {StartState.Aggregate("",(a, b) => a + ", " + b)}\n end state = {AcceptState.GetMultiDimensionString()}\n";
             var i = 0;
             foreach(var node in Nodes)
             {
