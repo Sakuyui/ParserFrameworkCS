@@ -8,8 +8,7 @@ namespace YaccLexCS.ycomplier.automata
 
     public class AutomataContext
     {
-        public dynamic CurInput;
-        private Dictionary<object, object> _kvMemory = new();
+        private readonly Dictionary<object, object> _kvMemory = new();
 
         public bool IsInclude(object key)
         {
@@ -22,22 +21,22 @@ namespace YaccLexCS.ycomplier.automata
         }
         public void ResetContext()
         {
-            
+            _kvMemory.Clear();
         }
     }
     public class Automata
     {
         public IEnumerable<object> StartState = new HashSet<object>();
         public HashSet<object> AcceptState = new HashSet<object>();
-        public HashSet<object> CurrentStateCollection = new();
+        public readonly HashSet<object> CurrentStateCollection = new();
         
         public HashSet<object> StartNodes => StartState.ToHashSet();
 
-        public List<AutomataNode> Nodes = new(); //节点集合
-        public List<AutomataEdge> Edges = new(); //边集合
+        public readonly List<AutomataNode> Nodes = new(); //节点集合
+        public readonly List<AutomataEdge> Edges = new(); //边集合
         
-        public Dictionary<object, List<AutomataEdge>> NodeNext = new(); // map node id -> edges that from this node
-        public Dictionary<object, AutomataNode> NodeMap = new(); //map node id -> node
+        public readonly Dictionary<object, List<AutomataEdge>> NodeNext = new(); // map node id -> edges that from this node
+        public readonly Dictionary<object, AutomataNode> NodeMap = new(); //map node id -> node
 
 
         public readonly AutomataContext Context = new();
@@ -144,7 +143,7 @@ namespace YaccLexCS.ycomplier.automata
             foreach (var edge in set.Select(node => NodeNext[node])
                 .SelectMany(e => e.Where(edge => edge.IsCanTrans.Judge(Context, null))))
             {
-                edge.EventTransInEdge?.Invoke(null, Context);
+                edge.EventTransInEdge?.Invoke(null!, Context);
                 CurrentStateCollection.Add(edge.ToNode.NodeId);
             }
 

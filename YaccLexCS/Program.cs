@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using YaccLexCS.ycomplier;
 using YaccLexCS.ycomplier.automata;
+using YaccLexCS.ycomplier.automata.re;
 using YaccLexCS.ycomplier.conf.attribution;
 using YaccLexCS.ycomplier.util;
 
@@ -144,7 +145,6 @@ namespace YaccLexCS
        
        
         
-
         public static string ConcatAutomata(string a1, string a2)
         {
             $"Concat {a1} with {a2}".PrintToConsole();
@@ -156,89 +156,89 @@ namespace YaccLexCS
             var str = $"[automata: {automatas.Aggregate((a,b) => a + " | " + b)}]";
             return str;
         }
-        public static void AutomataFrom(string s)
-        {
-            var sb = new StringBuilder(s);
-            //stack
-            var bStack = new Stack<char>();
-            var strStack = new Stack<string>();
-            var orExpStack = new Stack<List<string>>();
-            
-            //register
-            var cur = "";
-            var orExp = new List<string>();
-
-            var lastResult = "";
-            void ShowStrStack()
-            {
-                $"current stack: len = {strStack.Count}, content = {strStack.ToEnumerationString()}".PrintToConsole();
-                
-            }
-            void ShowOrStack()
-            {
-                $"current stack: len = {orExp.Count}, content = {orExp.ToEnumerationString()}".PrintToConsole();
-                
-            }
-            while (sb.Length > 0)
-            {
-                var c = sb[0];
-                sb.Remove(0, 1);
-                if (c == '(')
-                {
-                    $"meet (, begin a new exp, save cur = {cur} to stack".PrintToConsole();
-                    bStack.Push('(');
-                    strStack.Push(cur);
-                    orExpStack.Push(orExp);
-                    orExp = new List<string>();
-                    cur = "";
-                    ShowStrStack();
-                }else if (c == ')')
-                {
-                    $"\n meet ), merge cur string and all element in or stack".PrintToConsole();
-                    orExp.Add(cur);
-                    
-                    ReAutomata.BuildAutomataFromTopExp(cur);
-
-                    var result = OrMergeAutomata(orExp);
-                    $"build finish..begin merge result = {result}".PrintToConsole();
-                 
-                    result.PrintToConsole();
-                    orExp.Clear();
-                    orExp = orExpStack.Pop();
-                    
-                    
-                    if (!bStack.Any())
-                        throw new Exception("brace exception");
-                    bStack.Pop();
-                    cur = strStack.Pop();
-                    $"restore str = {cur}\n".PrintToConsole();
-                    
-                    
-                    var r = ConcatAutomata(cur, result);
-                    lastResult = result;
-                    $"last result = {lastResult}".PrintToConsole();
-                    cur = r;
-                }
-                else if (c == '|')
-                {
-                    $"meet |, cur str = {cur}, save to 'or stack' ".PrintToConsole();
-                    orExp.Add(cur);
-                    cur ="";
-                    ShowOrStack();
-                }
-                else if (cur == "" && (c == '+' || c == '*'))
-                {
-                    $"meet {c}, build ({lastResult}){c}".PrintToConsole();
-                    cur += c;
-                }else
-                {
-                    cur += c;
-                    
-                }
-                
-            }
-            $"final = {cur}".PrintToConsole();
-        }
+        // public static void AutomataFrom(string s)
+        // {
+        //     var sb = new StringBuilder(s);
+        //     //stack
+        //     var bStack = new Stack<char>();
+        //     var strStack = new Stack<string>();
+        //     var orExpStack = new Stack<List<string>>();
+        //     
+        //     //register
+        //     var cur = "";
+        //     var orExp = new List<string>();
+        //
+        //     var lastResult = "";
+        //     void ShowStrStack()
+        //     {
+        //         $"current stack: len = {strStack.Count}, content = {strStack.ToEnumerationString()}".PrintToConsole();
+        //         
+        //     }
+        //     void ShowOrStack()
+        //     {
+        //         $"current stack: len = {orExp.Count}, content = {orExp.ToEnumerationString()}".PrintToConsole();
+        //         
+        //     }
+        //     while (sb.Length > 0)
+        //     {
+        //         var c = sb[0];
+        //         sb.Remove(0, 1);
+        //         if (c == '(')
+        //         {
+        //             $"meet (, begin a new exp, save cur = {cur} to stack".PrintToConsole();
+        //             bStack.Push('(');
+        //             strStack.Push(cur);
+        //             orExpStack.Push(orExp);
+        //             orExp = new List<string>();
+        //             cur = "";
+        //             ShowStrStack();
+        //         }else if (c == ')')
+        //         {
+        //             $"\n meet ), merge cur string and all element in or stack".PrintToConsole();
+        //             orExp.Add(cur);
+        //             
+        //             ReAutomata.BuildAutomataFromTopExp(cur);
+        //
+        //             var result = OrMergeAutomata(orExp);
+        //             $"build finish..begin merge result = {result}".PrintToConsole();
+        //          
+        //             result.PrintToConsole();
+        //             orExp.Clear();
+        //             orExp = orExpStack.Pop();
+        //             
+        //             
+        //             if (!bStack.Any())
+        //                 throw new Exception("brace exception");
+        //             bStack.Pop();
+        //             cur = strStack.Pop();
+        //             $"restore str = {cur}\n".PrintToConsole();
+        //             
+        //             
+        //             var r = ConcatAutomata(cur, result);
+        //             lastResult = result;
+        //             $"last result = {lastResult}".PrintToConsole();
+        //             cur = r;
+        //         }
+        //         else if (c == '|')
+        //         {
+        //             $"meet |, cur str = {cur}, save to 'or stack' ".PrintToConsole();
+        //             orExp.Add(cur);
+        //             cur ="";
+        //             ShowOrStack();
+        //         }
+        //         else if (cur == "" && (c == '+' || c == '*'))
+        //         {
+        //             $"meet {c}, build ({lastResult}){c}".PrintToConsole();
+        //             cur += c;
+        //         }else
+        //         {
+        //             cur += c;
+        //             
+        //         }
+        //         
+        //     }
+        //     $"final = {cur}".PrintToConsole();
+        // }
    
         public static void Main()
         {

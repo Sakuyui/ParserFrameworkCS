@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace YaccLexCS.ycomplier.automata
+namespace YaccLexCS.ycomplier.automata.re
 {
-    public class ReAutomataConstruction
+    public static class ReAutomataConstruction
     {
    
 
@@ -60,7 +60,23 @@ namespace YaccLexCS.ycomplier.automata
             stack.Pop();
             return null;
         }
-
+        public static object? StatePushOne(object input, object[] objs)
+        {
+            var context = (AutomataContext) objs[0];
+            if (!context.IsInclude("stateStack"))
+                context["stateStack"] = new Stack<object>();
+            ((Stack<object>)context["stateStack"]).Push(1);
+            return null;
+        }
+        public static object? StatePushZero(object input, object[] objs)
+        {
+            var context = (AutomataContext) objs[0];
+            if (!context.IsInclude("stateStack"))
+                context["stateStack"] = new Stack<object>();
+            ((Stack<object>)context["stateStack"]).Push(0);
+            return null;
+        }
+        
         public static object? ProcessSlashChar(object input, object[] objs)
         {
             var context = (AutomataContext) objs[0];
