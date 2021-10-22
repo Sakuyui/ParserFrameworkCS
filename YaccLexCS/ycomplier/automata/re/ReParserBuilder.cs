@@ -20,7 +20,7 @@ namespace YaccLexCS.ycomplier.automata.re
             var e1 = new ReEdge(node0, node0, ReAutomataConstruction.AddSingleCharCompareNode ,CommonTransitionStrategy.NormalCharacterTrans.Instance);
             var e2 = new ReEdge(node0, node0, ReAutomataConstruction.EnterPlusChar,new CommonTransitionStrategy.EqualJudgeTrans<char>('+'));
             var e3 = new ReEdge(node0, node0, ReAutomataConstruction.EnterStarChar,new CommonTransitionStrategy.EqualJudgeTrans<char>('*'));
-            var e4 = new ReEdge(node0, node0, new CommonTransitionStrategy.EqualJudgeTrans<char>('.'));
+            var e4 = new ReEdge(node0, node0, ReAutomataConstruction.AddDotCompareNode,new CommonTransitionStrategy.EqualJudgeTrans<char>('.'));
             var e5 = new ReEdge(node0, node0, ReAutomataConstruction.EnterLeftBrace, new CommonTransitionStrategy.EqualJudgeTrans<char>('('));
             var e6 = new ReEdge(node0, node0, ReAutomataConstruction.EnterRightBrace,new CommonTransitionStrategy.EqualJudgeTrans<char>(')'));
             var e7 = new ReEdge(node0, node1, ReAutomataConstruction.EnterLeftMBrace,new CommonTransitionStrategy.EqualJudgeTrans<char>('['));

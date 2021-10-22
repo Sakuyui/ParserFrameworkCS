@@ -27,7 +27,7 @@ namespace YaccLexCS.ycomplier.automata
     public class Automata
     {
         public IEnumerable<object> StartState = new HashSet<object>();
-        public HashSet<object> AcceptState = new HashSet<object>();
+        public HashSet<object> AcceptState = new();
         public readonly HashSet<object> CurrentStateCollection = new();
         
         public HashSet<object> StartNodes => StartState.ToHashSet();
@@ -46,6 +46,13 @@ namespace YaccLexCS.ycomplier.automata
             return this;
         }
 
+        public bool IsCanTransWith(object input)
+        {
+            ApplyClosure();
+            var transEdges = CurrentStateCollection.SelectMany(e => 
+                NodeNext[e].Where(edge => edge.IsCanTrans.Judge(Context, input, null))).ToArray();
+            return transEdges.Any();
+        }
         public void ParseFromCurrentStates(object input)
         {
             $">> get input {input}".PrintToConsole();

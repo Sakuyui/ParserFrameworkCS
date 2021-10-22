@@ -33,6 +33,7 @@ namespace YaccLexCS.ycomplier.automata.re
             $"lastResult Node = {lastResult.NodeId}".PrintToConsole();
             $"last Node = {lastNode.NodeId}".PrintToConsole();
             curAutomata.AddEdge(new ReEdge(lastResult, lastNode, CommonTransitionStrategy.EpsilonTrans.Instance));
+            curAutomata.AddEdge(new ReEdge(lastNode,lastResult, CommonTransitionStrategy.EpsilonTrans.Instance));
             curAutomata.PrintToConsole();
             context["lastResult"] = lastNode;
             
@@ -140,18 +141,37 @@ namespace YaccLexCS.ycomplier.automata.re
           
             return null;
         }
+
+        private static char[] _nonPrintChars = new[] {'t', 'n', 'w', 'f', 'r', 's', 'S', 't', 'v'};
         public static object? ProcessSlashChar(object input, object[] objs)
         {
             var context = (AutomataContext) objs[0];
             var stack = (Stack<object>) context["stateStack"];
+            var real = input;
+            if (_nonPrintChars.Contains((char)input))
+            {
+                var c = (char) input;
+
+                real = c switch
+                {
+                    't' => '\t',
+                    'f' => '\f',
+                    'n' => '\n',
+                    'r' => '\r',
+                    'v' => '\v',
+                    _ => real
+                };
+            }
             if ((int)stack.Peek() == 1)
             {
-                context["v_charRange_desc"] = context["v_charRange_desc"] + "" + input;
+                
+                context["v_charRange_desc"] = context["v_charRange_desc"] + "" + real;
+                
                 $"now = {context["v_charRange_desc"]}".PrintToConsole();
             }else if ((int) stack.Peek() == 0)
             {
                 
-                AddSingleCharCompareNode(input, objs);
+                AddSingleCharCompareNode(real, objs);
                 ((Automata) context["automata"]).PrintToConsole();
             }
 
@@ -351,7 +371,7 @@ namespace YaccLexCS.ycomplier.automata.re
                     CommonTransitionStrategy.EpsilonTrans.Instance));
             }
             automata.PrintToConsole();
-            throw new Exception();
+           
             return automata;
 
         }
@@ -456,6 +476,25 @@ namespace YaccLexCS.ycomplier.automata.re
             context["lastNode"] = node;
 
             $"add a normal char {input}".PrintToConsole();
+
+            context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
+            
+            //automata.PrintToConsole();
+            return null;
+        }
+        
+        public static object? AddDotCompareNode(object input, object[] objs)
+        {
+            var context = (AutomataContext) objs[0];
+            var lastNode = (AutomataNode) context["lastNode"];
+            var automata = (Automata) context["automata"];
+
+            var node = new AutomataNode(automata.Nodes.Count);
+            automata.AddNode(node);
+            automata.AddEdge(new ReEdge(lastNode, node, new CommonTransitionStrategy.CharacterRangeTrans((char)0, (char)255)));
+            context["lastNode"] = node;
+
+            $"add a .".PrintToConsole();
 
             context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
             

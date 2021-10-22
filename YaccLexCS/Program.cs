@@ -40,7 +40,7 @@ namespace YaccLexCS
         [TokenDefinition("Skip", @"[ \t]", true)]
         public static void Skip(){}
         
-        [TokenDefinition("DOUBLE_LITERAL", @"(([0-9]+\.[0-9]+)|([1-9][0-9]*)|0)", true)]
+        [TokenDefinition("DOUBLE_LITERAL", @"[0-9]+\.[0-9]+|[1-9][0-9]*|0", true)]
         public static void DoubleLiteral(ParserContext context)
         {
             $"DOUBLE_LITERAL with val = {context.TokenText}".PrintToConsole();
@@ -156,115 +156,87 @@ namespace YaccLexCS
             var str = $"[automata: {automatas.Aggregate((a,b) => a + " | " + b)}]";
             return str;
         }
-        // public static void AutomataFrom(string s)
-        // {
-        //     var sb = new StringBuilder(s);
-        //     //stack
-        //     var bStack = new Stack<char>();
-        //     var strStack = new Stack<string>();
-        //     var orExpStack = new Stack<List<string>>();
-        //     
-        //     //register
-        //     var cur = "";
-        //     var orExp = new List<string>();
-        //
-        //     var lastResult = "";
-        //     void ShowStrStack()
-        //     {
-        //         $"current stack: len = {strStack.Count}, content = {strStack.ToEnumerationString()}".PrintToConsole();
-        //         
-        //     }
-        //     void ShowOrStack()
-        //     {
-        //         $"current stack: len = {orExp.Count}, content = {orExp.ToEnumerationString()}".PrintToConsole();
-        //         
-        //     }
-        //     while (sb.Length > 0)
-        //     {
-        //         var c = sb[0];
-        //         sb.Remove(0, 1);
-        //         if (c == '(')
-        //         {
-        //             $"meet (, begin a new exp, save cur = {cur} to stack".PrintToConsole();
-        //             bStack.Push('(');
-        //             strStack.Push(cur);
-        //             orExpStack.Push(orExp);
-        //             orExp = new List<string>();
-        //             cur = "";
-        //             ShowStrStack();
-        //         }else if (c == ')')
-        //         {
-        //             $"\n meet ), merge cur string and all element in or stack".PrintToConsole();
-        //             orExp.Add(cur);
-        //             
-        //             ReAutomata.BuildAutomataFromTopExp(cur);
-        //
-        //             var result = OrMergeAutomata(orExp);
-        //             $"build finish..begin merge result = {result}".PrintToConsole();
-        //          
-        //             result.PrintToConsole();
-        //             orExp.Clear();
-        //             orExp = orExpStack.Pop();
-        //             
-        //             
-        //             if (!bStack.Any())
-        //                 throw new Exception("brace exception");
-        //             bStack.Pop();
-        //             cur = strStack.Pop();
-        //             $"restore str = {cur}\n".PrintToConsole();
-        //             
-        //             
-        //             var r = ConcatAutomata(cur, result);
-        //             lastResult = result;
-        //             $"last result = {lastResult}".PrintToConsole();
-        //             cur = r;
-        //         }
-        //         else if (c == '|')
-        //         {
-        //             $"meet |, cur str = {cur}, save to 'or stack' ".PrintToConsole();
-        //             orExp.Add(cur);
-        //             cur ="";
-        //             ShowOrStack();
-        //         }
-        //         else if (cur == "" && (c == '+' || c == '*'))
-        //         {
-        //             $"meet {c}, build ({lastResult}){c}".PrintToConsole();
-        //             cur += c;
-        //         }else
-        //         {
-        //             cur += c;
-        //             
-        //         }
-        //         
-        //     }
-        //     $"final = {cur}".PrintToConsole();
-        // }
-   
+
+
+
+        public static void ParseInStream(string s, Dictionary<TokenDefinition, (MethodInfo method, Automata? automata)> patternSet)
+        {
+            var sb = new StringBuilder(s);
+            var cur = "";
+
+            void init()
+            {
+                foreach (var a in patternSet)
+                {
+                    a.Value.automata?.ResetAutomata();
+                }
+            }
+            init();
+
+            var order = patternSet.GroupBy(e => e.Key.Priority)
+                .OrderBy(g => g.Key).SelectMany(g => g.ToList()).ToList();
+            var available = order.ToArray();
+            while (sb.Length > 0)
+            {
+                var c = sb[0];
+               
+                var t = available.Where(e =>
+                    !e.Key.UseRegex ? e.Key.SourcePattern == (cur + "" + c) : e.Value.automata.IsCanTransWith(c) );
+                available = t.ToArray();
+                
+                if (!t.Any() ||  t.GroupBy(e => e.Key)
+                    .OrderBy(e => e.Key).First().Count() == 1)
+                {
+                    
+                    $"get token {cur}".PrintToConsole();
+                    cur = "";
+                    available = order.ToArray();
+                    init();
+                    
+                }
+                else
+                {
+                    cur += c;
+                    sb.Remove(0, 1);
+                    t.ElementInvoke(e =>
+                    {
+                        if (e.Key.UseRegex)
+                            e.Value.automata?.ParseFromCurrentStates(c);
+                    });
+                }
+
+            }
+        }
         public static void Main()
         {
-
-    
             
-            
-            ReAutomata reAutomata = new();
-            //TryParse("((ab|cd|ef)|aaabc|((ag)(ge)))");
-            //AutomataFrom(@"(([0-9]+\.[0-9]+)|([1-9][0-9]*)|0)");
-            ReAutomata.BuildAutomataFromExp(@"[0-9]+\.[0-9]+|0");
-            
+            //var a1 = ReAutomata.BuildAutomataFromExp(@"[0-9]+\.[0-9]+|[1-9][0-9]*|0");
+          
             // var tclassType = typeof(TokenList);
             // ReflectionUtil.GetAllTokenDefinition(typeof(TokenList)).PrintEnumerationToConsole();
-            // "".PrintToConsole();
-            //
-            // Parse("1.43+2");
+           
 
-            // ReflectionUtil.GetAllTokenDefinition(typeof(TokenList)).ElementInvoke(e =>
-            // {
-            //     var p = e.methodInfo.GetParameters(); //get parameters
-            //     if(!p.Any())
-            //         e.methodInfo.Invoke(null, Array.Empty<object>());
-            //     else if (p.Length == 1)
-            //         e.methodInfo.Invoke(null, new object?[]{parserContext});
-            // });
+            var parserContext = new ParserContext();
+            var map = new Dictionary<TokenDefinition, (MethodInfo, Automata?)>();
+            ReflectionUtil.GetAllTokenDefinition(typeof(TokenList)).ElementInvoke(e =>
+            {
+                var p = e.methodInfo.GetParameters(); //get parameters
+                if (!e.tokenDef.UseRegex)
+                {
+                    map[e.tokenDef] = (e.methodInfo, null)!;
+                }
+                else
+                {
+                    var a = ReAutomata.BuildAutomataFromExp(e.tokenDef.SourcePattern);
+                    map[e.tokenDef] = (e.methodInfo, a)!;
+                }
+                // if(!p.Any())
+                //     e.methodInfo.Invoke(null, Array.Empty<object>());
+                // else if (p.Length == 1)
+                //     e.methodInfo.Invoke(null, new object?[]{parserContext});
+            });
+            ParseInStream("1.43+2", map);
+            //map.PrintToConsole();
         }
     }
 }

@@ -14,7 +14,7 @@ namespace YaccLexCS.ycomplier.automata
     {
         public class EpsilonTrans : ITransStrategy
         {
-            public static EpsilonTrans Instance = new Lazy<EpsilonTrans>(() => new EpsilonTrans()).Value;
+            public static readonly EpsilonTrans Instance = new Lazy<EpsilonTrans>(() => new EpsilonTrans()).Value;
             private EpsilonTrans(){}
 
             public bool Judge(AutomataContext? ctx, object? tryInputItem, params object[]? objs)
@@ -65,7 +65,7 @@ namespace YaccLexCS.ycomplier.automata
 
         public class ExclusionElementsTrans<T> : ITransStrategy
         {
-            private HashSet<T> _exclusionElements;
+            private readonly HashSet<T> _exclusionElements;
 
             public ExclusionElementsTrans(IEnumerable<T> elements)
             {
@@ -82,7 +82,7 @@ namespace YaccLexCS.ycomplier.automata
 
         public class CustomTrans : ITransStrategy
         {
-            private readonly Dictionary<object, object> _map = new Dictionary<object, object>();
+            private readonly Dictionary<object, object> _map = new();
 
             public object this[object obj]
             {
@@ -91,7 +91,7 @@ namespace YaccLexCS.ycomplier.automata
             }
 
             private readonly TransitionStrategy _transitionStrategy;
-            public delegate bool TransitionStrategy(AutomataContext? ctx, object? tryInputItem, params object[] objs);
+            public delegate bool TransitionStrategy(AutomataContext? ctx, object? tryInputItem, params object[]? objs);
             public CustomTrans([NotNull]TransitionStrategy transitionStrategy)
             {
                 _transitionStrategy = transitionStrategy;
@@ -107,7 +107,7 @@ namespace YaccLexCS.ycomplier.automata
             private static readonly 
                 ExclusionElementsTrans<char> Trans = new(new []{'(', ')', '|', '*', '\\', '.', '[', ']', '{', '}', '+', '^'});
             
-            public static NormalCharacterTrans Instance = 
+            public static readonly NormalCharacterTrans Instance = 
                 new Lazy<NormalCharacterTrans>(() => new NormalCharacterTrans()).Value;
             private NormalCharacterTrans(){}
             
@@ -118,7 +118,7 @@ namespace YaccLexCS.ycomplier.automata
         }
         public class TargetElementsTrans<T> : ITransStrategy
         {
-            private HashSet<T> _elements;
+            private readonly HashSet<T> _elements;
 
             public TargetElementsTrans(IEnumerable<T> es)
             {

@@ -30,7 +30,7 @@ namespace YaccLexCS.ycomplier.automata.re
         
         //ensure the expression provided is a top level expression
 
-        private static object EndParse(Automata regexBuilderAutomata)
+        private static Automata EndParse(Automata regexBuilderAutomata)
         {
             var context = regexBuilderAutomata.Context;
             var strStack = (Stack<string>)context["tmp_strStack"];
@@ -45,9 +45,9 @@ namespace YaccLexCS.ycomplier.automata.re
             $"======= Try End Parse ====".PrintToConsole();
             var a = orExpAutomata.Append(curAutomata);
             var finalAutomata = ReAutomataConstruction.OrMergeAutomata(a);
-            return null;
+            return finalAutomata;
         }
-         public static void BuildAutomataFromExp(string exp)
+         public static Automata BuildAutomataFromExp(string exp)
          {
              var sb = new StringBuilder(exp);
             
@@ -85,67 +85,9 @@ namespace YaccLexCS.ycomplier.automata.re
             }
             
             regexBuilderAutomata.Context["automata"].PrintToConsole();
-            EndParse(regexBuilderAutomata);
-            // while (sb.Length > 0)
-            // {
-            //     var c = sb[0];
-            //     sb.Remove(0, 1);
-            //     automata.ParseFromCurrentStates(c);
-            //     if (c == '(')
-            //     {
-            //         // $"meet (, begin a new exp, save cur = {cur} to stack".PrintToConsole();
-            //         // bStack.Push('(');
-            //         // strStack.Push(cur);
-            //         // orExpStack.Push(orExp);
-            //         // orExp = new List<string>();
-            //         // cur = "";
-            //         // ShowStrStack();
-            //     }else if (c == ')')
-            //     {
-            //         // $"\n meet ), merge cur string and all element in or stack".PrintToConsole();
-            //         // orExp.Add(cur);
-            //         //
-            //         // ReAutomata.BuildAutomataFromTopExp(cur);
-            //         //
-            //         // var result = OrMergeAutomata(orExp);
-            //         // $"build finish..begin merge result = {result}".PrintToConsole();
-            //         //
-            //         // result.PrintToConsole();
-            //         // orExp.Clear();
-            //         // orExp = orExpStack.Pop();
-            //         //
-            //         //
-            //         // if (!bStack.Any())
-            //         //     throw new Exception("brace exception");
-            //         // bStack.Pop();
-            //         // cur = strStack.Pop();
-            //         // $"restore str = {cur}\n".PrintToConsole();
-            //         //
-            //         //
-            //         // var r = ConcatAutomata(cur, result);
-            //         // lastResult = result;
-            //         // $"last result = {lastResult}".PrintToConsole();
-            //         // cur = r;
-            //     }
-            //     else if (c == '|')
-            //     {
-            //         // $"meet |, cur str = {cur}, save to 'or stack' ".PrintToConsole();
-            //         // orExp.Add(cur);
-            //         // cur ="";
-            //         // ShowOrStack();
-            //     }
-            //     else if (cur == "" && (c == '+' || c == '*'))
-            //     {
-            //         // $"meet {c}, build ({lastResult}){c}".PrintToConsole();
-            //         // cur += c;
-            //     }else
-            //     {
-            //         //cur += c;
-            //         
-            //     }
-            //     
-            // }
-            // $"final = {cur}".PrintToConsole();
+            var result = EndParse(regexBuilderAutomata);
+            result.SetStartState(0).SetAcceptState(result.Nodes.Count - 1);
+            return result;
          }
         public ReAutomata()
         {

@@ -13,7 +13,7 @@ namespace YaccLexCS.ycomplier.conf.attribution
     public class TokenDefinition : Attribute
     {
         public readonly Regex Pattern;
-        
+        public readonly string SourcePattern;
         public readonly bool UseRegex;
         public string TokenName { get; }
 
@@ -23,6 +23,7 @@ namespace YaccLexCS.ycomplier.conf.attribution
         {
             TokenName = tokenName;
             Pattern = useRegex ? new Regex(patternDesc) : StringProcess.StringToRegex(patternDesc);
+            SourcePattern = patternDesc;
             UseRegex = useRegex;
             Priority = priority;
         }

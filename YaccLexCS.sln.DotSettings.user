@@ -2,4 +2,5 @@
 	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=C_003A_005CUsers_005CSakuyui39_005CRiderProjects_005CYaccLexCS_005CYaccLexCS_005CGrimoire_002EFA_002Edll/@EntryIndexedValue">True</s:Boolean>
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;&#xD;
   &lt;Assembly Path="C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\Grimoire.FA.dll" /&gt;&#xD;
-&lt;/AssemblyExplorer&gt;</s:String></wpf:ResourceDictionary>
+&lt;/AssemblyExplorer&gt;</s:String>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=ycomplier/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>
