@@ -159,7 +159,7 @@ namespace YaccLexCS
 
 
 
-        public static void ParseInStream(string s, Dictionary<TokenDefinition, (MethodInfo method, Automata? automata)> patternSet)
+        public static IEnumerable<string> ParseInStream(string s, Dictionary<TokenDefinition, (MethodInfo method, Automata? automata)> patternSet)
         {
             var sb = new StringBuilder(s);
             var cur = "";
@@ -176,20 +176,35 @@ namespace YaccLexCS
             var order = patternSet.GroupBy(e => e.Key.Priority)
                 .OrderBy(g => g.Key).SelectMany(g => g.ToList()).ToList();
             var available = order.ToArray();
+
+            void Invoke(MethodInfo methodInfo)
+            {
+                var p = methodInfo.GetParameters();
+                if (!p.Any())
+                    methodInfo.Invoke(null, Array.Empty<object>());
+                else if(p.Length == 1)
+                    methodInfo.Invoke(null, new object?[]{_parserContext});
+
+            }
             while (sb.Length > 0)
             {
                 var c = sb[0];
                
                 var t = available.Where(e =>
-                    !e.Key.UseRegex ? e.Key.SourcePattern == (cur + "" + c) : e.Value.automata.IsCanTransWith(c) );
-                available = t.ToArray();
+                    !e.Key.UseRegex ? e.Key.SourcePattern == (cur + "" + c) : e.Value.automata.IsCanTransWith(c) ).ToArray();
+               
                 
-                if (!t.Any() ||  t.GroupBy(e => e.Key)
-                    .OrderBy(e => e.Key).First().Count() == 1)
+                if (!t.Any())
                 {
                     
                     $"get token {cur}".PrintToConsole();
+                    _parserContext.TokenText = cur;
+                    
                     cur = "";
+                  
+                    
+                    Invoke(available.First().Value.method);
+                    yield return available.First().Key.TokenName;
                     available = order.ToArray();
                     init();
                     
@@ -203,10 +218,20 @@ namespace YaccLexCS
                         if (e.Key.UseRegex)
                             e.Value.automata?.ParseFromCurrentStates(c);
                     });
+                    available = t.ToArray();
                 }
+                
+            }
 
+            if (available.Any())
+            {
+                $"get token {cur}".PrintToConsole();
+                _parserContext.TokenText = cur;
+                Invoke(available.First().Value.method);
+                yield return available.First().Key.TokenName;
             }
         }
+        private static ParserContext _parserContext = new ParserContext();
         public static void Main()
         {
             
@@ -216,7 +241,7 @@ namespace YaccLexCS
             // ReflectionUtil.GetAllTokenDefinition(typeof(TokenList)).PrintEnumerationToConsole();
            
 
-            var parserContext = new ParserContext();
+           
             var map = new Dictionary<TokenDefinition, (MethodInfo, Automata?)>();
             ReflectionUtil.GetAllTokenDefinition(typeof(TokenList)).ElementInvoke(e =>
             {
@@ -235,7 +260,7 @@ namespace YaccLexCS
                 // else if (p.Length == 1)
                 //     e.methodInfo.Invoke(null, new object?[]{parserContext});
             });
-            ParseInStream("1.43+2", map);
+            ParseInStream("1.43+2", map).PrintEnumerationToConsole();
             //map.PrintToConsole();
         }
     }
