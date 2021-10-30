@@ -1,6 +1,8 @@
-﻿using System;
+﻿//#define DELTAILMODE
+using System;
 using System.Collections.Generic;
 using System.Linq;
+
 
 namespace YaccLexCS.ycomplier.automata.re
 {
@@ -19,8 +21,10 @@ namespace YaccLexCS.ycomplier.automata.re
             
             var cur = (string) context["tmp_cur"];
             var curAutomata = (Automata) context["automata"];
-            $"meet *, cur automata = \n {curAutomata}".PrintToConsole();
             
+#if DELTAILMODE
+            $"meet *, cur automata = \n {curAutomata}".PrintToConsole();
+#endif
             
             var orExpAutomataStack =  (Stack<List<Automata>>) context["stack_OrAutomata"];
             var orExpAutomata = (List<Automata>) context["orExpAutomata"];
@@ -30,11 +34,15 @@ namespace YaccLexCS.ycomplier.automata.re
             var lastNode = (AutomataNode) context["lastNode"];
             
             var lastResult = (AutomataNode) context["lastResult"];
+#if DELTAILMODE
             $"lastResult Node = {lastResult.NodeId}".PrintToConsole();
             $"last Node = {lastNode.NodeId}".PrintToConsole();
+#endif
             curAutomata.AddEdge(new ReEdge(lastResult, lastNode, CommonTransitionStrategy.EpsilonTrans.Instance));
             curAutomata.AddEdge(new ReEdge(lastNode,lastResult, CommonTransitionStrategy.EpsilonTrans.Instance));
+#if DELTAILMODE
             curAutomata.PrintToConsole();
+#endif
             context["lastResult"] = lastNode;
             
             context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
@@ -52,8 +60,9 @@ namespace YaccLexCS.ycomplier.automata.re
             
             var cur = (string) context["tmp_cur"];
             var curAutomata = (Automata) context["automata"];
+#if DELTAILMODE
             $"meet +, cur automata = \n {curAutomata}".PrintToConsole();
-            
+#endif
             
             var orExpAutomataStack =  (Stack<List<Automata>>) context["stack_OrAutomata"];
             var orExpAutomata = (List<Automata>) context["orExpAutomata"];
@@ -63,10 +72,18 @@ namespace YaccLexCS.ycomplier.automata.re
             var lastNode = (AutomataNode) context["lastNode"];
             
             var lastResult = (AutomataNode) context["lastResult"];
+            
+#if DELTAILMODE
             $"lastResult Node = {lastResult.NodeId}".PrintToConsole();
             $"last Node = {lastNode.NodeId}".PrintToConsole();
+#endif
+            
             curAutomata.AddEdge(new ReEdge(lastNode, lastResult, CommonTransitionStrategy.EpsilonTrans.Instance));
+            
+#if DELTAILMODE
             curAutomata.PrintToConsole();
+#endif
+           
             context["lastResult"] = lastNode;
             
             context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
@@ -76,7 +93,10 @@ namespace YaccLexCS.ycomplier.automata.re
         public static object? EnterLeftMBrace(object input, object[] objs)
         {
             var context = (AutomataContext) objs[0];
+#if DELTAILMODE
             $"meet [, begin a new exp, to get char range state".PrintToConsole();
+#endif
+          
             context["v_charRange_desc"] = "";
             var curAutomata = (Automata) context["automata"];
             context["lastResult"] = curAutomata.NodeMap[curAutomata.Nodes.Count - 1];
@@ -153,7 +173,10 @@ namespace YaccLexCS.ycomplier.automata.re
         public static object? ProcessOr(object input, object[] objs)
         {
             var context = (AutomataContext) objs[0];
+#if DELTAILMODE
             $"meet |, begin a new exp, save cur = {context["tmp_cur"]} to stack".PrintToConsole();
+#endif
+            
             var bStack = (Stack<char>)context["stack_Brace"];
             //bStack.Push('(');
             
@@ -171,8 +194,11 @@ namespace YaccLexCS.ycomplier.automata.re
             context["tmp_cur"] = "";
             orExpAutomata.Add(curAutomata);
             var initNode = new AutomataNode(0);
+#if DELTAILMODE
             $"save current automata = \n {curAutomata}".PrintToConsole();
             $"now or automata list len = {orExpAutomata.Count}".PrintToConsole();
+#endif
+          
             context["automata"] = new Automata().AddNode(initNode).SetStartState(0);
             context["lastNode"] = initNode;
             context["lastResult"] = null;
@@ -204,13 +230,18 @@ namespace YaccLexCS.ycomplier.automata.re
             {
                 
                 context["v_charRange_desc"] = context["v_charRange_desc"] + "" + real;
-                
+#if DELTAILMODE
                 $"now = {context["v_charRange_desc"]}".PrintToConsole();
+#endif
+               
             }else if ((int) stack.Peek() == 0)
             {
                 
                 AddSingleCharCompareNode(real, objs);
+#if DELTAILMODE
                 ((Automata) context["automata"]).PrintToConsole();
+#endif
+                
             }
 
             return null;
@@ -218,7 +249,10 @@ namespace YaccLexCS.ycomplier.automata.re
         public static object? ProcessCharsSet(object input, object[] objs)
         {
             var context = (AutomataContext) objs[0];
+#if DELTAILMODE
             $"\n process {context["v_charRange_desc"]}".PrintToConsole();
+#endif
+            
             var desc = (string)context["v_charRange_desc"];
             List<(char f, char e)> ranges = new();
             HashSet<char> singleChar = new();
@@ -269,8 +303,11 @@ namespace YaccLexCS.ycomplier.automata.re
                     return singleChar.Contains((char) item) || targetRange.Any(r => (char) item >= r.start && (char) item <= r.end);
                 }, type: $"Range trans : [{targetRange.GetMultiDimensionString()}]");
             
+#if DELTAILMODE
             targetRange.PrintEnumerationToConsole();
             singleChar.PrintEnumerationToConsole();
+#endif
+            
             
             //connect
             var lastNode = (AutomataNode) context["lastNode"];
@@ -280,11 +317,18 @@ namespace YaccLexCS.ycomplier.automata.re
             automata.AddNode(node);
             automata.AddEdge(new ReEdge(lastNode, node, customTrans));
             context["lastNode"] = node;
-
+            
+#if DELTAILMODE
             $"add a char set {desc}".PrintToConsole();
+#endif
+            
 
             context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
+            
+#if DELTAILMODE
             automata.PrintToConsole();
+#endif
+            
 
             return null;
 
@@ -292,10 +336,16 @@ namespace YaccLexCS.ycomplier.automata.re
         public static object? InReadingCharSet(object input, object[] objs)
         {
             var context = (AutomataContext) objs[0];
+#if DELTAILMODE
             $"get char {input} (reading char set state)".PrintToConsole();
+#endif
+           
             context["v_charRange_desc"] = context["v_charRange_desc"] + "" + input;
             context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
+#if DELTAILMODE
             $"now = {context["v_charRange_desc"]}".PrintToConsole();
+#endif
+           
            
             
             return null;
@@ -303,7 +353,10 @@ namespace YaccLexCS.ycomplier.automata.re
         public static object? InReadingNum(object input, object[] objs)
         {
             var context = (AutomataContext) objs[0];
+#if DELTAILMODE
             $"get char {input} (reading char set state)".PrintToConsole();
+#endif
+            
             context["v_repeat_num"] = context["v_charRange_desc"] + "" + input;
             context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
             
@@ -323,7 +376,11 @@ namespace YaccLexCS.ycomplier.automata.re
             
             var cur = (string) context["tmp_cur"];
             var curAutomata = (Automata) context["automata"];
+            
+#if DELTAILMODE
             $"meet ), return from subroutine, cur automata = \n {curAutomata}".PrintToConsole();
+#endif
+            
             
             
             var orExpAutomataStack =  (Stack<List<Automata>>) context["stack_OrAutomata"];
@@ -339,8 +396,9 @@ namespace YaccLexCS.ycomplier.automata.re
             context["orExpAutomata"] = orExpAutomata;
             var result = OrMergeAutomata(orExp);
             var resultAutomata = OrMergeAutomata(orExpAutomata.Append(curAutomata));
-            
+#if DELTAILMODE
             $"build finish..begin merge result = {result}".PrintToConsole();
+#endif
             
             orExp.Clear();
             orExp = null;
@@ -351,14 +409,22 @@ namespace YaccLexCS.ycomplier.automata.re
                 throw new Exception("brace exception");
             bStack.Pop();
             cur = strStack.Pop();
+            
+#if DELTAILMODE
             $"restore str = {cur}\n".PrintToConsole();
+#endif
+            
             curAutomata = andStack.Pop();
             context["automata"] = curAutomata;
             var r = ConcatAutomata(cur, result);
             context["lastResult"] = curAutomata.NodeMap[curAutomata.AcceptState.First()];
             resultAutomata = ConcatAutomata(curAutomata, resultAutomata);
             context["lastNode"] = resultAutomata.NodeMap[resultAutomata.Nodes.Count - 1];
+            
+#if DELTAILMODE
             $"lastResultNode = {((AutomataNode)context["lastResult"]).NodeId}".PrintToConsole();
+#endif
+           
             
           
             
@@ -369,8 +435,10 @@ namespace YaccLexCS.ycomplier.automata.re
         public static Automata? OrMergeAutomata(IEnumerable<Automata> orExpAutomata)
         {
             orExpAutomata = orExpAutomata.Where(a => a.Nodes.Count > 1);
+#if DELTAILMODE
             $"Try merge {orExpAutomata.Count()} automata".PrintToConsole();
-           
+#endif
+            
             
             if (!orExpAutomata.Any())
             {
@@ -387,7 +455,10 @@ namespace YaccLexCS.ycomplier.automata.re
             var startSet = new List<int>();
             foreach (var a in orExpAutomata)
             {
+#if DELTAILMODE
                 $"try add \n {a}".PrintToConsole();
+#endif
+                
                 var c = automata.Nodes.Count;
                 startSet.Add(c);
                 foreach (var node in a.Nodes)
@@ -427,7 +498,10 @@ namespace YaccLexCS.ycomplier.automata.re
 
         public static string ConcatAutomata(string a1, string a2)
         {
+#if DELTAILMODE
             $"Concat {a1} with {a2}".PrintToConsole();
+#endif
+            
             return a1 + a2;
         }
         public static Automata? ConcatAutomata(Automata? a1, Automata? a2)
@@ -436,8 +510,10 @@ namespace YaccLexCS.ycomplier.automata.re
                 return a2;
             if (a2 == null)
                 return a1;
-            
+#if DELTAILMODE
             $"Concat {a1} \n with {a2}\n".PrintToConsole();
+#endif
+            
             var c = a1.Nodes.Count;
             var newNodes = a2.Nodes.Select(e => new AutomataNode(c + (int) e.NodeId)).ToArray();
             
@@ -463,7 +539,9 @@ namespace YaccLexCS.ycomplier.automata.re
             }
             a1.AcceptState.Clear();
             a1.AcceptState.Add(a1.Nodes.Count - 1);
+#if DELTAILMODE
             a1.PrintToConsole();
+#endif
             return a1;
         }
         public static string OrMergeAutomata(IEnumerable<string> automatas)
@@ -474,7 +552,11 @@ namespace YaccLexCS.ycomplier.automata.re
         public static object? EnterLeftBrace(object input, object[] objs)
         {
             var context = (AutomataContext) objs[0];
+            
+#if DELTAILMODE
             $"meet (, begin a new exp, save cur = {context["tmp_cur"]} to stack".PrintToConsole();
+#endif
+            
             var bStack = (Stack<char>)context["stack_Brace"];
             bStack.Push('(');
             
@@ -507,8 +589,11 @@ namespace YaccLexCS.ycomplier.automata.re
             lastNodeStack.Push(lastNode);
             context["lastNode"] = initNode;
             
-            strStack.GetMultiDimensionString().PrintToConsole();
+#if DELTAILMODE
+             strStack.GetMultiDimensionString().PrintToConsole();
             andStack.Count.PrintToConsole();
+#endif
+           
 
             return null;
         }
@@ -523,8 +608,10 @@ namespace YaccLexCS.ycomplier.automata.re
             automata.AddNode(node);
             automata.AddEdge(new ReEdge(lastNode, node, new CommonTransitionStrategy.EqualJudgeTrans<char>((char) input)));
             context["lastNode"] = node;
-
+#if DELTAILMODE
             $"add a normal char {input}".PrintToConsole();
+#endif
+           
 
             context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
             
@@ -541,8 +628,10 @@ namespace YaccLexCS.ycomplier.automata.re
             automata.AddNode(node);
             automata.AddEdge(new ReEdge(lastNode, node, new CommonTransitionStrategy.CharacterRangeTrans((char)0, (char)255)));
             context["lastNode"] = node;
-
+#if DELTAILMODE
             $"add a .".PrintToConsole();
+#endif
+            
 
             context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
             

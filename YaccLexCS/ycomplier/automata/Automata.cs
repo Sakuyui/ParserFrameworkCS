@@ -1,10 +1,14 @@
-﻿using System;
+﻿#define NOOUTPUTAUTOMATA
+#define NOSHOWAUTOMATATRANS
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace YaccLexCS.ycomplier.automata
 {
+
     public class Automata
     {
         public IEnumerable<object> StartState = new HashSet<object>();
@@ -54,29 +58,34 @@ namespace YaccLexCS.ycomplier.automata
         }
         public void ParseSingleInputFromCurrentStates(object input)
         {
-            
+#if  !NOSHOWAUTOMATATRANS
             $">> get input {input}".PrintToConsole();
+#endif
             ApplyClosure();
             var transEdges = CurrentStateCollection.SelectMany(e => 
                 NodeNext[e].Where(edge => edge.IsCanTrans.Judge(Context, input, null))).ToArray();
-
+#if  !NOSHOWAUTOMATATRANS
             foreach (var node in transEdges)
             {
                 $"can trans from {node.FromNode.NodeId} -> {node.ToNode.NodeId}".PrintToConsole();
             }
-            
+#endif    
             CurrentStateCollection.Clear();
             foreach (var e in transEdges)
             {
                 e.EventTransInEdge?.Invoke(input, Context);
                 CurrentStateCollection.Add(e.ToNode.NodeId);
             }
-            
+#if  !NOSHOWAUTOMATATRANS            
             $"get non-closure state = {CurrentStateCollection.GetMultiDimensionString()}".PrintToConsole();
+#endif
             //closure
             ApplyClosure();
+            
+#if  !NOSHOWAUTOMATATRANS
             $"after closure state = {CurrentStateCollection.GetMultiDimensionString()}".PrintToConsole();
             $"<< process {input} finish.\n".PrintToConsole();
+#endif
         }
         public bool ParseFromCurrentStates(IEnumerable<object> input)
         {
@@ -156,7 +165,6 @@ namespace YaccLexCS.ycomplier.automata
             }
             if(CurrentStateCollection.Count != set.Count)
                 ApplyClosure();
-            //CurrentStateCollection.PrintEnumerationToConsole();
 
         }
 
@@ -189,6 +197,9 @@ namespace YaccLexCS.ycomplier.automata
 
         public override string ToString()
         {
+#if NOOUTPUTAUTOMATA
+            return "";
+#endif
             var str = "===============================================\n";
             str += $"[Cur state: {CurrentStateCollection.Aggregate("", (a, b) => a + ", " + b)}]\n";
             str += $"start from node_id {StartState.Aggregate("",(a, b) => a + ", " + b)}\n end state = {AcceptState.GetMultiDimensionString()}\n";

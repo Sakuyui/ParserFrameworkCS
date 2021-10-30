@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -34,7 +35,73 @@ namespace YaccLexCS
             });
             return lexer;
         }
-        public IEnumerable<Token> ParseInStream(string s) {
+
+        public void ParseInStream(TextReader stream, Action<Token> callBack)
+        {
+            void Init()
+            {
+                foreach (var a in _patternMap)
+                {
+                    a.Key.Automata?.ResetAutomata();
+                }
+            }
+            void Invoke(MethodBase methodInfo) {
+                var p = methodInfo.GetParameters();
+                if (!p.Any())
+                    methodInfo.Invoke(null, Array.Empty<object>());
+                else if(p.Length == 1)
+                    methodInfo.Invoke(null, new object?[]{ParserContext});
+            }
+            
+            
+            Init();
+        
+            var order = _patternMap.GroupBy(e => e.Key.Priority)
+                .OrderBy(g => g.Key).SelectMany(g => g.ToList()).ToList();
+            var available = order.ToArray();
+
+            
+
+            var cur = "";
+            int c;
+            while ((c = stream.Peek()) > 0)
+            {
+                
+                var cur1 = cur;
+                var c1 = (char) stream.Peek();
+                var str = order.Where(e => 
+                    !e.Key.UseRegex && (cur1 + c1) == e.Key.SourcePattern);
+                var t = available.Where(e =>
+                        e.Key.UseRegex && e.Key.Automata!.IsCanTransWith(c1)).Concat(str)
+                    .OrderBy(e => e.Key.Priority).ToArray();
+                       
+               
+                if (!t.Any()) {
+                            
+                    //$"get token {cur}".PrintToConsole();
+                    ParserContext.TokenText = cur;
+                            
+                    cur = "";
+                          
+                            
+                    Invoke(available.First().Value);
+                    callBack?.Invoke(new Token(ParserContext.TokenText,available.First().Key.TokenName));
+                    available = order.ToArray();
+                    Init();
+                }else {
+                    cur += c1;
+                    stream.Read();
+                    
+                    t.ElementInvoke(e => {
+                        if (e.Key.UseRegex)
+                            e.Key.Automata?.ParseSingleInputFromCurrentStates(c1);
+                    });
+                    available = t.ToArray();
+                }
+            }
+            
+        }
+        public IEnumerable<Token> ParseWholeText(string s) {
             var sb = new StringBuilder(s);
             var cur = "";
         
@@ -70,11 +137,10 @@ namespace YaccLexCS
                             e.Key.UseRegex && e.Key.Automata!.IsCanTransWith(c)).Concat(str)
                     .OrderBy(e => e.Key.Priority).ToArray();
                        
-                if(cur == "{")
-                    "".PrintToConsole();
+               
                 if (!t.Any()) {
                             
-                    $"get token {cur}".PrintToConsole();
+                    //$"get token {cur}".PrintToConsole();
                     ParserContext.TokenText = cur;
                             
                     cur = "";
