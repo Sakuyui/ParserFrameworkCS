@@ -105,12 +105,15 @@ namespace YaccLexCS
         {
 
             
+           
+            
+
             var lexer = Lexer.ConfigureFromPackages(new []{"YaccLexCS"});
             
             lexer.ParseInStream("while i < 10 {\n    sum = sum + i\n i = i + 1 \n } sum")
                 .Where(e => e.Type != "Skip")
                 .PrintEnumerationToConsole();
-            
+
 
         }
     }

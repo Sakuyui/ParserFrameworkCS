@@ -83,7 +83,7 @@ namespace YaccLexCS.ycomplier.automata
         public class CustomTrans : ITransCondition
         {
             private readonly Dictionary<object, object> _map = new();
-
+            public readonly string Type;
             public object this[object obj]
             {
                 get => _map[obj];
@@ -92,9 +92,10 @@ namespace YaccLexCS.ycomplier.automata
 
             private readonly TransitionStrategy _transitionStrategy;
             public delegate bool TransitionStrategy(AutomataContext? ctx, object? tryInputItem, params object[]? objs);
-            public CustomTrans([NotNull]TransitionStrategy transitionStrategy)
+            public CustomTrans([NotNull]TransitionStrategy transitionStrategy, [AllowNull] string type = null)
             {
                 _transitionStrategy = transitionStrategy;
+                Type = type;
             }
 
             public bool Judge(AutomataContext? ctx, object? tryInputItem, params object[]? objs)

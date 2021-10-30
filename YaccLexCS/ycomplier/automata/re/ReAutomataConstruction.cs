@@ -267,7 +267,7 @@ namespace YaccLexCS.ycomplier.automata.re
                 {
                     if (item == null) return false;
                     return singleChar.Contains((char) item) || targetRange.Any(r => (char) item >= r.start && (char) item <= r.end);
-                });
+                }, type: $"Range trans : [{targetRange.GetMultiDimensionString()}]");
             
             targetRange.PrintEnumerationToConsole();
             singleChar.PrintEnumerationToConsole();

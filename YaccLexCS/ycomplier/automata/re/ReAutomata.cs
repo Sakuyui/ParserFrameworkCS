@@ -81,7 +81,7 @@ namespace YaccLexCS.ycomplier.automata.re
             {
                 var c = sb[0];
                 sb.Remove(0, 1);
-                regexBuilderAutomata.ParseFromCurrentStates(c);
+                regexBuilderAutomata.ParseSingleInputFromCurrentStates(c);
             }
             
             regexBuilderAutomata.Context["automata"].PrintToConsole();

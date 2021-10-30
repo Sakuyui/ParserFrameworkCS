@@ -35,7 +35,7 @@ namespace YaccLexCS.ycomplier.automata
             while (input.Any())
             {
                 var e = input.Dequeue();
-                ParseFromCurrentStates(e);
+                ParseSingleInputFromCurrentStates(e);
             }
 
             return runningStrategy?.Invoke(this);
@@ -52,9 +52,11 @@ namespace YaccLexCS.ycomplier.automata
                 NodeNext[e].Where(edge => edge.IsCanTrans.Judge(Context, input, null))).ToArray();
             return transEdges.Any();
         }
-        public void ParseFromCurrentStates(object input)
+        public void ParseSingleInputFromCurrentStates(object input)
         {
+            
             $">> get input {input}".PrintToConsole();
+            ApplyClosure();
             var transEdges = CurrentStateCollection.SelectMany(e => 
                 NodeNext[e].Where(edge => edge.IsCanTrans.Judge(Context, input, null))).ToArray();
 
@@ -86,7 +88,7 @@ namespace YaccLexCS.ycomplier.automata
             foreach (var e in input)
             {
                 $"try input {e} from {CurrentStateCollection.GetMultiDimensionString()}".PrintToConsole();
-                ParseFromCurrentStates(e);
+                ParseSingleInputFromCurrentStates(e);
                 $"after input state = {CurrentStateCollection.GetMultiDimensionString()}".PrintToConsole();
                 
                 if (!CurrentStateCollection.Any())
@@ -152,8 +154,10 @@ namespace YaccLexCS.ycomplier.automata
                 edge.EventTransInEdge?.Invoke(null!, Context);
                 CurrentStateCollection.Add(edge.ToNode.NodeId);
             }
+            if(CurrentStateCollection.Count != set.Count)
+                ApplyClosure();
+            //CurrentStateCollection.PrintEnumerationToConsole();
 
-            
         }
 
         public void AddEdges(IEnumerable<AutomataEdge> edge)

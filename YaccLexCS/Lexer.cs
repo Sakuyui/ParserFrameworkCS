@@ -89,7 +89,7 @@ namespace YaccLexCS
                     sb.Remove(0, 1);
                     t.ElementInvoke(e => {
                         if (e.Key.UseRegex)
-                                    e.Key.Automata?.ParseFromCurrentStates(c);
+                                    e.Key.Automata?.ParseSingleInputFromCurrentStates(c);
                     });
                     available = t.ToArray();
                 }

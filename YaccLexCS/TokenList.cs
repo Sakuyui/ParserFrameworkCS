@@ -58,7 +58,7 @@ namespace YaccLexCS
         {
             
         }
-        [TokenDefinition("DOUBLE_LITERAL", @"[0-9]+\.[0-9]+|[1-9][0-9]*|0", true)]
+        [TokenDefinition("DOUBLE_LITERAL", @"([0-9]+\.[0-9]+)|([1-9][0-9]*)|(0)", true)]
         public static void DoubleLiteral(ParserContext context)
         {
             $"DOUBLE_LITERAL with val = {context.TokenText}".PrintToConsole();
