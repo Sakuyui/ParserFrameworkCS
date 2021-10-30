@@ -86,6 +86,44 @@ namespace YaccLexCS.ycomplier.automata.re
             
             return null;
         }
+        public static object? EnterLeftLargeBrace(object input, object[] objs)
+        {
+            var context = (AutomataContext) objs[0];
+            context["v_repeat_num"] = "";
+            var curAutomata = (Automata) context["automata"];
+            context["lastResult"] = curAutomata.NodeMap[curAutomata.Nodes.Count - 1];
+            context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
+
+            return null;
+        }
+        
+        public static object? ProcessRepeatNum(object input, object[] objs)
+        {
+            var context = (AutomataContext) objs[0];
+            var num = Convert.ToInt32(context["v_repeat_num"] + "");
+            var customTrans = new CommonTransitionStrategy.CustomTrans(
+                delegate(AutomataContext? ctx, object? item, object[]? objects)
+                {
+                    if (ctx.ContainsKey("v_repeat"))
+                    {
+                        ctx["v_repeat"] = (int) ctx["v_repeat"] + 1;
+                    }
+                    else
+                    {
+                        ctx["v_repeat"] = 0;
+                    }
+
+                    return (int)ctx["v_repeat"] == num;
+                });
+            var lastNode = (AutomataNode) context["lastNode"];
+            var automata = (Automata) context["automata"];
+
+            var node = new AutomataNode(automata.Nodes.Count);
+            automata.AddNode(node);
+            automata.AddEdge(new ReEdge(lastNode, node, customTrans));
+            context["lastNode"] = node;
+            return null;
+        }
 
         public static object? ProcessSlashReturn(object input, object[] objs)
         {
@@ -97,7 +135,7 @@ namespace YaccLexCS.ycomplier.automata.re
         public static object? StatePushOne(object input, object[] objs)
         {
             var context = (AutomataContext) objs[0];
-            if (!context.IsInclude("stateStack"))
+            if (!context.ContainsKey("stateStack"))
                 context["stateStack"] = new Stack<object>();
             ((Stack<object>)context["stateStack"]).Push(1);
             return null;
@@ -105,7 +143,7 @@ namespace YaccLexCS.ycomplier.automata.re
         public static object? StatePushZero(object input, object[] objs)
         {
             var context = (AutomataContext) objs[0];
-            if (!context.IsInclude("stateStack"))
+            if (!context.ContainsKey("stateStack"))
                 context["stateStack"] = new Stack<object>();
             ((Stack<object>)context["stateStack"]).Push(0);
             return null;
@@ -258,8 +296,18 @@ namespace YaccLexCS.ycomplier.automata.re
             context["v_charRange_desc"] = context["v_charRange_desc"] + "" + input;
             context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
             $"now = {context["v_charRange_desc"]}".PrintToConsole();
-            //var bStack = (Stack<char>)context["stack_Brace"];
-            //bStack.Push('(');
+           
+            
+            return null;
+        }
+        public static object? InReadingNum(object input, object[] objs)
+        {
+            var context = (AutomataContext) objs[0];
+            $"get char {input} (reading char set state)".PrintToConsole();
+            context["v_repeat_num"] = context["v_charRange_desc"] + "" + input;
+            context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
+            
+           
             
             return null;
         }
@@ -287,9 +335,10 @@ namespace YaccLexCS.ycomplier.automata.re
             
             
             orExp.Add(cur);
-            orExpAutomata.Add(curAutomata);
+            orExpAutomata = orExpAutomataStack.Pop();
+            context["orExpAutomata"] = orExpAutomata;
             var result = OrMergeAutomata(orExp);
-            var resultAutomata = OrMergeAutomata(orExpAutomata);
+            var resultAutomata = OrMergeAutomata(orExpAutomata.Append(curAutomata));
             
             $"build finish..begin merge result = {result}".PrintToConsole();
             
@@ -317,7 +366,7 @@ namespace YaccLexCS.ycomplier.automata.re
         }
 
         
-        public static Automata OrMergeAutomata(IEnumerable<Automata> orExpAutomata)
+        public static Automata? OrMergeAutomata(IEnumerable<Automata> orExpAutomata)
         {
             orExpAutomata = orExpAutomata.Where(a => a.Nodes.Count > 1);
             $"Try merge {orExpAutomata.Count()} automata".PrintToConsole();
@@ -325,7 +374,7 @@ namespace YaccLexCS.ycomplier.automata.re
             
             if (!orExpAutomata.Any())
             {
-                return null;
+                return null!;
             }
 
             if (orExpAutomata.Count() == 1)
@@ -343,7 +392,7 @@ namespace YaccLexCS.ycomplier.automata.re
                 startSet.Add(c);
                 foreach (var node in a.Nodes)
                 {
-                    var es = a.NodeNext[node.NodeId];
+                    var ess = a.NodeNext[node.NodeId];
                     automata.AddNode(new AutomataNode((int) node.NodeId + c));
                     
                 }
@@ -479,7 +528,6 @@ namespace YaccLexCS.ycomplier.automata.re
 
             context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
             
-            //automata.PrintToConsole();
             return null;
         }
         

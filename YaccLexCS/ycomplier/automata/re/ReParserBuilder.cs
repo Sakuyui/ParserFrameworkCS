@@ -24,10 +24,10 @@ namespace YaccLexCS.ycomplier.automata.re
             var e5 = new ReEdge(node0, node0, ReAutomataConstruction.EnterLeftBrace, new CommonTransitionStrategy.EqualJudgeTrans<char>('('));
             var e6 = new ReEdge(node0, node0, ReAutomataConstruction.EnterRightBrace,new CommonTransitionStrategy.EqualJudgeTrans<char>(')'));
             var e7 = new ReEdge(node0, node1, ReAutomataConstruction.EnterLeftMBrace,new CommonTransitionStrategy.EqualJudgeTrans<char>('['));
-            var e8 = new ReEdge(node0, node2, new CommonTransitionStrategy.EqualJudgeTrans<char>('{'));
+            var e8 = new ReEdge(node0, node2, ReAutomataConstruction.EnterLeftLargeBrace,new CommonTransitionStrategy.EqualJudgeTrans<char>('{'));
             
-            var e9 = new ReEdge(node2, node2, new CommonTransitionStrategy.CharacterRangeTrans('1', '9'));
-            var e10 = new ReEdge(node2, node0, new CommonTransitionStrategy.EqualJudgeTrans<char>('}'));
+            var e9 = new ReEdge(node2, node2, ReAutomataConstruction.InReadingNum,new CommonTransitionStrategy.CharacterRangeTrans('1', '9'));
+            var e10 = new ReEdge(node2, node0,ReAutomataConstruction.ProcessRepeatNum, new CommonTransitionStrategy.EqualJudgeTrans<char>('}'));
             
            
             var e11 = new ReEdge(node1, node1, ReAutomataConstruction.InReadingCharSet, new CommonTransitionStrategy.EqualJudgeTrans<char>('^'));

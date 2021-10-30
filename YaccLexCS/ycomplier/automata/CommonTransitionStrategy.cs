@@ -5,14 +5,14 @@ using System.Linq;
 
 namespace YaccLexCS.ycomplier.automata
 {
-    public interface ITransStrategy
+    public interface ITransCondition
     {
         bool Judge(AutomataContext? ctx, object? tryInputItem, params object[]? objs);
     }
     
     public static class CommonTransitionStrategy
     {
-        public class EpsilonTrans : ITransStrategy
+        public class EpsilonTrans : ITransCondition
         {
             public static readonly EpsilonTrans Instance = new Lazy<EpsilonTrans>(() => new EpsilonTrans()).Value;
             private EpsilonTrans(){}
@@ -25,7 +25,7 @@ namespace YaccLexCS.ycomplier.automata
 
         
         
-        public class EqualJudgeTrans<T> : ITransStrategy
+        public class EqualJudgeTrans<T> : ITransCondition
         {
             private readonly T _target;
             public EqualJudgeTrans(T targetChar)
@@ -40,11 +40,11 @@ namespace YaccLexCS.ycomplier.automata
 
             public override string ToString()
             {
-                return $"Equal = {_target} trans";
+                return $"Equal {_target} trans";
             }
         }
         
-        public class CharacterRangeTrans : ITransStrategy
+        public class CharacterRangeTrans : ITransCondition
         {
             private readonly char _targetFrom;
             private readonly char _targetTo;
@@ -63,7 +63,7 @@ namespace YaccLexCS.ycomplier.automata
         }
 
 
-        public class ExclusionElementsTrans<T> : ITransStrategy
+        public class ExclusionElementsTrans<T> : ITransCondition
         {
             private readonly HashSet<T> _exclusionElements;
 
@@ -80,7 +80,7 @@ namespace YaccLexCS.ycomplier.automata
 
 
 
-        public class CustomTrans : ITransStrategy
+        public class CustomTrans : ITransCondition
         {
             private readonly Dictionary<object, object> _map = new();
 
@@ -102,7 +102,7 @@ namespace YaccLexCS.ycomplier.automata
                 return _transitionStrategy.Invoke(ctx, tryInputItem, objs);
             }
         }
-        public class NormalCharacterTrans : ITransStrategy
+        public class NormalCharacterTrans : ITransCondition
         {
             private static readonly 
                 ExclusionElementsTrans<char> Trans = new(new []{'(', ')', '|', '*', '\\', '.', '[', ']', '{', '}', '+', '^'});
@@ -116,7 +116,7 @@ namespace YaccLexCS.ycomplier.automata
                 return Trans.Judge(ctx, tryInputItem, objs);
             }
         }
-        public class TargetElementsTrans<T> : ITransStrategy
+        public class TargetElementsTrans<T> : ITransCondition
         {
             private readonly HashSet<T> _elements;
 

@@ -5,25 +5,6 @@ using System.Linq;
 
 namespace YaccLexCS.ycomplier.automata
 {
-
-    public class AutomataContext
-    {
-        private readonly Dictionary<object, object> _kvMemory = new();
-
-        public bool IsInclude(object key)
-        {
-            return _kvMemory.ContainsKey(key);
-        }
-        public object this[object obj]
-        {
-            get => _kvMemory[obj];
-            set => _kvMemory[obj] = value;
-        }
-        public void ResetContext()
-        {
-            _kvMemory.Clear();
-        }
-    }
     public class Automata
     {
         public IEnumerable<object> StartState = new HashSet<object>();
@@ -45,7 +26,25 @@ namespace YaccLexCS.ycomplier.automata
             StartState = new HashSet<object>(idSet);
             return this;
         }
+        public object? RunWithInputQueue(Queue<object> input)
+        {
+            return RunWithInputQueue(input, _ => true);
+        }
+        public object? RunWithInputQueue(Queue<object> input, Func<Automata, object>? runningStrategy)
+        {
+            while (input.Any())
+            {
+                var e = input.Dequeue();
+                ParseFromCurrentStates(e);
+            }
 
+            return runningStrategy?.Invoke(this);
+        }
+        
+        public object Run(Func<Automata, object> func)
+        {
+            return func.Invoke(this);
+        }
         public bool IsCanTransWith(object input)
         {
             ApplyClosure();

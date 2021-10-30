@@ -12,18 +12,18 @@
        // public delegate bool TransStrategy(AutomataContext ctx, AutomataEdge edge, params object[] objs);
 
         public readonly InTransEvent EventTransInEdge;
-        public readonly ITransStrategy IsCanTrans;
-        public AutomataEdge( AutomataNode fromNode, AutomataNode toNode,InTransEvent eventTransInEdge, ITransStrategy transStrategy)
+        public readonly ITransCondition IsCanTrans;
+        public AutomataEdge( AutomataNode fromNode, AutomataNode toNode,InTransEvent eventTransInEdge, ITransCondition transCondition)
         {
             EventTransInEdge = eventTransInEdge;
-            IsCanTrans = transStrategy;
+            IsCanTrans = transCondition;
             FromNode = fromNode;
             ToNode = toNode;
         }
 
-        public AutomataEdge( AutomataNode fromNode, AutomataNode toNode, ITransStrategy transStrategy)
+        public AutomataEdge( AutomataNode fromNode, AutomataNode toNode, ITransCondition transCondition)
         {
-            IsCanTrans = transStrategy;
+            IsCanTrans = transCondition;
             FromNode = fromNode;
             ToNode = toNode;
         }

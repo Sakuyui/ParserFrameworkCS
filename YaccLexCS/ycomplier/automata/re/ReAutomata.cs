@@ -14,11 +14,11 @@ namespace YaccLexCS.ycomplier.automata.re
             return $"[RE Edge ({FromNode.NodeId} -> {ToNode.NodeId})] use strategy = {IsCanTrans}";
         }
 
-        public ReEdge(AutomataNode fromNode, AutomataNode toNode, InTransEvent eventTransInEdge, ITransStrategy transStrategy) : base(fromNode, toNode, eventTransInEdge, transStrategy)
+        public ReEdge(AutomataNode fromNode, AutomataNode toNode, InTransEvent eventTransInEdge, ITransCondition transCondition) : base(fromNode, toNode, eventTransInEdge, transCondition)
         {
         }
 
-        public ReEdge(AutomataNode fromNode, AutomataNode toNode, ITransStrategy transStrategy) : base(fromNode, toNode, transStrategy)
+        public ReEdge(AutomataNode fromNode, AutomataNode toNode, ITransCondition transCondition) : base(fromNode, toNode, transCondition)
         {
         }
     }
@@ -63,7 +63,7 @@ namespace YaccLexCS.ycomplier.automata.re
             regexBuilderAutomata.Context["initNode"] = initNode;
             regexBuilderAutomata.Context["lastNode"] = initNode;
             regexBuilderAutomata.Context["automata"] = targetAutomata; // The automata current in building process.
-            regexBuilderAutomata.Context["preContNode"] = null!;
+           //regexBuilderAutomata.Context["preContNode"] = null!;
             regexBuilderAutomata.Context["lastResult"] = null!;
             regexBuilderAutomata.Context["orExpAutomata"] = new List<Automata>();
 

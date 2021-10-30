@@ -3,7 +3,7 @@
     public class AutomataNode
     {
        
-        public delegate object TransToNodeEvent();
+        public delegate object? TransToNodeEvent(object? input, params object[] objects);
 
         public readonly object NodeId;
         public TransToNodeEvent EventTransToNode;
