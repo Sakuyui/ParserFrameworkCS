@@ -28,6 +28,8 @@ namespace YaccLexCS
             $"meet operator {content.TokenText}".PrintToConsole();
         }
 
+
+      
         [TokenDefinition("CR", "\n")]
         [TokenDefinition("LBRACE", "(")]
         [TokenDefinition("RBRACE", ")")]
@@ -41,7 +43,17 @@ namespace YaccLexCS
         [TokenDefinition("Skip", @"[ \t]", true)]
         public static void Skip(){}
         
-        [TokenDefinition("ID", @"[A-Z_a-z]+", true)]
+        
+        [TokenDefinition("WHILE", "while")]
+        [TokenDefinition("IF", "if")]
+        [TokenDefinition("ELSE", "else")]
+        [TokenDefinition("FOR", "for")]
+        public static void KeyWord()
+        {
+            
+        }
+
+        [TokenDefinition("ID", @"[A-Z_a-z]+", true, 1)]
         public static void Id(ParserContext context)
         {
             

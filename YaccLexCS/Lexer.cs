@@ -52,21 +52,26 @@ namespace YaccLexCS
                         .OrderBy(g => g.Key).SelectMany(g => g.ToList()).ToList();
             var available = order.ToArray();
         
-            void Invoke(MethodInfo methodInfo) {
-                        var p = methodInfo.GetParameters();
-                        if (!p.Any())
-                            methodInfo.Invoke(null, Array.Empty<object>());
-                        else if(p.Length == 1)
-                            methodInfo.Invoke(null, new object?[]{ParserContext});
+            void Invoke(MethodBase methodInfo) {
+                var p = methodInfo.GetParameters();
+                if (!p.Any())
+                    methodInfo.Invoke(null, Array.Empty<object>());
+                else if(p.Length == 1)
+                    methodInfo.Invoke(null, new object?[]{ParserContext});
             }
             
             while (sb.Length > 0) {
                 var c = sb[0];
-                       
+
+                var cur1 = cur;
+                var str = order.Where(e => 
+                    !e.Key.UseRegex && (cur1 + c) == e.Key.SourcePattern);
                 var t = available.Where(e =>
-                            !e.Key.UseRegex ? e.Key.SourcePattern == (cur + "" + c) : e.Key.Automata!.IsCanTransWith(c)).ToArray();
+                            e.Key.UseRegex && e.Key.Automata!.IsCanTransWith(c)).Concat(str)
+                    .OrderBy(e => e.Key.Priority).ToArray();
                        
-                        
+                if(cur == "{")
+                    "".PrintToConsole();
                 if (!t.Any()) {
                             
                     $"get token {cur}".PrintToConsole();
