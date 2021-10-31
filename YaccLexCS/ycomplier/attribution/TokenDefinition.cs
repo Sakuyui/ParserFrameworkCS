@@ -6,13 +6,6 @@ using YaccLexCS.ycomplier.util;
 
 namespace YaccLexCS.ycomplier.attribution
 {
-    
-    [AttributeUsage(AttributeTargets.Class)]
-    public class TokenConfiguration : Attribute
-    {
-        
-    }
-    
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     [Serializable]
     public class TokenDefinition : Attribute
@@ -36,5 +29,7 @@ namespace YaccLexCS.ycomplier.attribution
         }
     }
 
+    
+    
     
 }

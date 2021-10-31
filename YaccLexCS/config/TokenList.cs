@@ -29,6 +29,13 @@ namespace YaccLexCS.config
             $"meet operator {content.TokenText}".PrintToConsole();
         }
         
+        [TokenDefinition("STRING", "\".*\"", true)]
+        public static void StringType(ParserContext context)
+        {
+            var v = context.TokenText;
+            $"get string = {v}".PrintToConsole();
+            context.TokenVal = v;
+        }
         
         
         [TokenDefinition("CR", "\n")]
@@ -36,6 +43,7 @@ namespace YaccLexCS.config
         [TokenDefinition("RBRACE", ")")]
         [TokenDefinition("LCBRACE", "{")]
         [TokenDefinition("RCBRACE", "}")]
+        [TokenDefinition("SEMICOL", ";")]
         public static void SpecialCharacter()
         {
             $"meet special character".PrintToConsole();
