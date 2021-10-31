@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace YaccLexCS.ycomplier.automata
 {
+    [Serializable]
     public class AutomataContext
     {
         private readonly Dictionary<object, object> _kvMemory = new();

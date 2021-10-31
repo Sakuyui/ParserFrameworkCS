@@ -1,8 +1,8 @@
 ﻿using System;
 using YaccLexCS.ycomplier;
-using YaccLexCS.ycomplier.conf.attribution;
+using YaccLexCS.ycomplier.attribution;
 
-namespace YaccLexCS
+namespace YaccLexCS.config
 {
     
     [TokenConfiguration]
@@ -13,7 +13,6 @@ namespace YaccLexCS
         [TokenDefinition("SUB", "-")]
         [TokenDefinition("MUL", "*")]
         [TokenDefinition("DIV", "/")]
-        [TokenDefinition("MUL", "*")]
         [TokenDefinition("CMP", "<|<=|>|>=|==", true)]
         [TokenDefinition("LOGIC_OP", @"&&|\|\|", true)]
         public static void Operator(ParserContext content)
@@ -22,14 +21,16 @@ namespace YaccLexCS
         }
         
         
+        
+        
         [TokenDefinition("EQ", "=")]
         public static void Eq(ParserContext content)
         {
             $"meet operator {content.TokenText}".PrintToConsole();
         }
-
-
-      
+        
+        
+        
         [TokenDefinition("CR", "\n")]
         [TokenDefinition("LBRACE", "(")]
         [TokenDefinition("RBRACE", ")")]
@@ -74,6 +75,7 @@ namespace YaccLexCS
         }
         
     }
+    
     // [TokenConfiguration]
     // public static class TokenList
     // {

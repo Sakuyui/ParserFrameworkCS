@@ -4,7 +4,7 @@
     {
         private readonly string _sourceText;
         public string Type { get; }
-
+        public int LineNum;
         public Token(string sourceText, string type)
         {
             _sourceText = sourceText;

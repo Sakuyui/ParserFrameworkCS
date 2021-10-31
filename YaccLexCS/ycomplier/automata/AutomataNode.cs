@@ -1,5 +1,8 @@
-﻿namespace YaccLexCS.ycomplier.automata
+﻿using System;
+
+namespace YaccLexCS.ycomplier.automata
 {
+    [Serializable]
     public class AutomataNode
     {
        

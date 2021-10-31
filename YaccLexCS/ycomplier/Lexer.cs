@@ -3,18 +3,21 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using YaccLexCS.ycomplier;
+using System.Xml.Serialization;
+using YaccLexCS.ycomplier.attribution;
 using YaccLexCS.ycomplier.automata.re;
-using YaccLexCS.ycomplier.conf.attribution;
 
-namespace YaccLexCS
+namespace YaccLexCS.ycomplier
 {
     public class Lexer
     {
         private Lexer(){}
         public readonly ParserContext ParserContext = new();
-        Dictionary<TokenDefinition, MethodInfo> _patternMap = new();
+        private readonly Dictionary<TokenDefinition, MethodInfo> _patternMap = new();
+
         
         public static Lexer ConfigureFromPackages(IEnumerable<string> scanPackage)
         {
@@ -22,39 +25,37 @@ namespace YaccLexCS
             YCompilerConfigurator.GetAllTokenDefinitions(
                 YCompilerConfigurator.ScanTokenConfiguration(scanPackage)).ElementInvoke(e =>
             {
-                var p = e.methodInfo.GetParameters(); //get parameters
                 if (!e.tokenDef.UseRegex)
                 {
                     lexer._patternMap[e.tokenDef] = e.methodInfo!;
                 }
                 else
                 {
-                    var a = ReAutomata.BuildAutomataFromExp(e.tokenDef.SourcePattern);
                     lexer._patternMap[e.tokenDef] = e.methodInfo!;
                 }
             });
             return lexer;
         }
 
+
+        private void InitAutomata()
+        {
+            foreach (var a in _patternMap)
+            {
+                a.Key.Automata?.ResetAutomata();
+            }
+        }
+
+        private void InvokeTokenCallBackMethod(MethodBase methodInfo) {
+            var p = methodInfo.GetParameters();
+            if (!p.Any())
+                methodInfo.Invoke(null, Array.Empty<object>());
+            else if(p.Length == 1)
+                methodInfo.Invoke(null, new object?[]{ParserContext});
+        }
         public void ParseInStream(TextReader stream, Action<Token> callBack)
         {
-            void Init()
-            {
-                foreach (var a in _patternMap)
-                {
-                    a.Key.Automata?.ResetAutomata();
-                }
-            }
-            void Invoke(MethodBase methodInfo) {
-                var p = methodInfo.GetParameters();
-                if (!p.Any())
-                    methodInfo.Invoke(null, Array.Empty<object>());
-                else if(p.Length == 1)
-                    methodInfo.Invoke(null, new object?[]{ParserContext});
-            }
-            
-            
-            Init();
+            InitAutomata();
         
             var order = _patternMap.GroupBy(e => e.Key.Priority)
                 .OrderBy(g => g.Key).SelectMany(g => g.ToList()).ToList();
@@ -63,8 +64,7 @@ namespace YaccLexCS
             
 
             var cur = "";
-            int c;
-            while ((c = stream.Peek()) > 0)
+            while (stream.Peek() > 0)
             {
                 
                 var cur1 = cur;
@@ -84,10 +84,10 @@ namespace YaccLexCS
                     cur = "";
                           
                             
-                    Invoke(available.First().Value);
+                    InvokeTokenCallBackMethod(available.First().Value);
                     callBack?.Invoke(new Token(ParserContext.TokenText,available.First().Key.TokenName));
                     available = order.ToArray();
-                    Init();
+                    InitAutomata();
                 }else {
                     cur += c1;
                     stream.Read();
@@ -105,27 +105,14 @@ namespace YaccLexCS
             var sb = new StringBuilder(s);
             var cur = "";
         
-            void Init()
-            {
-                foreach (var a in _patternMap)
-                {
-                    a.Key.Automata?.ResetAutomata();
-                }
-            }
+           
             
-            Init();
+            InitAutomata();
         
             var order = _patternMap.GroupBy(e => e.Key.Priority)
                         .OrderBy(g => g.Key).SelectMany(g => g.ToList()).ToList();
             var available = order.ToArray();
         
-            void Invoke(MethodBase methodInfo) {
-                var p = methodInfo.GetParameters();
-                if (!p.Any())
-                    methodInfo.Invoke(null, Array.Empty<object>());
-                else if(p.Length == 1)
-                    methodInfo.Invoke(null, new object?[]{ParserContext});
-            }
             
             while (sb.Length > 0) {
                 var c = sb[0];
@@ -146,10 +133,10 @@ namespace YaccLexCS
                     cur = "";
                           
                             
-                    Invoke(available.First().Value);
+                    InvokeTokenCallBackMethod(available.First().Value);
                     yield return new Token(ParserContext.TokenText,available.First().Key.TokenName);
                     available = order.ToArray();
-                    Init();
+                    InitAutomata();
                 }else {
                     cur += c;
                     sb.Remove(0, 1);
@@ -166,7 +153,7 @@ namespace YaccLexCS
                 yield break;
             $"get token {cur}".PrintToConsole();
             ParserContext.TokenText = cur;
-            Invoke(available.First().Value);
+            InvokeTokenCallBackMethod(available.First().Value);
             yield return new Token(ParserContext.TokenText,available.First().Key.TokenName);
         }
     }

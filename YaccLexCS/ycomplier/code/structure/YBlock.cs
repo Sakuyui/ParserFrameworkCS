@@ -1,4 +1,4 @@
-﻿namespace YaccLexCS
+﻿namespace YaccLexCS.ycomplier.code.structure
 {
     public class YBlock
     {

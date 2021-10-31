@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace YaccLexCS.ycomplier.automata
 {
-
+    [Serializable]
     public class Automata
     {
         public IEnumerable<object> StartState = new HashSet<object>();

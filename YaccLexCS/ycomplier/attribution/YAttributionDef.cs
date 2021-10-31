@@ -4,7 +4,7 @@ using YaccLexCS.ycomplier.automata;
 using YaccLexCS.ycomplier.automata.re;
 using YaccLexCS.ycomplier.util;
 
-namespace YaccLexCS.ycomplier.conf.attribution
+namespace YaccLexCS.ycomplier.attribution
 {
     
     [AttributeUsage(AttributeTargets.Class)]
@@ -12,7 +12,9 @@ namespace YaccLexCS.ycomplier.conf.attribution
     {
         
     }
+    
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    [Serializable]
     public class TokenDefinition : Attribute
     {
         public readonly Regex Pattern;

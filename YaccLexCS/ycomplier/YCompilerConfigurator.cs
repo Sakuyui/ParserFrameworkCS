@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using YaccLexCS.ycomplier.conf.attribution;
+using YaccLexCS.ycomplier.attribution;
 
 namespace YaccLexCS.ycomplier
 {

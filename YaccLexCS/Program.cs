@@ -1,4 +1,3 @@
-// See https://aka.ms/new-console-template for more information
 
 using System;
 using System.Collections.Generic;
@@ -10,7 +9,6 @@ using System.Text.RegularExpressions;
 using YaccLexCS.ycomplier;
 using YaccLexCS.ycomplier.automata;
 using YaccLexCS.ycomplier.automata.re;
-using YaccLexCS.ycomplier.conf.attribution;
 using YaccLexCS.ycomplier.util;
 
 using Regex = System.Text.RegularExpressions.Regex;
@@ -27,23 +25,25 @@ namespace YaccLexCS
 
             
 
-            //指定されたパッケージネームスからToken Configurationクラスを探す。
-            var lexer = Lexer.ConfigureFromPackages(new []{"YaccLexCS"});
+            //在指定命名空间扫描配置
+            var lexer = Lexer.ConfigureFromPackages(new []{"YaccLexCS.config"});
             
-            //Use lexer in stream. Simply provide a reader of text stream, and a callback function to process a token as soon as the token is parsed.
+            //创建输入流
             var r = (TextReader) new StringReader("while i < 10 {\n    sum = sum + i\n i = i + 1 \n } sum");
-            
-            //lexer.ParseInStream(r, TokenCallBack); 
-            
-            lexer.ParseInStream(r, token =>  //lambda expression can also be used.
+            var tokenList = new List<Token>();
+            //在流中词法分析。
+            lexer.ParseInStream(r, token =>  //callback function
             {
-                if(token.Type != "Skip") token.PrintToConsole();
+                if(token.Type != "Skip") 
+                    tokenList.Add(token);
             });
             
+            tokenList.PrintEnumerationToConsole();
             return;
             
             //it can also used to parsed a whole text if you want. Simply use it as follow. This Function will return a IEnumerable<Token>,
             //you can also provide a callback function to process a token as soon as a token is parsed.
+            
             var tokens = lexer.ParseWholeText("while i < 10 {\n    sum = sum + i\n i = i + 1 \n } sum")
                 .Where(e => e.Type != "Skip");
             
