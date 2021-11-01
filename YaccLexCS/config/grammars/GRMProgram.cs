@@ -7,10 +7,18 @@ namespace YaccLexCS.config.grammars
     {
         //[]是一回 {}是0~ 
         //[GrammarDefinition("program", "[statement](SEMICOL|CR)")]
-        [GrammarDefinition("program", "[statement](SEMICOL|CR)")]
-        public void Program()
+        [GrammarDefinition("program", "definition_or_statement")]
+        public static void Program()
         {
             
         }
+        
+        [GrammarDefinition("definition_or_statement", "expression SEMICOLON")]
+        public static void DefinitionOrStatement()
+        {
+            
+        }
+        
+        
     }
 }

@@ -8,7 +8,7 @@ namespace YaccLexCS.ycomplier.attribution
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     [Serializable]
-    public class TokenDefinition : Attribute
+    public class TokenDefinition : YDefinition
     {
         public readonly Regex Pattern;
         public readonly string SourcePattern;

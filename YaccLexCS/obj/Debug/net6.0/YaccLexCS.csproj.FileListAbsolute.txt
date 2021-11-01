@@ -15,10 +15,3 @@ C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\obj\Debug\net6.0\ref\YaccLe
 C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\obj\Debug\net6.0\YaccLexCS.pdb
 C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\obj\Debug\net6.0\YaccLexCS.genruntimeconfig.cache
 C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\bin\Debug\net6.0\System.CodeDom.dll
-C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\bin\Debug\net6.0\JetBrains.Annotations.dll
-C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\bin\Debug\net6.0\JJ.Framework.Collections.dll
-C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\bin\Debug\net6.0\JJ.Framework.Common.dll
-C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\bin\Debug\net6.0\JJ.Framework.Exceptions.dll
-C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\bin\Debug\net6.0\JJ.Framework.PlatformCompatibility.dll
-C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\bin\Debug\net6.0\JJ.Framework.Reflection.dll
-C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\bin\Debug\net6.0\JJ.Framework.Text.dll

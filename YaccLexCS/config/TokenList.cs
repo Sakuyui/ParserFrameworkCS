@@ -12,6 +12,7 @@ namespace YaccLexCS.config
         [TokenDefinition("ADD", "+")]
         [TokenDefinition("SUB", "-")]
         [TokenDefinition("MUL", "*")]
+        [TokenDefinition("MOD", "%")]
         [TokenDefinition("DIV", "/")]
         [TokenDefinition("CMP", "<|<=|>|>=|==", true)]
         [TokenDefinition("LOGIC_OP", @"&&|\|\|", true)]
@@ -23,12 +24,16 @@ namespace YaccLexCS.config
         
         
         
-        [TokenDefinition("EQ", "=")]
+        [TokenDefinition("EQ", "==")]
         public static void Eq(ParserContext content)
         {
             $"meet operator {content.TokenText}".PrintToConsole();
         }
-        
+        [TokenDefinition("ASSIGN", "=")]
+        public static void Assign(ParserContext content)
+        {
+            $"meet operator {content.TokenText}".PrintToConsole();
+        }
         [TokenDefinition("STRING", "\".*\"", true)]
         public static void StringType(ParserContext context)
         {
@@ -39,11 +44,11 @@ namespace YaccLexCS.config
         
         
         [TokenDefinition("CR", "\n")]
-        [TokenDefinition("LBRACE", "(")]
-        [TokenDefinition("RBRACE", ")")]
-        [TokenDefinition("LCBRACE", "{")]
-        [TokenDefinition("RCBRACE", "}")]
-        [TokenDefinition("SEMICOL", ";")]
+        [TokenDefinition("LP", "(")]
+        [TokenDefinition("RP", ")")]
+        [TokenDefinition("LC", "{")]
+        [TokenDefinition("RC", "}")]
+        [TokenDefinition("SEMICOLON", ";")]
         public static void SpecialCharacter()
         {
             $"meet special character".PrintToConsole();

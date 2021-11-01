@@ -6,7 +6,7 @@ namespace YaccLexCS.ycomplier.attribution
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     [Serializable]
-    public class GrammarDefinition : Attribute
+    public class GrammarDefinition : YDefinition
     {
         public readonly string Name;
         public List<string> CfgItem;
@@ -16,7 +16,10 @@ namespace YaccLexCS.ycomplier.attribution
             Name = name;
             CfgItem = cfgItem.ToList();
         }
-        
-        
+
+        public override string ToString()
+        {
+            return $"[Cfg: {Name} : {CfgItem.ToEnumerationString()}";
+        }
     }
 }

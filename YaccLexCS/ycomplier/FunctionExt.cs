@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.RegularExpressions;
-using JetBrains.Annotations;
 using YaccLexCS.ycomplier.util;
 
 namespace YaccLexCS
@@ -11,7 +11,13 @@ namespace YaccLexCS
       public static class FunctionExt
     {
 
-       
+        public static void AddRange<T>(this HashSet<T> target, IEnumerable<T> data)
+        {
+            foreach (var e in data)
+            {
+                target.Add(e);
+            }
+        }
         public static void PrintToConsole(this object obj)
         {
             Console.WriteLine(obj.ToString());

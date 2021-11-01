@@ -2,91 +2,6 @@
   "version": 3,
   "targets": {
     "net6.0": {
-      "JetBrains.Annotations/2018.2.1": {
-        "type": "package",
-        "compile": {
-          "lib/netstandard2.0/JetBrains.Annotations.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard2.0/JetBrains.Annotations.dll": {}
-        }
-      },
-      "JJ.Framework.Collections/1.5.6877.41334": {
-        "type": "package",
-        "dependencies": {
-          "JJ.Framework.Common": "[1.5.0, 1.6.0)",
-          "JJ.Framework.Exceptions": "[1.5.0, 1.6.0)",
-          "JJ.Framework.Reflection": "[1.5.0, 1.6.0)",
-          "JetBrains.Annotations": "2018.2.1",
-          "System.ValueTuple": "4.5.0"
-        },
-        "compile": {
-          "lib/net461/JJ.Framework.Collections.dll": {}
-        },
-        "runtime": {
-          "lib/net461/JJ.Framework.Collections.dll": {}
-        }
-      },
-      "JJ.Framework.Common/1.5.6877.34538": {
-        "type": "package",
-        "dependencies": {
-          "JetBrains.Annotations": "2018.2.1"
-        },
-        "compile": {
-          "lib/net461/JJ.Framework.Common.dll": {}
-        },
-        "runtime": {
-          "lib/net461/JJ.Framework.Common.dll": {}
-        }
-      },
-      "JJ.Framework.Exceptions/1.5.6877.34548": {
-        "type": "package",
-        "dependencies": {
-          "JJ.Framework.Reflection": "[1.5.0, 1.6.0)",
-          "JJ.Framework.Text": "[1.5.0, 1.6.0)",
-          "JetBrains.Annotations": "2018.2.1",
-          "System.ValueTuple": "4.3.0"
-        },
-        "compile": {
-          "lib/net461/JJ.Framework.Exceptions.dll": {}
-        },
-        "runtime": {
-          "lib/net461/JJ.Framework.Exceptions.dll": {}
-        }
-      },
-      "JJ.Framework.PlatformCompatibility/1.5.6877.34540": {
-        "type": "package",
-        "compile": {
-          "lib/net461/JJ.Framework.PlatformCompatibility.dll": {}
-        },
-        "runtime": {
-          "lib/net461/JJ.Framework.PlatformCompatibility.dll": {}
-        }
-      },
-      "JJ.Framework.Reflection/1.5.6877.34540": {
-        "type": "package",
-        "dependencies": {
-          "JJ.Framework.Common": "[1.5.0, 1.6.0)",
-          "JJ.Framework.PlatformCompatibility": "[1.5.0, 1.6.0)",
-          "JJ.Framework.Text": "[1.5.0, 1.6.0)",
-          "JetBrains.Annotations": "2018.2.1"
-        },
-        "compile": {
-          "lib/net461/JJ.Framework.Reflection.dll": {}
-        },
-        "runtime": {
-          "lib/net461/JJ.Framework.Reflection.dll": {}
-        }
-      },
-      "JJ.Framework.Text/1.5.6877.34538": {
-        "type": "package",
-        "compile": {
-          "lib/net461/JJ.Framework.Text.dll": {}
-        },
-        "runtime": {
-          "lib/net461/JJ.Framework.Text.dll": {}
-        }
-      },
       "System.CodeDom/6.0.0-rc.2.21480.5": {
         "type": "package",
         "compile": {
@@ -98,124 +13,10 @@
         "build": {
           "buildTransitive/netcoreapp3.1/_._": {}
         }
-      },
-      "System.ValueTuple/4.5.0": {
-        "type": "package",
-        "compile": {
-          "ref/netcoreapp2.0/_._": {}
-        },
-        "runtime": {
-          "lib/netcoreapp2.0/_._": {}
-        }
       }
     }
   },
   "libraries": {
-    "JetBrains.Annotations/2018.2.1": {
-      "sha512": "/aPVHEW93EV1Httnbniz0Cty5+jrXobS27I8QBnIUMe0n51qgxLyQV2AQNko4yXkeOxEdWiZ7bg9+BuMxYbXcA==",
-      "type": "package",
-      "path": "jetbrains.annotations/2018.2.1",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "jetbrains.annotations.2018.2.1.nupkg.sha512",
-        "jetbrains.annotations.nuspec",
-        "lib/net20/JetBrains.Annotations.dll",
-        "lib/net20/JetBrains.Annotations.xml",
-        "lib/netstandard1.0/JetBrains.Annotations.deps.json",
-        "lib/netstandard1.0/JetBrains.Annotations.dll",
-        "lib/netstandard1.0/JetBrains.Annotations.xml",
-        "lib/netstandard2.0/JetBrains.Annotations.deps.json",
-        "lib/netstandard2.0/JetBrains.Annotations.dll",
-        "lib/netstandard2.0/JetBrains.Annotations.xml",
-        "lib/portable40-net40+sl5+win8+wp8+wpa81/JetBrains.Annotations.dll",
-        "lib/portable40-net40+sl5+win8+wp8+wpa81/JetBrains.Annotations.xml"
-      ]
-    },
-    "JJ.Framework.Collections/1.5.6877.41334": {
-      "sha512": "M7dzSiD5xj3FEVADrc+TeKdHmk15S9IzmMSZeTB9aemg6cZzQi5oG6H5A+NzHS1vbJrbh8mtpwFh6Z6d/YiOkg==",
-      "type": "package",
-      "path": "jj.framework.collections/1.5.6877.41334",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "README.MD",
-        "jj.framework.collections.1.5.6877.41334.nupkg.sha512",
-        "jj.framework.collections.nuspec",
-        "lib/net461/JJ.Framework.Collections.dll",
-        "lib/net461/JJ.Framework.Collections.xml"
-      ]
-    },
-    "JJ.Framework.Common/1.5.6877.34538": {
-      "sha512": "UteYvK6MuAKxc/8H010ibZFI1uv7iO7SI/iebcdU/0sMIKSm8Zuv2wX9XRUt2MsfHNxraVXeL8WpTgnhXqMx2A==",
-      "type": "package",
-      "path": "jj.framework.common/1.5.6877.34538",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "README.MD",
-        "jj.framework.common.1.5.6877.34538.nupkg.sha512",
-        "jj.framework.common.nuspec",
-        "lib/net461/JJ.Framework.Common.dll",
-        "lib/net461/JJ.Framework.Common.xml"
-      ]
-    },
-    "JJ.Framework.Exceptions/1.5.6877.34548": {
-      "sha512": "udb8wkn8Ktoqrp0/c2pgqILdcTAh9lBXna1eN2D9iOkumx8+yardv+frwglz3IebYIv+X3oZx026pDD883XgmA==",
-      "type": "package",
-      "path": "jj.framework.exceptions/1.5.6877.34548",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "README.MD",
-        "jj.framework.exceptions.1.5.6877.34548.nupkg.sha512",
-        "jj.framework.exceptions.nuspec",
-        "lib/net461/JJ.Framework.Exceptions.dll",
-        "lib/net461/JJ.Framework.Exceptions.xml"
-      ]
-    },
-    "JJ.Framework.PlatformCompatibility/1.5.6877.34540": {
-      "sha512": "UkEaYH9JxL9hBM/OEInneZ97oUUYi/ag4dO/gC9LkVSlQIAojRQC1p/VW6KWuUCGeln17BsD7wucv3SxmqIkdA==",
-      "type": "package",
-      "path": "jj.framework.platformcompatibility/1.5.6877.34540",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "README.MD",
-        "jj.framework.platformcompatibility.1.5.6877.34540.nupkg.sha512",
-        "jj.framework.platformcompatibility.nuspec",
-        "lib/net461/JJ.Framework.PlatformCompatibility.dll",
-        "lib/net461/JJ.Framework.PlatformCompatibility.xml"
-      ]
-    },
-    "JJ.Framework.Reflection/1.5.6877.34540": {
-      "sha512": "U38JL752MslKHLq7iIoxiyOmuPMB4GbqU2epQwZiiTAaZjJqWKe1EYcoIMtaiC0FUs9HtLBNeITFQAGrUnbwpQ==",
-      "type": "package",
-      "path": "jj.framework.reflection/1.5.6877.34540",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "README.MD",
-        "jj.framework.reflection.1.5.6877.34540.nupkg.sha512",
-        "jj.framework.reflection.nuspec",
-        "lib/net461/JJ.Framework.Reflection.dll",
-        "lib/net461/JJ.Framework.Reflection.xml"
-      ]
-    },
-    "JJ.Framework.Text/1.5.6877.34538": {
-      "sha512": "EVzhQB5RQYS9l72NXty+NXCfcikerFiqaR/6//TfhvV9SKLvmjjfXGp2Z+8eeoIm4U5/Mfh54Pwq5iupzCOmCA==",
-      "type": "package",
-      "path": "jj.framework.text/1.5.6877.34538",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "README.MD",
-        "jj.framework.text.1.5.6877.34538.nupkg.sha512",
-        "jj.framework.text.nuspec",
-        "lib/net461/JJ.Framework.Text.dll",
-        "lib/net461/JJ.Framework.Text.xml"
-      ]
-    },
     "System.CodeDom/6.0.0-rc.2.21480.5": {
       "sha512": "0Olnx7KoF8bFjzTwu5N5IA3RGWA+PBn6veiIQ+2JVDfMCbHbN04z1PVPMg+VFIApsunL5rH1YQsbF6wS9vw7Fg==",
       "type": "package",
@@ -238,55 +39,10 @@
         "system.codedom.nuspec",
         "useSharedDesignerContext.txt"
       ]
-    },
-    "System.ValueTuple/4.5.0": {
-      "sha512": "okurQJO6NRE/apDIP23ajJ0hpiNmJ+f0BwOlB/cSqTLQlw5upkf+5+96+iG2Jw40G1fCVCyPz/FhIABUjMR+RQ==",
-      "type": "package",
-      "path": "system.valuetuple/4.5.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "LICENSE.TXT",
-        "THIRD-PARTY-NOTICES.TXT",
-        "lib/MonoAndroid10/_._",
-        "lib/MonoTouch10/_._",
-        "lib/net461/System.ValueTuple.dll",
-        "lib/net461/System.ValueTuple.xml",
-        "lib/net47/System.ValueTuple.dll",
-        "lib/net47/System.ValueTuple.xml",
-        "lib/netcoreapp2.0/_._",
-        "lib/netstandard1.0/System.ValueTuple.dll",
-        "lib/netstandard1.0/System.ValueTuple.xml",
-        "lib/netstandard2.0/_._",
-        "lib/portable-net40+sl4+win8+wp8/System.ValueTuple.dll",
-        "lib/portable-net40+sl4+win8+wp8/System.ValueTuple.xml",
-        "lib/uap10.0.16299/_._",
-        "lib/xamarinios10/_._",
-        "lib/xamarinmac20/_._",
-        "lib/xamarintvos10/_._",
-        "lib/xamarinwatchos10/_._",
-        "ref/MonoAndroid10/_._",
-        "ref/MonoTouch10/_._",
-        "ref/net461/System.ValueTuple.dll",
-        "ref/net47/System.ValueTuple.dll",
-        "ref/netcoreapp2.0/_._",
-        "ref/netstandard2.0/_._",
-        "ref/portable-net40+sl4+win8+wp8/System.ValueTuple.dll",
-        "ref/uap10.0.16299/_._",
-        "ref/xamarinios10/_._",
-        "ref/xamarinmac20/_._",
-        "ref/xamarintvos10/_._",
-        "ref/xamarinwatchos10/_._",
-        "system.valuetuple.4.5.0.nupkg.sha512",
-        "system.valuetuple.nuspec",
-        "useSharedDesignerContext.txt",
-        "version.txt"
-      ]
     }
   },
   "projectFileDependencyGroups": {
     "net6.0": [
-      "JJ.Framework.Collections >= 1.5.6877.41334",
       "System.CodeDom >= 6.0.0-rc.2.21480.5"
     ]
   },
@@ -329,10 +85,6 @@
       "net6.0": {
         "targetAlias": "net6.0",
         "dependencies": {
-          "JJ.Framework.Collections": {
-            "target": "Package",
-            "version": "[1.5.6877.41334, )"
-          },
           "System.CodeDom": {
             "target": "Package",
             "version": "[6.0.0-rc.2.21480.5, )"
@@ -356,127 +108,5 @@
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.100-rc.1.21463.6\\RuntimeIdentifierGraph.json"
       }
     }
-  },
-  "logs": [
-    {
-      "code": "NU1603",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "JJ.Framework.Collections 1.5.6877.41334 depends on JJ.Framework.Common (>= 1.5.0 && < 1.6.0) but JJ.Framework.Common 1.5.0 was not found. An approximate best match of JJ.Framework.Common 1.5.6877.34538 was resolved.",
-      "libraryId": "JJ.Framework.Common",
-      "targetGraphs": [
-        "net6.0"
-      ]
-    },
-    {
-      "code": "NU1603",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "JJ.Framework.Collections 1.5.6877.41334 depends on JJ.Framework.Exceptions (>= 1.5.0 && < 1.6.0) but JJ.Framework.Exceptions 1.5.0 was not found. An approximate best match of JJ.Framework.Exceptions 1.5.6877.34548 was resolved.",
-      "libraryId": "JJ.Framework.Exceptions",
-      "targetGraphs": [
-        "net6.0"
-      ]
-    },
-    {
-      "code": "NU1603",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "JJ.Framework.Reflection 1.5.6877.34540 depends on JJ.Framework.PlatformCompatibility (>= 1.5.0 && < 1.6.0) but JJ.Framework.PlatformCompatibility 1.5.0 was not found. An approximate best match of JJ.Framework.PlatformCompatibility 1.5.6877.34540 was resolved.",
-      "libraryId": "JJ.Framework.PlatformCompatibility",
-      "targetGraphs": [
-        "net6.0"
-      ]
-    },
-    {
-      "code": "NU1603",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "JJ.Framework.Collections 1.5.6877.41334 depends on JJ.Framework.Reflection (>= 1.5.0 && < 1.6.0) but JJ.Framework.Reflection 1.5.0 was not found. An approximate best match of JJ.Framework.Reflection 1.5.6877.34540 was resolved.",
-      "libraryId": "JJ.Framework.Reflection",
-      "targetGraphs": [
-        "net6.0"
-      ]
-    },
-    {
-      "code": "NU1603",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "JJ.Framework.Exceptions 1.5.6877.34548 depends on JJ.Framework.Text (>= 1.5.0 && < 1.6.0) but JJ.Framework.Text 1.5.0 was not found. An approximate best match of JJ.Framework.Text 1.5.6877.34538 was resolved.",
-      "libraryId": "JJ.Framework.Text",
-      "targetGraphs": [
-        "net6.0"
-      ]
-    },
-    {
-      "code": "NU1603",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "JJ.Framework.Reflection 1.5.6877.34540 depends on JJ.Framework.Text (>= 1.5.0 && < 1.6.0) but JJ.Framework.Text 1.5.0 was not found. An approximate best match of JJ.Framework.Text 1.5.6877.34538 was resolved.",
-      "libraryId": "JJ.Framework.Text",
-      "targetGraphs": [
-        "net6.0"
-      ]
-    },
-    {
-      "code": "NU1701",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Package 'JJ.Framework.Collections 1.5.6877.41334' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8' instead of the project target framework 'net6.0'. This package may not be fully compatible with your project.",
-      "libraryId": "JJ.Framework.Collections",
-      "targetGraphs": [
-        "net6.0"
-      ]
-    },
-    {
-      "code": "NU1701",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Package 'JJ.Framework.Common 1.5.6877.34538' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8' instead of the project target framework 'net6.0'. This package may not be fully compatible with your project.",
-      "libraryId": "JJ.Framework.Common",
-      "targetGraphs": [
-        "net6.0"
-      ]
-    },
-    {
-      "code": "NU1701",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Package 'JJ.Framework.Exceptions 1.5.6877.34548' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8' instead of the project target framework 'net6.0'. This package may not be fully compatible with your project.",
-      "libraryId": "JJ.Framework.Exceptions",
-      "targetGraphs": [
-        "net6.0"
-      ]
-    },
-    {
-      "code": "NU1701",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Package 'JJ.Framework.PlatformCompatibility 1.5.6877.34540' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8' instead of the project target framework 'net6.0'. This package may not be fully compatible with your project.",
-      "libraryId": "JJ.Framework.PlatformCompatibility",
-      "targetGraphs": [
-        "net6.0"
-      ]
-    },
-    {
-      "code": "NU1701",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Package 'JJ.Framework.Reflection 1.5.6877.34540' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8' instead of the project target framework 'net6.0'. This package may not be fully compatible with your project.",
-      "libraryId": "JJ.Framework.Reflection",
-      "targetGraphs": [
-        "net6.0"
-      ]
-    },
-    {
-      "code": "NU1701",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Package 'JJ.Framework.Text 1.5.6877.34538' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8' instead of the project target framework 'net6.0'. This package may not be fully compatible with your project.",
-      "libraryId": "JJ.Framework.Text",
-      "targetGraphs": [
-        "net6.0"
-      ]
-    }
-  ]
+  }
 }

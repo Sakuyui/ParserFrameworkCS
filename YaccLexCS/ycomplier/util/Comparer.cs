@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using JetBrains.Annotations;
+
 
 namespace YaccLexCS.ycomplier.util
 {
@@ -39,7 +40,7 @@ namespace YaccLexCS.ycomplier.util
  
     public class CustomerEqualityComparer<T> : IEqualityComparer<T>
     {
-        public delegate bool EqualityCompareStrategy([CanBeNull]T t1,[CanBeNull]T t2);
+        public delegate bool EqualityCompareStrategy([AllowNull]T t1,[AllowNull]T t2);
 
         private readonly EqualityCompareStrategy _compareStrategy = null;
         private readonly Func<T, int> _hashCode;

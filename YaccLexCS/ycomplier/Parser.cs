@@ -8,7 +8,12 @@ namespace YaccLexCS
     {
        
         
-        private readonly ParserContext _context = new ParserContext();
+        private readonly ParserContext _context ;
+
+        private Parser(ParserContext context)
+        {
+            _context = context;
+        }
         public abstract void Parse();
 
         public object SetParserContextVariable(string name, object obj)

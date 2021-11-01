@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using CIExam.Complier;
-using JJ.Framework.Collections;
 
 namespace YaccLexCS.ycomplier.LrParser
 {
@@ -80,7 +79,7 @@ namespace YaccLexCS.ycomplier.LrParser
                      ans.AddRange(f[t]);
                      return ans;
                  }
-                 ans.AddRange(f[t].Except("ε"));
+                 ans.AddRange(f[t].Except(new []{"ε"}));
              }
 
              return ans;

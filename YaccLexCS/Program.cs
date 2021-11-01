@@ -22,10 +22,11 @@ namespace YaccLexCS
         
         public static void Main()
         {
-            
 
+
+            var context = new ParserContext();
             //在指定命名空间扫描配置
-            var lexer = Lexer.ConfigureFromPackages(new []{"YaccLexCS.config"});
+            var lexer = Lexer.ConfigureFromPackages(new []{"YaccLexCS.config"}, context);
             
             //创建输入流
             var r = (TextReader) new StringReader("while i < 10 {\n    sum = sum + i\n i = i + 1 \n } sum");
@@ -38,6 +39,36 @@ namespace YaccLexCS
             });
             
             tokenList.PrintEnumerationToConsole();
+
+
+
+
+            var gs = YCompilerConfigurator.GetAllGrammarDefinitions(
+            YCompilerConfigurator.ScanGrammarConfiguration(new []{"YaccLexCS.config.grammars"})).ToList();
+            
+            foreach (var valueTuple in gs)
+            {
+                valueTuple.tokenDef.PrintToConsole();
+            }
+
+            var cfgDefSet = gs.Select(g => g.tokenDef.Name).ToHashSet();
+            var tokenNames = lexer.TokenNames;
+            cfgDefSet.PrintEnumerationToConsole();
+            tokenNames.PrintEnumerationToConsole();
+            var symbolsAppearInCfg = gs.SelectMany(e => 
+                e.tokenDef.CfgItem.SelectMany(s => s.Split("|").SelectMany(item => item.Split(" "))));
+            symbolsAppearInCfg.PrintEnumerationToConsole();
+            //check
+            void CheckDef()
+            {
+                var except = symbolsAppearInCfg.Except(tokenNames).Except(cfgDefSet);
+                except.PrintEnumerationToConsole();
+                if (except.Any())
+                {
+                    throw new Exception("CFG Definition uncompleted, unrecognized symbols :" + except.ToEnumerationString());
+                }
+            }
+            CheckDef();
             return;
             
             //it can also used to parsed a whole text if you want. Simply use it as follow. This Function will return a IEnumerable<Token>,

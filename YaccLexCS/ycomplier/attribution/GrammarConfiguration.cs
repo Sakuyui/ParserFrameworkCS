@@ -3,7 +3,7 @@
 namespace YaccLexCS.ycomplier.attribution
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class GrammarConfiguration : Attribute
+    public class GrammarConfiguration : YConfiguration
     {
         
     }
