@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="JJ.Framework.Collections" Version="1.5.6877.41334" />
       <PackageReference Include="System.CodeDom" Version="6.0.0-rc.2.21480.5" />
     </ItemGroup>
 

@@ -35,7 +35,7 @@ namespace YaccLexCS.ycomplier.automata.re
             
             var lastResult = (AutomataNode) context["lastResult"];
 #if DELTAILMODE
-            $"lastResult Node = {lastResult.NodeId}".PrintToConsole();
+            $"lastResult Node = {lastResult?.NodeId??""}".PrintToConsole();
             $"last Node = {lastNode.NodeId}".PrintToConsole();
 #endif
             curAutomata.AddEdge(new ReEdge(lastResult, lastNode, CommonTransitionStrategy.EpsilonTrans.Instance));
@@ -607,6 +607,7 @@ namespace YaccLexCS.ycomplier.automata.re
             var node = new AutomataNode(automata.Nodes.Count);
             automata.AddNode(node);
             automata.AddEdge(new ReEdge(lastNode, node, new CommonTransitionStrategy.EqualJudgeTrans<char>((char) input)));
+            context["lastResult"] = lastNode;
             context["lastNode"] = node;
 #if DELTAILMODE
             $"add a normal char {input}".PrintToConsole();
@@ -627,6 +628,7 @@ namespace YaccLexCS.ycomplier.automata.re
             var node = new AutomataNode(automata.Nodes.Count);
             automata.AddNode(node);
             automata.AddEdge(new ReEdge(lastNode, node, new CommonTransitionStrategy.CharacterRangeTrans((char)0, (char)255)));
+            context["lastResult"] = lastNode;
             context["lastNode"] = node;
 #if DELTAILMODE
             $"add a .".PrintToConsole();

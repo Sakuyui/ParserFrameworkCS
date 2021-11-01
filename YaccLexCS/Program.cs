@@ -22,7 +22,6 @@ namespace YaccLexCS
         
         public static void Main()
         {
-
             
 
             //在指定命名空间扫描配置

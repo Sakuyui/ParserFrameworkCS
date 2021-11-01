@@ -2,6 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
+using JetBrains.Annotations;
+using YaccLexCS.ycomplier.util;
 
 namespace YaccLexCS
 {
@@ -188,7 +191,184 @@ namespace YaccLexCS
             res = res.Substring(0, res.Length - 1) + "]";
             return res;
         }
+        public static (int, TSource) ArgMax<TSource, TKey>(this IEnumerable<TSource> enumerable,
+            Func<TSource, TKey> keySelector,
+            IComparer<TKey> comparer = null)
+        {
+            if (comparer != null)
+                return enumerable.ArgMin(keySelector,
+                    new CustomerComparer<TKey>((t1, t2) => -comparer.Compare(t1, t2)));
+            {
+                if (typeof(TKey).GetInterface("IComparable") != null)
+                {
+                    comparer = new CustomerComparer<TKey>((t1, t2) => ((IComparable) t1).CompareTo(t2));
+                }
+                else
+                {
+                    throw new ArithmeticException();
+                }
+            }
+            return enumerable.ArgMin(keySelector, new CustomerComparer<TKey>((t1, t2) => -comparer.Compare(t1, t2)));
+        }
+        public static Matrix<TSource> ToMatrix2D<TSource>(this IEnumerable<IEnumerable<TSource>> source, bool isValueMat = false,bool reverse = false)
+        {
+            var enumerable = source as IEnumerable<TSource>[] ?? source.ToArray();
+            var t = enumerable.ToArray();
+            var r = t.Length;
+            if (r == 0)
+                return isValueMat? new ValueMatrix<TSource>(0, 0) : new Matrix<TSource>(0, 0);
+            var c = t[0].Count();
+            var ans = enumerable.SelectMany(e => e).ToMatrix(r, c, isValueMat);
+            return reverse ? ans._T() : ans;
+        }
+        public static Matrix<TSource> ToMatrix<TSource>(this IEnumerable<TSource> sources, bool inRow = true)
+        {
+            var tSources = sources as TSource[] ?? sources.ToArray();
+            var c = tSources.Length;
+            return tSources.ToMatrix(inRow ? 1 : c, inRow ? c : 1);
+        }
+        
+        public static IEnumerable<string> FindAll(this string str, Regex regex)
+        {
+            var m = regex.Matches(str);
+            return regex.Matches(str).Select(e => e.Value);
 
+        }
+        public static IEnumerable<(int, T)> FindAll<T>(this IEnumerable<T> enumerable, Func<T, bool> condition)
+        {
+            var t = enumerable.ToArray();
+            for(var i = 0; i < t.Length; i++)
+            {
+                if (condition.Invoke(t[i]))
+                {
+                    yield return (i, t[i]);
+                }
+            }
+        }
+        public static IEnumerable<(int, T)> FindAll<T>(this IEnumerable<T> enumerable, Func<T, int, bool> condition)
+        {
+            var t = enumerable.ToArray();
+            for(var i = 0; i < t.Length; i++)
+            {
+                if (condition.Invoke(t[i], i))
+                {
+                    yield return (i, t[i]);
+                }
+            }
+        }
+        public static IEnumerable<TResult> FindAll<T, TResult>(this IEnumerable<T> enumerable, Func<T, int, bool> condition, Func<T, int, TResult> sel)
+        {
+            var t = enumerable.ToArray();
+            for(var i = 0; i < t.Length; i++)
+            {
+                if (condition.Invoke(t[i], i))
+                {
+                    yield return sel(t[i], i);
+                }
+            }
+        }
+
+
+        public static bool HasImplementedRawGeneric([NotNull] this Type type, [NotNull] Type generic)
+        {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+            if (generic == null) throw new ArgumentNullException(nameof(generic));
+
+            // 测试接口。
+            var isTheRawGenericType = type.GetInterfaces().Any(IsTheRawGenericType);
+            if (isTheRawGenericType) return true;
+
+            // 测试类型。
+            while (type != null && type != typeof(object))
+            {
+                
+                if(type.IsGenericType)
+                    (type.GetGenericTypeDefinition().GenericTypeArguments).PrintEnumerationToConsole();
+                isTheRawGenericType = IsTheRawGenericType(type);
+                if (isTheRawGenericType) return true;
+                type = type.BaseType;
+            }
+
+            // 没有找到任何匹配的接口或类型。
+            return false;
+
+            // 测试某个类型是否是指定的原始接口。
+            bool IsTheRawGenericType(Type test)
+                => generic == (test.IsGenericType ? test.GetGenericTypeDefinition() : test);
+        }
+        public static Matrix<TSource> ToMatrix<TSource>(this IEnumerable<TSource> sources, int rows, int cols, bool isValueMat = false)
+        {
+            var tSources = sources as TSource[] ?? sources.ToArray();
+            if(tSources.Length != rows * cols)
+            {
+                var mat = isValueMat ? new ValueMatrix<TSource>(rows, cols):new Matrix<TSource>(rows, cols);
+                for (var i = 0; i < rows; i++)
+                {
+                    for (var j = 0; j < cols; j++)
+                    {
+                        var index = i * rows + j;
+                        if (index >= tSources.Length)
+                            return mat;
+                        mat[i, j] = tSources[index];
+                    }
+                }
+            }
+            var matrix = new Matrix<TSource>(CollectionHelper.CreateTwoDimensionList(
+                tSources.ToArray(),
+                rows,cols
+            ));
+            return matrix;
+        }
+
+        public static DataFrame ToDataFrame<T>(this IEnumerable<IEnumerable<T>> enumerable, string[] cols = null)
+        {
+            var ses = enumerable as IEnumerable<T>[] ?? enumerable.ToArray();
+            var maxWidth = ses.Max(e => e.Count());
+            var n = ses.Length;
+            var df = new DataFrame(cols ?? Enumerable.Range(0, n).Select(e => e + ""));
+            foreach (var s in ses)
+            {
+                df.AddRow(s.ToArray());
+            }
+            return df;
+        }
+        public static (int, TSource) ArgMin<TSource, TKey>(this IEnumerable<TSource> enumerable,  Func<TSource, TKey> keySelector,
+            IComparer<TKey> comparer = null)
+        {
+            var list = enumerable.ToArray();
+            switch (list.Length)
+            {
+                case 0:
+                    return (-1, default);
+                case 1:
+                    return (0, list[0]);
+            }
+
+            if (comparer == null)
+            {
+                if (typeof(TKey).GetInterface("IComparable") != null)
+                {
+                    comparer = new CustomerComparer<TKey>((t1, t2) => ((IComparable) t1).CompareTo(t2));
+                }
+                else
+                {
+                    throw new ArithmeticException("not comparable");
+                }
+            }
+            var c = keySelector.Invoke(list[0]);
+            var mIndex = 0;
+            for (var i = 1; i < list.Length; i++)
+            {
+                var tmp = keySelector.Invoke(list[i]);
+                if (comparer.Compare(tmp, c) >= 0) continue;
+                c = tmp;
+                mIndex = i;
+
+            }
+
+            return (mIndex, list[mIndex]);
+        }
+        
         public static IEnumerable<bool> ConditionFindWithBoolResult<T>(this IEnumerable<T> list, Func<T,bool> condition)
         {
             var ans = list.Select(condition.Invoke).ToList();
