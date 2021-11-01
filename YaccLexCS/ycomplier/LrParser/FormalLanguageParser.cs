@@ -88,7 +88,203 @@ namespace YaccLexCS.ycomplier.LrParser
         //private Dictionary<string, List<List<string>>> _produceMapping;
         public delegate object ReductionStrategy(params object[] parameters);
 
-       
+        public void InitParse()
+        {
+            "".DebugOutPut();
+            $"Grammar List = {Definitions.Grammars.GetMultiDimensionString()}\n".DebugOutPut();
+            Definitions.AddGrammar(new ProducerDefinitionItem("<S'>->"+Definitions.StartWord));
+      
+            Definitions.InitProduceMapping();
+            "==========================================P SET===================================".DebugOutPut();
+            foreach (var s in Definitions.ProduceMapping)
+            {
+                ("[" + s.Key +"] => " + s.Value.Select(e => e.ToEnumerationString()).ToEnumerationString()).DebugOutPut();
+            }
+            
+            
+            "==========================================FIRST SET===================================".DebugOutPut();
+            var dict = new Dictionary<int, ProjectSet>();
+            
+            var firstSet = CfgTools.GetFirstSet(Definitions);
+            firstSet.Select(e => (e.Key, e.Value.ToEnumerationString())).DebugPrintCollectionToConsole();
+            
+            
+            "============================================I(0)=======================================".PrintToConsole();
+            var curPSet = new ProjectSet(new []{new Lr1Item("<S'>", 
+                new List<string>(new []{Definitions.StartWord}),
+                new List<string>(new []{"$"}))});
+            curPSet.PrintToConsole();
+            curPSet.ApplyClosure(Definitions);
+            curPSet.GetProjectItemsDesc().DebugOutPut();
+            
+            
+            var projects = new Dictionary<int, ProjectSet> {{0,curPSet}};
+            var changed = true;
+            var memo = new HashSet<ProjectSet>();
+            var lr1Table = new Lr1Table(Definitions);
+            lr1Table.AddRow();
+            var products = Definitions.Grammars.Select((e, i)=> (i, e))
+                .ToDictionary(k => k.i, v => v.e);
+            
+            
+            while (changed)
+            {
+                changed = false;
+                var curProjects = new Dictionary<int, ProjectSet>(projects);
+                var count = curProjects.Count;
+                foreach (var p in curProjects.Where(p => !memo.Contains(p.Value)))
+                {
+                    MoveProject(p, projects, lr1Table, products);
+                    
+                    memo.Add(p.Value);
+                }
+
+                if (projects.Count != count)
+                    changed = true;
+            }
+            return;
+            products.DebugOutPut();
+            curPSet.DebugOutPut();
+        }
+        public void Parse()
+        {
+            //reductionStrategies ??= new Dictionary<string, ReductionStrategy>();
+            if(InputList.Count == 0)
+                return;
+            Definitions.AddGrammar(new ProducerDefinitionItem("<S'>->"+Definitions.StartWord));
+            Definitions.InitProduceMapping();
+            
+            "==========================================P SET===================================".PrintToConsole();
+            foreach (var s in Definitions.ProduceMapping)
+            {
+                ("[" + s.Key +"] => " + s.Value.Select(e => e.ToEnumerationString()).ToEnumerationString()).PrintToConsole();
+            }
+
+            "==========================================FIRST SET===================================".PrintToConsole();
+            var dict = new Dictionary<int, ProjectSet>();
+            
+            var firstSet = CfgTools.GetFirstSet(Definitions);
+            
+            "============================================I(0)=======================================".PrintToConsole();
+            var curPSet = new ProjectSet(new []{new Lr1Item("<S'>", 
+                new List<string>(new []{Definitions.StartWord}),
+                new List<string>(new []{"$"}))});
+            curPSet.PrintToConsole();
+            curPSet.ApplyClosure(Definitions);
+            curPSet.GetProjectItemsDesc().PrintToConsole();
+            return;
+            var projects = new Dictionary<int, ProjectSet> {{0,curPSet}};
+            var changed = true;
+            var memo = new HashSet<ProjectSet>();
+            var lr1Table = new Lr1Table(Definitions);
+            lr1Table.AddRow();
+            var products = Definitions.Grammars.Select((e, i)=> (i, e))
+                .ToDictionary(k => k.i, v => v.e);
+            
+            
+            while (changed)
+            {
+                changed = false;
+                var curProjects = new Dictionary<int, ProjectSet>(projects);
+                var count = curProjects.Count;
+                foreach (var p in curProjects.Where(p => !memo.Contains(p.Value)))
+                {
+                    MoveProject(p, projects, lr1Table, products);
+                    memo.Add(p.Value);
+                }
+
+                if (projects.Count != count)
+                    changed = true;
+            }
+            
+            "==============================Project sets===================".PrintToConsole();
+            projects.Count.PrintToConsole();
+            projects.ElementInvoke(delegate(KeyValuePair<int, ProjectSet> pair)
+            {
+                var ps = pair.Value.GetProjectItemsDesc();
+                $"I({pair.Key}): {ps}".PrintToConsole();
+            });
+
+            
+            
+            "==============================Project sets===================".PrintToConsole();
+
+            lr1Table.PrintToConsole();
+            
+            "============================== Begin Parse ===================".PrintToConsole();
+            
+            var codeStack = new Stack<string>();
+            codeStack.Push("$");
+            InputList.PrintCollectionToConsole();
+            var stateStack = new Stack<int>();
+            stateStack.Push(0);
+            var input = InputList.ToList();
+            input.Add(new CIExam.Complier.Token("$", TokenType.T,"$"));
+            var times = 90;
+            while (times > 0)
+            {
+                "".PrintToConsole();
+                
+                ("code peek = " + input.First().TokenName + " , state = " + stateStack.Peek()).PrintToConsole();
+                //根据状态栈顶，和当前输入确定。
+                var t = lr1Table.Transition[stateStack.Peek()][input.First().TokenName] + "";
+                if (t == "ACC")
+                {
+                    "================== ACC!!! =================".PrintToConsole();
+                    return;
+                }
+                if (t[0] == 's') //如果开头是s就移进 = 新状态压栈 + 新符号从输入队列弹出压栈
+                {
+                    //shift
+                    var nextState = int.Parse(t[1..]);
+                    $"shift to {nextState}".PrintToConsole();
+                    stateStack.Push(nextState);
+                    codeStack.Push(input.First().TokenName);
+                    input.RemoveAt(0);
+                    $"code Stack = {codeStack.GetMultiDimensionString()}".PrintToConsole();
+                    $"state Stack = {stateStack.GetMultiDimensionString()}".PrintToConsole();
+                }else if (t[0] == 'r')
+                {
+                    //reduction 规约后一定对应一个新状态
+                    var grammarCode = int.Parse(t[1..]);
+                    $"reduction by {grammarCode}".PrintToConsole();
+                    Definitions.Grammars[grammarCode].PrintToConsole();
+                    
+                    var g = Definitions.Grammars[grammarCode];
+                    
+                    var sb = new StringBuilder(g.ProduceItem);
+                    var list = new List<string>();
+                    //处理单条产生式
+                    var kSet = Definitions.Terminations.Union(Definitions.NonTerminationWords).ToHashSet(null);
+                    while (sb.Length > 0)
+                    {
+                        var found = kSet.Where(s => sb.ToString()
+                                .IndexOf(s, StringComparison.Ordinal) == 0).ArgMax(e => e.Length).Item2;
+                        list.Add(found);
+                        sb.Remove(0, found.Length);
+                    }
+                    list.PrintEnumerationToConsole();
+                
+                    foreach(var s in list)
+                    {
+                        codeStack.Pop();
+                        stateStack.Pop();
+                    }
+                    codeStack.Push(g.LeftSymbol);
+                    var gotoNext = lr1Table.Goto[stateStack.Peek()][codeStack.Peek()].ToString();
+                    
+                    $"goto => {stateStack.Peek()}".PrintToConsole();
+                    stateStack.Push(int.Parse(gotoNext));
+
+
+                    
+                    $"code Stack = {codeStack.GetMultiDimensionString()}".PrintToConsole();
+                    $"state Stack = {stateStack.GetMultiDimensionString()}".PrintToConsole();
+                }
+
+                times--;
+            }
+        }
         public void Parse(Dictionary<string, ReductionStrategy> reductionStrategies = null)
         {
             reductionStrategies ??= new Dictionary<string, ReductionStrategy>();
@@ -283,7 +479,7 @@ namespace YaccLexCS.ycomplier.LrParser
                 return;
             var curId = projectSet.Key;
             
-            $">> From I({curId}) Move".PrintToConsole();
+            $">> From I({curId}) Move".DebugOutPut();
            
             //projectSet.Value.PrintToConsole();
             cSet.PrintEnumerationToConsole();
@@ -312,7 +508,7 @@ namespace YaccLexCS.ycomplier.LrParser
                                     return false;
                                 //$"true with {p}".PrintToConsole();
                                 //$"now {p.ProduceItem.GetMultiDimensionString()}, {r.ProduceItems[0].GetMultiDimensionString()}".PrintToConsole();
-                                return p.ProduceItem == r.ProduceItems.Aggregate("",(a, b) => a + b);
+                                return p.ProduceItem == r.ProduceItems.Aggregate("",(a, b) => a + " " + b).Trim();
                             }).Key;
                         }
                       
@@ -327,13 +523,13 @@ namespace YaccLexCS.ycomplier.LrParser
 
             foreach (var c in cSet)
             {
-                //$"input - {c}".PrintToConsole();
+                $"input - {c}".DebugOutPut();
                 var items = pSet.Where(item => item.ProduceItems[item.DotPos] == c)
                     .Select(item => item.MoveForward()).ToList();
                 
                 
                 var ps = new ProjectSet(items);
-                
+                //$"after {ps}".DebugOutPut();
                 ps.ApplyClosure(Definitions);
                
                 //判重
@@ -362,6 +558,9 @@ namespace YaccLexCS.ycomplier.LrParser
                 //存在规约项目，那么要填表
                 if (ps.Any(p => p.IsReductionItem()))
                 {
+                    $"need reduction".DebugOutPut();
+                    if(curId == 3)
+                        "".PrintToConsole();
                     //需要规约的项目
                     var reduction= ps.Where(p => p.IsReductionItem()).ToList();
                     
@@ -381,7 +580,9 @@ namespace YaccLexCS.ycomplier.LrParser
                                     return false;
                                 //$"a: {p.ProduceItem}, b:{r.ProduceItems.Aggregate("", (a, b) => a + b)}"
                                 //    .PrintToConsole();
-                                return p.ProduceItem.Equals(r.ProduceItems.Aggregate("", (a, b) => a + b));
+                                //p.ProduceItem.PrintToConsole();
+                                //r.ProduceItems.Aggregate("", (a, b) => a + " " + b).Trim().PrintToConsole();
+                                return p.ProduceItem.Equals(r.ProduceItems.Aggregate("", (a, b) => a + " " + b).Trim());
                             }).Key;
                             
                             //"归约" + definitionItems[k] + " " + k + " " + f).PrintToConsole();

@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using YaccLexCS.ycomplier;
 using YaccLexCS.ycomplier.automata;
 using YaccLexCS.ycomplier.automata.re;
+using YaccLexCS.ycomplier.LrParser;
 using YaccLexCS.ycomplier.util;
 
 using Regex = System.Text.RegularExpressions.Regex;
@@ -50,25 +51,43 @@ namespace YaccLexCS
             {
                 valueTuple.tokenDef.PrintToConsole();
             }
-
+            
             var cfgDefSet = gs.Select(g => g.tokenDef.Name).ToHashSet();
             var tokenNames = lexer.TokenNames;
-            cfgDefSet.PrintEnumerationToConsole();
-            tokenNames.PrintEnumerationToConsole();
+            
             var symbolsAppearInCfg = gs.SelectMany(e => 
                 e.tokenDef.CfgItem.SelectMany(s => s.Split("|").SelectMany(item => item.Split(" "))));
-            symbolsAppearInCfg.PrintEnumerationToConsole();
+            
             //check
             void CheckDef()
             {
                 var except = symbolsAppearInCfg.Except(tokenNames).Except(cfgDefSet);
-                except.PrintEnumerationToConsole();
+                
                 if (except.Any())
                 {
                     throw new Exception("CFG Definition uncompleted, unrecognized symbols :" + except.ToEnumerationString());
                 }
             }
             CheckDef();
+
+            var cfg = gs.GroupBy(e => e.tokenDef.Name).Select(g => (g.Key, g.ToList()))
+                .ToDictionary(k => k.Key, v => v.Item2);
+            var grammars = cfgDefSet.Select(l =>
+            {
+                var c = cfg[l];
+                var s = c.SelectMany(e => e.tokenDef.CfgItem).ToList();
+                return l + "->" + s.AggregateOneOrMore((a, b) => a + "|" + b);
+            }).ToArray();
+            var terminations = tokenNames.AggregateOneOrMore((a, b) => a +"|" + b);
+            grammars.PrintEnumerationToConsole();
+            
+            terminations.PrintToConsole();
+            var grammarSet = new ProducerDefinition(grammars, terminations, "program");
+            grammarSet.NonTerminationWords.PrintEnumerationToConsole();
+            grammarSet.Terminations.PrintEnumerationToConsole();
+            var parser = new GrammarParser(grammarSet);
+            parser.InitParse();
+            
             return;
             
             //it can also used to parsed a whole text if you want. Simply use it as follow. This Function will return a IEnumerable<Token>,

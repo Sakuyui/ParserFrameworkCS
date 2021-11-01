@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define DEBUGMODE
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -11,6 +12,12 @@ namespace YaccLexCS
       public static class FunctionExt
     {
 
+        public static T? AggregateOneOrMore<T>(this IEnumerable<T> enumerable, Func<T, T, T> func)
+        {
+            if (!enumerable.Any())
+                return default;
+            return enumerable.Count() == 1 ? enumerable.First() : enumerable.Aggregate(func);
+        }
         public static void AddRange<T>(this HashSet<T> target, IEnumerable<T> data)
         {
             foreach (var e in data)
@@ -21,6 +28,13 @@ namespace YaccLexCS
         public static void PrintToConsole(this object obj)
         {
             Console.WriteLine(obj.ToString());
+        }
+
+        public static void DebugOutPut(this object obj)
+        {
+#if DEBUGMODE
+            Console.WriteLine(obj.ToString());
+#endif
         }
 
         public static void ElementInvoke<T>(this IEnumerable<T> list, Action<T> action)
@@ -186,7 +200,9 @@ namespace YaccLexCS
       
         public static void PrintEnumerationToConsole<T>(this IEnumerable<T> list)
         {
+#if DEBUGMODE
             Console.WriteLine(list.ToEnumerationString());
+#endif
         }
         public static string ToEnumerationString<T>(this IEnumerable<T> list)
         {
@@ -443,6 +459,14 @@ namespace YaccLexCS
             str = str.Substring(0, str.Length - 1) + "]";
             Console.WriteLine(str);
         }
+        public static void DebugPrintCollectionToConsole<T>(this IEnumerable<T> enumerable)
+        {
+#if DEBUGMODE
+            var str = enumerable.Aggregate("[", (current, e) => current + (e + ","));
+            str = str.Substring(0, str.Length - 1) + "]";
+            Console.WriteLine(str);
+#endif
+        }
 
         public static IEnumerable<IEnumerable<T>> SplitCollection<T>(this IEnumerable<T> enumerable, IEnumerable<int> length)
         {
@@ -493,9 +517,7 @@ namespace YaccLexCS
         public static void PrintMultiDimensionCollectionToConsole<T>(this IEnumerable<T> enumerable)
         {
             $"{enumerable.GetMultiDimensionString()}".PrintToConsole();
-            /*var str = enumerable.Aggregate("[", (current, e) => current + (e.ToEnumerationString() + ","));
-            str = str.Substring(0, str.Length - 1) + "]";
-            Console.WriteLine(str);*/
+            
         }
         public static IEnumerable<TResult> ResultSaveAggregate<TSource, TResult>
             (this IEnumerable<TSource> enumerable, Func<TResult,TSource, TResult> func, TResult start)

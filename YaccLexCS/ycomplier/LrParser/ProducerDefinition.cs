@@ -36,26 +36,15 @@ namespace YaccLexCS.ycomplier.LrParser
         {
             var res = new Dictionary<string, List<List<string>>>();
             var kSet = Terminations.Union(NonTerminationWords).ToHashSet(null);
-            kSet.PrintCollectionToConsole();
+            
+            kSet.DebugPrintCollectionToConsole();
             
             //对每条产生式处理，转换为列表
             foreach (var p in this)
             {
-                var sb = new StringBuilder(p.ProduceItem);
-                var list = new List<string>();
-                //处理单条产生式
-
-                while (sb.Length > 0)
-                {
-                    
-                    var found = kSet.Where(s => sb.ToString()
-                        .IndexOf(s, StringComparison.Ordinal) == 0).ArgMax(e => e.Length).Item2;
-                    list.Add(found);
-                    sb.Remove(0, found.Length);
-                }
+                List<string> list = p.ProduceItem.Trim().Split(" ").ToList();
                 
                 
-                //list.PrintEnumerationToConsole();
                 if (!res.ContainsKey(p.LeftSymbol))
                     res[p.LeftSymbol] = new List<List<string>>();
                 res[p.LeftSymbol].Add(list);
