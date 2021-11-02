@@ -33,21 +33,16 @@ namespace YaccLexCS.ycomplier.LrParser
 
         public ProjectSet ApplyClosure(CfgProducerDefinition definition)
         {
-            //"apply closure".PrintToConsole();
-            //this.GetProjectItemsDesc().PrintToConsole();
             var changed = true;
             var memo = new HashSet<Lr1Item>();
             while (changed)
             {
-                //"try".PrintToConsole();
-                //$"cur {GetProjectItemsDesc()}".PrintToConsole();
                 changed = false;
                 var curSet = _items.ToList();
                 foreach (var item in curSet)
                 {
                     if (memo.Contains(item) || item.IsReductionItem())
                     {
-                        //$"skip {item}".PrintToConsole();
                         continue;
                     }
                     
@@ -142,6 +137,14 @@ namespace YaccLexCS.ycomplier.LrParser
             foreach (var item in definition.ProduceMapping[begin])
             {
                 var l = new Lr1Item(begin, item, forwardSearch.ToList());
+                if (l.ProduceItems.Count >= 2)
+                {
+                    var complete = CfgTools.GetSequenceFirstSet(definition, l.ProduceItems.Skip(1).ToList());
+                    foreach(var c in complete)
+                    {
+                        l.SearchWordList.Add(c);
+                    }
+                }
                 if (items.Contains(l)) continue;
                 
                 _items.Add(l);

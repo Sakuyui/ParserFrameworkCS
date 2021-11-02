@@ -30,7 +30,7 @@ namespace YaccLexCS
             var lexer = Lexer.ConfigureFromPackages(new []{"YaccLexCS.config"}, context);
             
             //创建输入流
-            var r = (TextReader) new StringReader("sum = 0");
+            var r = (TextReader) new StringReader("sum = 0;i = 0;");
             var tokenList = new List<Token>();
             //在流中词法分析。
             lexer.ParseInStream(r, token =>  //callback function
@@ -47,12 +47,13 @@ namespace YaccLexCS
            
             
             tokenList.DebugPrintCollectionToConsole();
-            parser.ParseFromCurrentState(tokenList[0]);
-            parser.ParseFromCurrentState(tokenList[1]);
-            parser.ParseFromCurrentState(tokenList[2]);
-            parser.ParseFromCurrentState(new Token(";", "SEMICOLON"));
+            foreach (var token in tokenList)
+            {
+                parser.ParseFromCurrentState(token);
+            }
+            
             parser.ParseFromCurrentState(new Token("$", "$"));
-
+            
             
             
             return;

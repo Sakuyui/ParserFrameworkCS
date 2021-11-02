@@ -143,6 +143,7 @@ namespace YaccLexCS
                 "================== ACC!!! =================".PrintToConsole();
                 return;
             }
+            token.PrintToConsole();
             if (t[0] == 's') //如果开头是s就移进 = 新状态压栈 + 新符号从输入队列弹出压栈
             {
                 //shift
@@ -235,43 +236,54 @@ namespace YaccLexCS
             "==========================================FIRST SET===================================".DebugOutPut();
             var dict = new Dictionary<int, ProjectSet>();
             
-            var firstSet = CfgTools.GetFirstSet(Definitions);
-            firstSet.Select(e => (e.Key, e.Value.ToEnumerationString())).DebugPrintCollectionToConsole();
+         
             
             
             "============================================I(0)=======================================".PrintToConsole();
             var curPSet = new ProjectSet(new []{new Lr1Item("<S'>", 
                 new List<string>(new []{Definitions.StartWord}),
                 new List<string>(new []{"$"}))});
-            curPSet.PrintToConsole();
+         
             curPSet.ApplyClosure(Definitions);
             curPSet.GetProjectItemsDesc().DebugOutPut();
+            //curPSet.PrintToConsole();
+            var fi = CfgTools.GetFirstSet(Definitions);
+            foreach (var keyValuePair in fi)
+            {
+                $"first({keyValuePair.Key}) = [{keyValuePair.Value.AggregateOneOrMore((a, b) => a + ","+ b)}]".PrintToConsole();
+            }
             
-            
-            var projects = new Dictionary<int, ProjectSet> {{0,curPSet}};
+           
+            var projects = new List<ProjectSet> {curPSet};
             var changed = true;
-            var memo = new HashSet<ProjectSet>();
+            
             Lr1Table = new Lr1Table(Definitions);
             Lr1Table.AddRow();
             var products = Definitions.Grammars.Select((e, i)=> (i, e))
                 .ToDictionary(k => k.i, v => v.e);
             
-            
+            var last = 0;
             while (changed)
             {
                 changed = false;
-                var curProjects = new Dictionary<int, ProjectSet>(projects);
-                var count = curProjects.Count;
-                foreach (var p in curProjects.Where(p => !memo.Contains(p.Value)))
+                
+                var count = projects.Count;
+                for (var i = last; i < projects.Count; i++)
                 {
-                    MoveProject(p, projects, Lr1Table, products);
+                    var p = projects[i];
+                    MoveProject(new KeyValuePair<int, ProjectSet>(i, p), projects, Lr1Table, products);
                     
-                    memo.Add(p.Value);
                 }
 
-                if (projects.Count != count)
+                if (projects.Count != last)
+                {
                     changed = true;
+                    last = count;
+                }
             }
+            
+            Lr1Table.Goto.DebugOutPut();
+            Lr1Table.Transition.DebugOutPut();
             Lr1Table.OutputToFilesAsCsv("d:\\pl\\goto.csv", "d:\\pl\\trans.csv");
             
             "=================================Init Finish, Goto and transition Table Generated===============================".PrintToConsole();
@@ -281,11 +293,12 @@ namespace YaccLexCS
             if(File.Exists("d:\\pl\\projects.txt"))
                 File.Delete("d:\\pl\\projects.txt");
             var f = File.Open("d:\\pl\\projects.txt", FileMode.OpenOrCreate);
-            projects.ElementInvoke(delegate(KeyValuePair<int, ProjectSet> pair)
+            projects.ElementInvoke((p, i) =>
             {
-                var ps = pair.Value.GetProjectItemsDesc();
-                f.Write($"I({pair.Key}): {ps}".ToCharArray().Select(e => (byte)e).Append((byte)'\n').ToArray());
+                var ps = p.GetProjectItemsDesc();
+                f.Write($"I({i}): {ps}".ToCharArray().Select(e => (byte)e).Append((byte)'\n').ToArray());
             });
+            
             f.Close();
 
 
@@ -302,21 +315,27 @@ namespace YaccLexCS
             return this;
         }
 
-        private void MoveProject(KeyValuePair<int, ProjectSet> projectSet, Dictionary<int, ProjectSet> result, Lr1Table table, 
+        private void MoveProject(KeyValuePair<int, ProjectSet> projectSet, List<ProjectSet> result, Lr1Table table, 
             Dictionary<int, ProducerDefinitionItem> definitionItems)
         {
             var (curId, value) = projectSet;
+            $">> From I({curId}) Move".DebugOutPut();
+            foreach (var d in value.Where(e => e.IsReductionItem()))
+            {
+                //table.Transition[curId, d]
+            }
             var cSet = value.Where(e => !e.IsReductionItem())
                 .Select(e => e.ProduceItems[e.DotPos]).ToHashSet(null);
-           
-            if(!cSet.Any())
-                return;
 
-            $">> From I({curId}) Move".DebugOutPut();
+            if (!cSet.Any())
+            {
+                return;
+            }
+
+            
            
             //projectSet.Value.PrintToConsole();
-            cSet.PrintEnumerationToConsole();
-
+            
             //解决规约填表
             if (value.Any(p => p.IsReductionItem()))
             {
@@ -363,19 +382,22 @@ namespace YaccLexCS
                 
                 var ps = new ProjectSet(items);
                 //$"after {ps}".DebugOutPut();
+                
+
+                //$"closure before {result.Count}".PrintToConsole();
                 ps.ApplyClosure(Definitions);
-               
+                //$"closure after {result.Count}".PrintToConsole();
                 //判重
                 var newCode = result.Count;
-                if (!result.Values.Contains(ps))
+                if (!result.Contains(ps))
                 {
                    
-                    result.Add(newCode, ps);
+                    result.Add(ps);
                     table.AddRow();
                 }
                 else
                 {
-                    newCode = result.First(e => e.Value.Equals(ps)).Key;
+                    newCode = result.FindIndex(e => e.Equals(ps));
                     //code.PrintToConsole();
                 }
                 
@@ -392,8 +414,7 @@ namespace YaccLexCS
                 if (ps.Any(p => p.IsReductionItem()))
                 {
                     
-                    if(curId == 3)
-                        "".PrintToConsole();
+                    
                     //需要规约的项目
                     var reduction= ps.Where(p => p.IsReductionItem()).ToList();
                     

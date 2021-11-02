@@ -7,7 +7,7 @@ namespace YaccLexCS.config.grammars
     {
         //[]是一回 {}是0~ 
         //[GrammarDefinition("program", "[statement](SEMICOL|CR)")]
-        [GrammarDefinition("program", "definition_or_statement")]
+        [GrammarDefinition("program", "definition_or_statement", "program definition_or_statement")]
         public static void Program()
         {
             

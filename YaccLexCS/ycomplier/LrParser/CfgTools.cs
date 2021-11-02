@@ -11,29 +11,30 @@ namespace YaccLexCS.ycomplier.LrParser
              Dictionary<string, List<List<string>>> _produceMapping, CfgProducerDefinition definitions, HashSet<string> finished = null, 
              Stack<string> path = null) 
          {
-            //("process : " + item).PrintToConsole();
             
             path ??= new Stack<string>();
             finished ??= new HashSet<string>();
-            
-            if (finished.Contains(item) || path.Contains(item))
+            path.Push(item);
+            if (finished.Contains(item))
             {
+                dict[path.Peek()].AddRange(dict[item]);
                 //(item + " has been processed").PrintToConsole();
+                path.Pop();
                 return;
             }
-            path.Push(item);
-            //$"First:  put {item}".PrintToConsole();
+            
+           
+          
             var t = item;
             if (definitions.Terminations.Contains(t) || t.Equals("ε"))
             {
-                //"终结符直接返回".PrintToConsole();
-                foreach (var node in path)
-                {
-                    if(!definitions.Terminations.Contains(node))
-                        dict[node].Add(t);
-                    
-                }
-
+                // foreach (var node in path)
+                // {
+                //     if(!definitions.Terminations.Contains(node))
+                //         dict[node].Add(t);
+                // }
+                dict[item].Add(t);
+                dict[path.Peek()].AddRange(dict[item]);
                 path.Pop();
                 return;
             }
@@ -46,7 +47,11 @@ namespace YaccLexCS.ycomplier.LrParser
                 {
                     foreach (var t1 in p)
                     {
+                        if(path.Contains(t1) && path.Peek() == t1)
+                            break;
                         GetFirstSetDfs(dict, t1,_produceMapping, definitions, finished, path);
+                        dict[path.Peek()].AddRange(dict[t1]);
+                        
                         if (definitions.Terminations.Contains(t1) || !dict[t1].Contains("ε"))
                         {
                             break;
@@ -99,20 +104,20 @@ First (X)都包含了First(X1) - {ε}。
             {
                 dict[s] = new HashSet<string>();
             }
-
+            foreach (var t in definition.Terminations.Where(nonT => !dict.ContainsKey(nonT)))
+            {
+                dict[t] = new HashSet<string> {t};
+            }
             var path = new Stack<string>();
             var finish = new HashSet<string>();
             foreach (var sWord in definition.ProduceMapping.Keys)
             {
                 GetFirstSetDfs(dict, sWord, definition.ProduceMapping, definition, finish, path);
             }
-            //dict.Select(kv => kv.Key + " => " + kv.Value.ToEnumerationString()).PrintEnumerationToConsole();
-            foreach (var t in definition.Terminations.Where(nonT => !dict.ContainsKey(nonT)))
-            {
-                dict[t] = new HashSet<string> {t};
-            }
             
-            //dict.Select(e => (e.Key, e.Value.GetMultiDimensionString())).PrintMultiDimensionCollectionToConsole();
+           
+            
+            ;
             return dict;
         }
     }

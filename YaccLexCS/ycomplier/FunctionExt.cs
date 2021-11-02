@@ -200,9 +200,9 @@ namespace YaccLexCS.ycomplier
       
         public static void PrintEnumerationToConsole<T>(this IEnumerable<T> list)
         {
-#if DEBUGMODE
+
             Console.WriteLine(list.ToEnumerationString());
-#endif
+
         }
         public static string ToEnumerationString<T>(this IEnumerable<T> list)
         {
