@@ -7,7 +7,7 @@ using CIExam.Complier;
 
 namespace YaccLexCS.ycomplier.LrParser
 {
-    public class ProducerDefinition : IEnumerable<ProducerDefinitionItem>
+    public class CfgProducerDefinition : IEnumerable<ProducerDefinitionItem>
     {
         public string StartWord = "";
         public readonly List<ProducerDefinitionItem> Grammars = new();
@@ -54,18 +54,18 @@ namespace YaccLexCS.ycomplier.LrParser
         }
 
 
-        public ProducerDefinition(IEnumerable<string> grammarsDefinition, string terminationsExp, string startWord)
+        public CfgProducerDefinition(IEnumerable<string> grammarsDefinition, string terminationsExp, string startWord)
         {
             AddGrammars(grammarsDefinition.SelectMany(ProducerDefinitionItem.ParseProducerExpression));
             Grammars.PrintEnumerationToConsole();
             AddTerminations(terminationsExp);
             StartWord = startWord;
         }
-        public ProducerDefinition(string grammarDefinition)
+        public CfgProducerDefinition(string grammarDefinition)
         {
             AddGrammar(new ProducerDefinitionItem(grammarDefinition));
         }
-        public ProducerDefinition(){}
+        public CfgProducerDefinition(){}
 
         public void AddGrammar(ProducerDefinitionItem item)
         {

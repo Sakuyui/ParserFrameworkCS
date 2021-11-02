@@ -27,7 +27,7 @@ namespace YaccLexCS.ycomplier.LrParser
             if (IsReductionItem())
                 return (Lr1Item) Clone();
             var c = (Lr1Item)Clone();
-            ("move " + c).PrintToConsole();
+            ("move " + c).DebugOutPut();
             c.DotPos++;
             
             return c;

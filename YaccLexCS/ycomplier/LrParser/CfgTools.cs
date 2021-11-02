@@ -8,7 +8,7 @@ namespace YaccLexCS.ycomplier.LrParser
     public class CfgTools
     {
          public static void GetFirstSetDfs(Dictionary<string, HashSet<string>> dict, string item, 
-             Dictionary<string, List<List<string>>> _produceMapping, ProducerDefinition definitions, HashSet<string> finished = null, 
+             Dictionary<string, List<List<string>>> _produceMapping, CfgProducerDefinition definitions, HashSet<string> finished = null, 
              Stack<string> path = null) 
          {
             //("process : " + item).PrintToConsole();
@@ -64,7 +64,7 @@ namespace YaccLexCS.ycomplier.LrParser
             finished.Add(path.Pop());
         }
 
-         public static HashSet<string> GetSequenceFirstSet(ProducerDefinition definition, List<string> input)
+         public static HashSet<string> GetSequenceFirstSet(CfgProducerDefinition definition, List<string> input)
          {
              if (input.Count <= 0)
                  return null;
@@ -84,7 +84,7 @@ namespace YaccLexCS.ycomplier.LrParser
 
              return ans;
          }
-        public static Dictionary<string, HashSet<string>> GetFirstSet(ProducerDefinition definition)
+        public static Dictionary<string, HashSet<string>> GetFirstSet(CfgProducerDefinition definition)
         {
             /*
              * （1）若X 是终结符或ε，则First (X) = {X}。

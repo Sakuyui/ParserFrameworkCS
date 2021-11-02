@@ -1,4 +1,5 @@
-﻿using YaccLexCS.ycomplier.attribution;
+﻿using YaccLexCS.ycomplier;
+using YaccLexCS.ycomplier.attribution;
 
 namespace YaccLexCS.config.grammars
 {
@@ -7,9 +8,9 @@ namespace YaccLexCS.config.grammars
     {
         [GrammarDefinition("expression",  "terminal_expression", "assign_expression", "additive_expression",
             "multiplicative_expression", "unary_expression", "primary_expression")]
-        public static void Expression()
+        public static void Expression(ParserContext context)
         {
-            
+            $">>> In CallBack Func: ======Reduction: {context["parser_reduction"]}\n".PrintToConsole();
         }
         
         
@@ -17,9 +18,9 @@ namespace YaccLexCS.config.grammars
         
         
         [GrammarDefinition("assign_expression",  "ID ASSIGN expression")]
-        public static void AssignExpression()
+        public static void AssignExpression(ParserContext context)
         {
-            
+            $">>> In CallBack Func: ======Reduction: {context["parser_reduction"]}\n".PrintToConsole();
         }
 
         
@@ -56,9 +57,9 @@ unary_expression
         }
         
         [GrammarDefinition("primary_expression",  "LP expression RP", "ID", "DOUBLE_LITERAL", "STRING")]
-        public static void PrimaryExpression()
+        public static void PrimaryExpression(ParserContext context)
         {
-            
+            $">>> In CallBack Func: ======Reduction: {context["parser_reduction"]}\n".PrintToConsole();
         }
         
     }

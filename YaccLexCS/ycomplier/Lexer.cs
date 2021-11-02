@@ -102,7 +102,14 @@ namespace YaccLexCS.ycomplier
                     available = t.ToArray();
                 }
             }
+
+            if (!available.Any())
+                return;
+            $"get token {cur}".PrintToConsole();
+            ParserContext.TokenText = cur;
+            InvokeTokenCallBackMethod(available.First().Value);
             
+            callBack?.Invoke(new Token(ParserContext.TokenText,available.First().Key.TokenName));
         }
         public IEnumerable<Token> ParseWholeText(string s) {
             var sb = new StringBuilder(s);

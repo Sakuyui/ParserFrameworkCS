@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using CIExam.Complier;
 using YaccLexCS.ycomplier.util;
 
@@ -33,7 +34,13 @@ namespace YaccLexCS.ycomplier.LrParser
         }
 
         public int RowCount => _goto.Count();
-        public Lr1Table(ProducerDefinition definition)
+
+        public void OutputToFilesAsCsv(string gotoTablePath, string transitionTablePath)
+        {
+            File.WriteAllText(gotoTablePath, this._goto.CsvText);
+            File.WriteAllText(transitionTablePath, this._transition.CsvText);
+        }
+        public Lr1Table(CfgProducerDefinition definition)
         {
             var terminations = definition.Terminations;
             var nonTerminations = definition.NonTerminationWords;

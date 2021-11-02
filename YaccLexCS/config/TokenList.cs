@@ -14,7 +14,6 @@ namespace YaccLexCS.config
         [TokenDefinition("MUL", "*")]
         [TokenDefinition("MOD", "%")]
         [TokenDefinition("DIV", "/")]
-        [TokenDefinition("CMP", "<|<=|>|>=|==", true)]
         [TokenDefinition("LOGIC_OP", @"&&|\|\|", true)]
         public static void Operator(ParserContext content)
         {
@@ -29,6 +28,7 @@ namespace YaccLexCS.config
         {
             $"meet operator {content.TokenText}".PrintToConsole();
         }
+        
         [TokenDefinition("ASSIGN", "=")]
         public static void Assign(ParserContext content)
         {

@@ -1,4 +1,4 @@
-﻿#define DEBUGMODE
+﻿//#define DEBUGMODE
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using YaccLexCS.ycomplier.util;
 
-namespace YaccLexCS
+namespace YaccLexCS.ycomplier
 {
       public static class FunctionExt
     {

@@ -3,21 +3,21 @@ using System.Linq;
 
 namespace YaccLexCS.ycomplier.code
 {
-    public class ASTList : ASTree
+    public class ASTNonTerminalNode : ASTNode
     {
-        protected List<ASTree> _children;
+        protected List<ASTNode> _children;
 
-        public ASTList(IEnumerable<ASTree> child)
+        public ASTNonTerminalNode(IEnumerable<ASTNode> child, string nodeName) : base(nodeName)
         {
             _children = child.ToList();
         }
-        public override ASTree? Child(int i)
+        public override ASTNode? Child(int i)
         {
             return _children[i];
         }
         
 
-        public override IEnumerable<ASTree> Children()
+        public override IEnumerable<ASTNode> Children()
         {
             return _children;
         }

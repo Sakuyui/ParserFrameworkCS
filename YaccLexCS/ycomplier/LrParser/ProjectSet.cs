@@ -31,7 +31,7 @@ namespace YaccLexCS.ycomplier.LrParser
             return GetEnumerator();
         }
 
-        public ProjectSet ApplyClosure(ProducerDefinition definition)
+        public ProjectSet ApplyClosure(CfgProducerDefinition definition)
         {
             //"apply closure".PrintToConsole();
             //this.GetProjectItemsDesc().PrintToConsole();
@@ -127,7 +127,7 @@ namespace YaccLexCS.ycomplier.LrParser
 
             return s;
         }
-        public void ClosureDfs(string begin, ProducerDefinition definition, HashSet<Lr1Item> items, Lr1Item lr1Items, HashSet<string> forwardSearch)
+        public void ClosureDfs(string begin, CfgProducerDefinition definition, HashSet<Lr1Item> items, Lr1Item lr1Items, HashSet<string> forwardSearch)
         {
             if (definition.Terminations.Contains(begin))
                 return;

@@ -4,15 +4,23 @@ using System.Linq;
 
 namespace YaccLexCS.ycomplier.code
 {
-    public abstract class ASTree : IEnumerable<ASTree>
+    public abstract class ASTNode : IEnumerable<ASTNode>
     {
-        public abstract ASTree? Child(int i);
+        public readonly string NodeName;
+
+        protected ASTNode(string nodeName)
+        {
+            NodeName = nodeName;
+        }
+
+        public abstract ASTNode? Child(int i);
         public int ChildrenCount => Children().Count();
-        public abstract IEnumerable<ASTree> Children();
+        public abstract IEnumerable<ASTNode> Children();
         public abstract string Location();
 
+        public bool IsLeaf => ChildrenCount == 0;
        
-        public IEnumerator<ASTree> GetEnumerator()
+        public IEnumerator<ASTNode> GetEnumerator()
         {
             return Children().GetEnumerator();
         }
@@ -22,6 +30,11 @@ namespace YaccLexCS.ycomplier.code
             return GetEnumerator();
         }
 
-        public ASTree? this[int i] => Child(i);
+        public ASTNode? this[int i] => Child(i);
+
+        public override string ToString()
+        {
+            return $"({NodeName}:{ChildrenCount})";
+        }
     }
 }

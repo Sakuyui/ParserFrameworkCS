@@ -43,7 +43,31 @@ namespace YaccLexCS.ycomplier.util
                 return map;
             }
         }
-        
+
+        public string CsvText
+        {
+            get
+            {
+                var header = _columnNames.Aggregate("", (a, b) => a + "," + b).Trim(',');
+                var c = "";
+                foreach (var s in Serials)
+                {
+                    var count = s.Values.Count;
+                    for (var i = 0; i < count; i++)
+                    {
+                        var obj = s.Values[i];
+
+                        c += (obj == null ? "" : obj);
+                        if (i != count - 1)
+                            c += ",";
+                    }
+                    
+
+                    c += "\n";
+                }
+                return header + "\n" + c;
+            }
+        }
         public void RemoveAt(int i)
         {
             Serials.RemoveAt(i);
