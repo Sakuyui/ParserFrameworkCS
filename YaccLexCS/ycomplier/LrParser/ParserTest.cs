@@ -23,7 +23,7 @@ namespace YaccLexCS.ycomplier.LrParser
             var terminations = "let|add|mult| |(|)|NUM|ID";
             //G=(N,P,S,T) 非终结符，产生式，开始符号，终结符
             var grammarSet = new CfgProducerDefinition(grammars, terminations, "S");
-            grammarSet.NonTerminationWords.PrintEnumerationToConsole();
+            grammarSet.NonTerminations.PrintEnumerationToConsole();
             grammarSet.Terminations.PrintEnumerationToConsole();
             
             

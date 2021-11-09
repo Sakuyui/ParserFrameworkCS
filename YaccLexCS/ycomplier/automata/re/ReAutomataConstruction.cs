@@ -33,7 +33,7 @@ namespace YaccLexCS.ycomplier.automata.re
             var lastNodeStack = (Stack<AutomataNode>) context["stack_lastNode"];
             var lastNode = (AutomataNode) context["lastNode"];
             
-            var lastResult = (AutomataNode) context["lastResult"];
+            var lastResult = (AutomataNode) context["preResultNode"];
 #if DELTAILMODE
             $"lastResult Node = {lastResult?.NodeId??""}".PrintToConsole();
             $"last Node = {lastNode.NodeId}".PrintToConsole();
@@ -43,7 +43,7 @@ namespace YaccLexCS.ycomplier.automata.re
 #if DELTAILMODE
             curAutomata.PrintToConsole();
 #endif
-            context["lastResult"] = lastNode;
+            context["preResultNode"] = lastNode;
             
             context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
             return null;
@@ -71,7 +71,7 @@ namespace YaccLexCS.ycomplier.automata.re
             var lastNodeStack = (Stack<AutomataNode>) context["stack_lastNode"];
             var lastNode = (AutomataNode) context["lastNode"];
             
-            var lastResult = (AutomataNode) context["lastResult"];
+            var lastResult = (AutomataNode) context["preResultNode"];
             
 #if DELTAILMODE
             $"lastResult Node = {lastResult.NodeId}".PrintToConsole();
@@ -84,7 +84,7 @@ namespace YaccLexCS.ycomplier.automata.re
             curAutomata.PrintToConsole();
 #endif
            
-            context["lastResult"] = lastNode;
+            context["preResultNode"] = lastNode;
             
             context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
             return null;
@@ -99,8 +99,9 @@ namespace YaccLexCS.ycomplier.automata.re
           
             context["v_charRange_desc"] = "";
             var curAutomata = (Automata) context["automata"];
-            context["lastResult"] = curAutomata.NodeMap[curAutomata.Nodes.Count - 1];
+            context["preResultNode"] = curAutomata.NodeMap[curAutomata.Nodes.Count - 1];
             context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
+            
             //var bStack = (Stack<char>)context["stack_Brace"];
             //bStack.Push('(');
             
@@ -111,36 +112,60 @@ namespace YaccLexCS.ycomplier.automata.re
             var context = (AutomataContext) objs[0];
             context["v_repeat_num"] = "";
             var curAutomata = (Automata) context["automata"];
-            context["lastResult"] = curAutomata.NodeMap[curAutomata.Nodes.Count - 1];
+            context["preResultNode"] = curAutomata.NodeMap[curAutomata.Nodes.Count - 1];
             context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
 
             return null;
         }
         
-        public static object? ProcessRepeatNum(object input, object[] objs)
+        public static object? LeaveLargeBrace(object input, object[] objs)
         {
             var context = (AutomataContext) objs[0];
             var num = Convert.ToInt32(context["v_repeat_num"] + "");
-            var customTrans = new CommonTransitionStrategy.CustomTrans(
-                delegate(AutomataContext? ctx, object? item, object[]? objects)
-                {
-                    if (ctx.ContainsKey("v_repeat"))
-                    {
-                        ctx["v_repeat"] = (int) ctx["v_repeat"] + 1;
-                    }
-                    else
-                    {
-                        ctx["v_repeat"] = 0;
-                    }
-
-                    return (int)ctx["v_repeat"] == num;
-                });
+           
             var lastNode = (AutomataNode) context["lastNode"];
+            var preResultNode = (AutomataNode) context["preResultNode"];
             var automata = (Automata) context["automata"];
 
             var node = new AutomataNode(automata.Nodes.Count);
             automata.AddNode(node);
-            automata.AddEdge(new ReEdge(lastNode, node, customTrans));
+            automata.AddEdge(new ReEdge(lastNode, preResultNode,
+                delegate(object o, object[] objects)
+                {
+                    var context = (AutomataContext) o;
+                    context["v_repeat"] = (int)context["v_repeat"] + 1;
+                    return null;
+                }
+                ,new CommonTransitionStrategy
+                .CustomTrans(delegate(AutomataContext? ctx, object? item, object[]? objects)
+                {
+                    if (!(ctx.ContainsKey("v_repeat")))
+                    {
+                        (ctx)["v_repeat"] = 0;
+                    }
+
+                    return (int)(ctx["v_repeat"]) < num;
+                })));
+            automata.AddEdge(new ReEdge(lastNode, node, delegate(object o, object[] objects)
+            {
+                if (((AutomataContext)o).ContainsKey("v_repeat"))
+                {
+                    ((AutomataContext) o)["v_repeat"] = 0;
+                }
+
+                return null;
+            },new CommonTransitionStrategy
+                .CustomTrans(delegate(AutomataContext? ctx, object? item, object[]? objects)
+                {
+                    if (ctx.ContainsKey("v_repeat"))
+                    {
+                        return (int)ctx["v_repeat"] == num;
+                    }
+
+                    return false;
+                })));
+            
+            
             context["lastNode"] = node;
             return null;
         }
@@ -201,7 +226,7 @@ namespace YaccLexCS.ycomplier.automata.re
           
             context["automata"] = new Automata().AddNode(initNode).SetStartState(0);
             context["lastNode"] = initNode;
-            context["lastResult"] = null;
+            context["preResultNode"] = null;
           
             return null;
         }
@@ -246,7 +271,7 @@ namespace YaccLexCS.ycomplier.automata.re
 
             return null;
         }
-        public static object? ProcessCharsSet(object input, object[] objs)
+        public static object? LeaveMBrace(object input, object[] objs)
         {
             var context = (AutomataContext) objs[0];
 #if DELTAILMODE
@@ -417,12 +442,13 @@ namespace YaccLexCS.ycomplier.automata.re
             curAutomata = andStack.Pop();
             context["automata"] = curAutomata;
             var r = ConcatAutomata(cur, result);
-            context["lastResult"] = curAutomata.NodeMap[curAutomata.AcceptState.First()];
+            
             resultAutomata = ConcatAutomata(curAutomata, resultAutomata);
             context["lastNode"] = resultAutomata.NodeMap[resultAutomata.Nodes.Count - 1];
-            
+            var preNode = ((Stack<AutomataNode>) context["stack_preResultNode"]).Pop();
+            context["preResultNode"] = preNode;
 #if DELTAILMODE
-            $"lastResultNode = {((AutomataNode)context["lastResult"]).NodeId}".PrintToConsole();
+            $"preResultNode = {((AutomataNode)context["lastResult"]).NodeId}".PrintToConsole();
 #endif
            
             
@@ -558,22 +584,30 @@ namespace YaccLexCS.ycomplier.automata.re
 #endif
             
             var bStack = (Stack<char>)context["stack_Brace"];
-            bStack.Push('(');
+            
             
             var strStack = (Stack<string>)context["tmp_strStack"];
             var andStack = (Stack<Automata>) context["stack_AndAutomata"];
+            var preResultNodeStack = (Stack<AutomataNode>) context["stack_preResultNode"];
+
+            var lastNodeStack = (Stack<AutomataNode>) context["stack_lastNode"];
+            var lastNode = (AutomataNode) context["lastNode"];
             
             var cur = (string) context["tmp_cur"];
             var curAutomata = (Automata) context["automata"];
-
+            
+            bStack.Push('(');
             curAutomata.SetAcceptState(curAutomata.NodeMap[curAutomata.Nodes.Count - 1].NodeId);
             strStack.Push(cur);
             andStack.Push(curAutomata);
+            preResultNodeStack.Push(lastNode);
             
             var orExpAutomataStack =  (Stack<List<Automata>>) context["stack_OrAutomata"];
             var orExpAutomata = (List<Automata>) context["orExpAutomata"];
             var orExpStack =  (Stack<List<string>>) context["tmp_OrExpStack"];
             var orExp = (List<string>) context["tmp_OrExp"];
+           
+            
             orExpAutomataStack.Push(orExpAutomata);
             orExpStack.Push(orExp);
 
@@ -584,11 +618,10 @@ namespace YaccLexCS.ycomplier.automata.re
             context["tmp_cur"] = "";
             var initNode = new AutomataNode(0);
             context["automata"] = new Automata().AddNode(initNode).SetStartState(0);
-            var lastNodeStack = (Stack<AutomataNode>) context["stack_lastNode"];
-            var lastNode = (AutomataNode) context["lastNode"];
+            
             lastNodeStack.Push(lastNode);
             context["lastNode"] = initNode;
-            
+            context["preResultNode"] = null;
 #if DELTAILMODE
              strStack.GetMultiDimensionString().PrintToConsole();
             andStack.Count.PrintToConsole();
@@ -607,7 +640,7 @@ namespace YaccLexCS.ycomplier.automata.re
             var node = new AutomataNode(automata.Nodes.Count);
             automata.AddNode(node);
             automata.AddEdge(new ReEdge(lastNode, node, new CommonTransitionStrategy.EqualJudgeTrans<char>((char) input)));
-            context["lastResult"] = lastNode;
+            context["preResultNode"] = lastNode;
             context["lastNode"] = node;
 #if DELTAILMODE
             $"add a normal char {input}".PrintToConsole();
@@ -628,7 +661,7 @@ namespace YaccLexCS.ycomplier.automata.re
             var node = new AutomataNode(automata.Nodes.Count);
             automata.AddNode(node);
             automata.AddEdge(new ReEdge(lastNode, node, new CommonTransitionStrategy.CharacterRangeTrans((char)0, (char)255)));
-            context["lastResult"] = lastNode;
+            context["preResultNode"] = lastNode;
             context["lastNode"] = node;
 #if DELTAILMODE
             $"add a .".PrintToConsole();

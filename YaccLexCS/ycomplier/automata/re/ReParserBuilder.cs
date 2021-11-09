@@ -27,7 +27,7 @@ namespace YaccLexCS.ycomplier.automata.re
             var e8 = new ReEdge(node0, node2, ReAutomataConstruction.EnterLeftLargeBrace,new CommonTransitionStrategy.EqualJudgeTrans<char>('{'));
             
             var e9 = new ReEdge(node2, node2, ReAutomataConstruction.InReadingNum,new CommonTransitionStrategy.CharacterRangeTrans('1', '9'));
-            var e10 = new ReEdge(node2, node0,ReAutomataConstruction.ProcessRepeatNum, new CommonTransitionStrategy.EqualJudgeTrans<char>('}'));
+            var e10 = new ReEdge(node2, node0,ReAutomataConstruction.LeaveLargeBrace, new CommonTransitionStrategy.EqualJudgeTrans<char>('}'));
             
            
             var e11 = new ReEdge(node1, node1, ReAutomataConstruction.InReadingCharSet, new CommonTransitionStrategy.EqualJudgeTrans<char>('^'));
@@ -37,7 +37,7 @@ namespace YaccLexCS.ycomplier.automata.re
                     item != null && CommonTransitionStrategy.NormalCharacterTrans.Instance.Judge(ctx, item, objs) && (char) item != '-'));
             
             var e14 = new ReEdge(node1, node3, ReAutomataConstruction.StatePushOne,new CommonTransitionStrategy.EqualJudgeTrans<char>('\\'));
-            var e15 = new ReEdge(node1, node0, ReAutomataConstruction.ProcessCharsSet, new CommonTransitionStrategy.EqualJudgeTrans<char>(']'));
+            var e15 = new ReEdge(node1, node0, ReAutomataConstruction.LeaveMBrace, new CommonTransitionStrategy.EqualJudgeTrans<char>(']'));
             var e16 = new ReEdge(node0, node3, ReAutomataConstruction.StatePushZero,new CommonTransitionStrategy.EqualJudgeTrans<char>('\\'));
             var e17 = new ReEdge(node3, node4, ReAutomataConstruction.ProcessSlashChar, new CommonTransitionStrategy.CharacterRangeTrans((char)0, (char)255));
             

@@ -63,14 +63,15 @@ namespace YaccLexCS.ycomplier.automata.re
             regexBuilderAutomata.Context["initNode"] = initNode;
             regexBuilderAutomata.Context["lastNode"] = initNode;
             regexBuilderAutomata.Context["automata"] = targetAutomata; // The automata current in building process.
-           //regexBuilderAutomata.Context["preContNode"] = null!;
-            regexBuilderAutomata.Context["lastResult"] = null!;
+          
+            regexBuilderAutomata.Context["preResultNode"] = null!;
             regexBuilderAutomata.Context["orExpAutomata"] = new List<Automata>();
 
             regexBuilderAutomata.Context["stack_lastNode"] = new Stack<AutomataNode>();
             regexBuilderAutomata.Context["stack_OrAutomata"] = new Stack<List<Automata>>();
             regexBuilderAutomata.Context["stack_AndAutomata"] = new Stack<Automata>();
             regexBuilderAutomata.Context["stack_Brace"] = new Stack<char>();
+            regexBuilderAutomata.Context["stack_preResultNode"] = new Stack<AutomataNode>();
             
             regexBuilderAutomata.Context["tmp_cur"] = "";
             regexBuilderAutomata.Context["tmp_strStack"] = new Stack<string>();

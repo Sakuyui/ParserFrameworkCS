@@ -15,7 +15,7 @@ namespace YaccLexCS.config
         [TokenDefinition("MOD", "%")]
         [TokenDefinition("DIV", "/")]
         [TokenDefinition("LOGIC_OP", @"&&|\|\|", true)]
-        public static void Operator(ParserContext content)
+        public static void Operator(CompilerContext content)
         {
             $"meet operator {content.TokenText}".PrintToConsole();
         }
@@ -24,18 +24,18 @@ namespace YaccLexCS.config
         
         
         [TokenDefinition("EQ", "==")]
-        public static void Eq(ParserContext content)
+        public static void Eq(CompilerContext content)
         {
             $"meet operator {content.TokenText}".PrintToConsole();
         }
         
         [TokenDefinition("ASSIGN", "=")]
-        public static void Assign(ParserContext content)
+        public static void Assign(CompilerContext content)
         {
             $"meet operator {content.TokenText}".PrintToConsole();
         }
         [TokenDefinition("STRING", "\".*\"", true)]
-        public static void StringType(ParserContext context)
+        public static void StringType(CompilerContext context)
         {
             var v = context.TokenText;
             $"get string = {v}".PrintToConsole();
@@ -68,12 +68,12 @@ namespace YaccLexCS.config
         }
 
         [TokenDefinition("ID", @"[A-Z_a-z]+", true, 1)]
-        public static void Id(ParserContext context)
+        public static void Id(CompilerContext context)
         {
             
         }
         [TokenDefinition("DOUBLE_LITERAL", @"[0-9]+\.[0-9]+|[1-9][0-9]*|0", true)]
-        public static void DoubleLiteral(ParserContext context)
+        public static void DoubleLiteral(CompilerContext context)
         {
             $"DOUBLE_LITERAL with val = {context.TokenText}".PrintToConsole();
             var val = double.Parse(context.TokenText);

@@ -50,8 +50,7 @@ namespace YaccLexCS.ycomplier.LrParser
                     
                     if(definition.Terminations.Contains(next))
                         continue;
-                    //$"get {item}".PrintToConsole();
-                    
+              
                     //导出导出式子
                     memo.Add(item);
                     ClosureDfs(next, definition, _items, item, 
@@ -126,7 +125,7 @@ namespace YaccLexCS.ycomplier.LrParser
         {
             if (definition.Terminations.Contains(begin))
                 return;
-            if (!definition.NonTerminationWords.Contains(begin))
+            if (!definition.NonTerminations.Contains(begin))
             {
                 throw new Exception("unexpected code");
             }
@@ -134,7 +133,7 @@ namespace YaccLexCS.ycomplier.LrParser
             //$"DFS for {lr1Items.StartWord}, {forwardSearch.GetMultiDimensionString()}".PrintToConsole();
             
             //("in => " + begin).PrintToConsole();
-            foreach (var item in definition.ProduceMapping[begin])
+            foreach (var item in definition.ProduceMappingList[begin])
             {
                 var l = new Lr1Item(begin, item, forwardSearch.ToList());
                 if (l.ProduceItems.Count >= 2)

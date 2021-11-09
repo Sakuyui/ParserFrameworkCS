@@ -9,11 +9,11 @@ using System.Text.RegularExpressions;
 using YaccLexCS.ycomplier;
 using YaccLexCS.ycomplier.automata;
 using YaccLexCS.ycomplier.automata.re;
+using YaccLexCS.ycomplier.code;
 using YaccLexCS.ycomplier.LrParser;
 using YaccLexCS.ycomplier.util;
 
 using Regex = System.Text.RegularExpressions.Regex;
-
 
 namespace YaccLexCS
 {
@@ -23,14 +23,15 @@ namespace YaccLexCS
         
         public static void Main()
         {
-
-
-            var context = new ParserContext();
+            
+            YCompilerConfigurator.GenerateGrammarDefinitionFileFrom("d:\\d.txt", "d:\\out");
+            return;
+            var context = new CompilerContext();
             //在指定命名空间扫描配置
             var lexer = Lexer.ConfigureFromPackages(new []{"YaccLexCS.config"}, context);
             
             //创建输入流
-            var r = (TextReader) new StringReader("sum = 0;i = 0;");
+            var r = (TextReader) new StringReader("sum = 0;i = 0;while(1){i = i + 1; sum = sum + i;}");
             var tokenList = new List<Token>();
             //在流中词法分析。
             lexer.ParseInStream(r, token =>  //callback function
@@ -38,10 +39,11 @@ namespace YaccLexCS
                 if(token.Type != "Skip") 
                     tokenList.Add(token);
             });
+            tokenList.PrintCollectionToConsole();
             
             tokenList.PrintEnumerationToConsole();
 
-            Lr1Parser parser = Lr1ParserBuilder.ConfigureFromPackages("program",lexer.TokenNames, new[] {"YaccLexCS.config"});
+            Lr1Parser parser = Lr1ParserBuilder.ConfigureFromPackages(lexer.TokenNames, new[] {"YaccLexCS.config"});
             parser.InitParser().SetContext(context);
             
            
@@ -53,9 +55,10 @@ namespace YaccLexCS
             }
             
             parser.ParseFromCurrentState(new Token("$", "$"));
-            
-            
-            
+
+            var root = parser.GetCurrentStack().Peek();
+            root.GetTreeShapeDescribe().PrintToConsole();
+
             return;
             
             //it can also used to parsed a whole text if you want. Simply use it as follow. This Function will return a IEnumerable<Token>,

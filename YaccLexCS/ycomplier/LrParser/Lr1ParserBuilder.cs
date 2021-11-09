@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using YaccLexCS.ycomplier.attribution;
 
 namespace YaccLexCS.ycomplier.LrParser
 {
     public static class Lr1ParserBuilder
     {
-        public static Lr1Parser ConfigureFromPackages(string startWord, IEnumerable<string> terminationNames,IEnumerable<string> packageNames)
+        public static Lr1Parser ConfigureFromPackages(IEnumerable<string> terminationNames,IEnumerable<string> packageNames)
         {
             var gs = YCompilerConfigurator.GetAllGrammarDefinitions(
             YCompilerConfigurator.ScanGrammarConfiguration(packageNames)).ToList();
@@ -23,13 +24,17 @@ namespace YaccLexCS.ycomplier.LrParser
                         
             var symbolsAppearInCfg = gs.SelectMany(e => 
                             e.tokenDef.CfgItem.SelectMany(s => s.Split("|").SelectMany(item => item.Split(" "))));
+            string startWord = "";
             
             //check
             void CheckDef()
             {
                 var except = symbolsAppearInCfg.Except(tokenNames).Except(cfgDefSet);
-                
-                if (except.Any() || !cfgDefSet.Contains(startWord))
+                var startGrammar = gs.Select(g => g.tokenDef).FirstOrDefault(d => d is BeginningGrammarDefinition,null);
+                if (startGrammar == null)
+                    throw new Exception("can find beginning word definition");
+                startWord = startGrammar.Name;
+                if (startWord == "" || except.Any() || !cfgDefSet.Contains(startWord))
                 {
                     throw new Exception("CFG Definition uncompleted, unrecognized symbols :" + except.ToEnumerationString());
                 }
@@ -46,17 +51,17 @@ namespace YaccLexCS.ycomplier.LrParser
                             return l + "->" + s.AggregateOneOrMore((a, b) => a + "|" + b);
                         }).ToArray();
             var terminations = tokenNames.AggregateOneOrMore((a, b) => a +"|" + b);
-            grammars.PrintEnumerationToConsole(); 
-            terminations.PrintToConsole();
+            
             var grammarSet = new CfgProducerDefinition(grammars, terminations, startWord);
-            grammarSet.NonTerminationWords.PrintEnumerationToConsole();
-            grammarSet.Terminations.PrintEnumerationToConsole();
+           
 
 
             Dictionary<string, MethodInfo> methodMapping = new();
+            Dictionary<string, Type> typeMapping = new();
             foreach (var (tokenDef, methodInfo) in gs)
             {
                 var name = tokenDef.Name;
+                typeMapping[tokenDef.Name] = tokenDef.Type;
                 foreach (var s in tokenDef.CfgItem.Select(i => name + "->" + i))
                 {
                     methodMapping[s] = methodInfo;
@@ -64,7 +69,8 @@ namespace YaccLexCS.ycomplier.LrParser
             }
             
             var parser = new Lr1Parser(grammarSet);
-            parser.SetParserMethod(methodMapping);
+            parser.InitGrammarMapping(methodMapping);
+            parser.InitTypeMapping(typeMapping);
             return parser;
         }
     }

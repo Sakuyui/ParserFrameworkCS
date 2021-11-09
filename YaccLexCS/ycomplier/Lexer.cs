@@ -12,17 +12,22 @@ using YaccLexCS.ycomplier.automata.re;
 
 namespace YaccLexCS.ycomplier
 {
+    public abstract class Builder{
+    
+    }
+
     public class Lexer
     {
-        private Lexer(ParserContext parserContext)
+        public Lexer(CompilerContext compilerContext)
         {
-            ParserContext = parserContext;
+            CompilerContext = compilerContext;
         }
-        public readonly ParserContext ParserContext;
+        public readonly CompilerContext CompilerContext;
         private readonly Dictionary<TokenDefinition, MethodInfo> _patternMap = new();
 
+        public Dictionary<TokenDefinition, MethodInfo> PatternMap => _patternMap;
         public HashSet<string> TokenNames => _patternMap.Select(e => e.Key.TokenName).ToHashSet();
-        public static Lexer ConfigureFromPackages(IEnumerable<string> scanPackage, ParserContext context)
+        public static Lexer ConfigureFromPackages(IEnumerable<string> scanPackage, CompilerContext context)
         {
             var lexer = new Lexer(context);
             YCompilerConfigurator.GetAllTokenDefinitions(
@@ -41,6 +46,8 @@ namespace YaccLexCS.ycomplier
         }
 
 
+        public void SetPattenMapping(TokenDefinition definition, MethodInfo value) => _patternMap[definition] = value;
+        
         private void InitAutomata()
         {
             foreach (var a in _patternMap)
@@ -54,7 +61,7 @@ namespace YaccLexCS.ycomplier
             if (!p.Any())
                 methodInfo.Invoke(null, Array.Empty<object>());
             else if(p.Length == 1)
-                methodInfo.Invoke(null, new object?[]{ParserContext});
+                methodInfo.Invoke(null, new object?[]{CompilerContext});
         }
         public void ParseInStream(TextReader stream, Action<Token> callBack)
         {
@@ -66,38 +73,37 @@ namespace YaccLexCS.ycomplier
 
             
 
-            var cur = "";
+            var text = "";
             while (stream.Peek() > 0)
             {
                 
-                var cur1 = cur;
-                var c1 = (char) stream.Peek();
+                var cur = text;
+                var peek = (char) stream.Peek();
                 var str = order.Where(e => 
-                    !e.Key.UseRegex && (cur1 + c1) == e.Key.SourcePattern);
+                    !e.Key.UseRegex && cur + peek == e.Key.SourcePattern);
                 var t = available.Where(e =>
-                        e.Key.UseRegex && e.Key.Automata!.IsCanTransWith(c1)).Concat(str)
+                        e.Key.UseRegex && e.Key.Automata!.IsCanTransWith(peek)).Concat(str)
                     .OrderBy(e => e.Key.Priority).ToArray();
                        
                
                 if (!t.Any()) {
-                            
-                    //$"get token {cur}".PrintToConsole();
-                    ParserContext.TokenText = cur;
-                            
-                    cur = "";
+                    
+                    CompilerContext.TokenText = text;
+                    
+                    text = "";
                           
                             
                     InvokeTokenCallBackMethod(available.First().Value);
-                    callBack?.Invoke(new Token(ParserContext.TokenText,available.First().Key.TokenName));
+                    callBack?.Invoke(new Token(CompilerContext.TokenText,available.First().Key.TokenName));
                     available = order.ToArray();
                     InitAutomata();
                 }else {
-                    cur += c1;
+                    text += peek;
                     stream.Read();
                     
                     t.ElementInvoke(e => {
                         if (e.Key.UseRegex)
-                            e.Key.Automata?.ParseSingleInputFromCurrentStates(c1);
+                            e.Key.Automata?.ParseSingleInputFromCurrentStates(peek);
                     });
                     available = t.ToArray();
                 }
@@ -105,11 +111,11 @@ namespace YaccLexCS.ycomplier
 
             if (!available.Any())
                 return;
-            $"get token {cur}".PrintToConsole();
-            ParserContext.TokenText = cur;
+            
+            CompilerContext.TokenText = text;
             InvokeTokenCallBackMethod(available.First().Value);
             
-            callBack?.Invoke(new Token(ParserContext.TokenText,available.First().Key.TokenName));
+            callBack?.Invoke(new Token(CompilerContext.TokenText,available.First().Key.TokenName));
         }
         public IEnumerable<Token> ParseWholeText(string s) {
             var sb = new StringBuilder(s);
@@ -138,13 +144,13 @@ namespace YaccLexCS.ycomplier
                 if (!t.Any()) {
                             
                     //$"get token {cur}".PrintToConsole();
-                    ParserContext.TokenText = cur;
+                    CompilerContext.TokenText = cur;
                             
                     cur = "";
                           
                             
                     InvokeTokenCallBackMethod(available.First().Value);
-                    yield return new Token(ParserContext.TokenText,available.First().Key.TokenName);
+                    yield return new Token(CompilerContext.TokenText,available.First().Key.TokenName);
                     available = order.ToArray();
                     InitAutomata();
                 }else {
@@ -162,9 +168,9 @@ namespace YaccLexCS.ycomplier
             if (!available.Any()) 
                 yield break;
             $"get token {cur}".PrintToConsole();
-            ParserContext.TokenText = cur;
+            CompilerContext.TokenText = cur;
             InvokeTokenCallBackMethod(available.First().Value);
-            yield return new Token(ParserContext.TokenText,available.First().Key.TokenName);
+            yield return new Token(CompilerContext.TokenText,available.First().Key.TokenName);
         }
     }
 }

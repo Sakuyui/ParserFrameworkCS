@@ -9,17 +9,19 @@ namespace YaccLexCS.ycomplier.LrParser
 {
     public class CfgProducerDefinition : IEnumerable<ProducerDefinitionItem>
     {
-        public string StartWord = "";
+        public readonly string StartWord = "";
         public readonly List<ProducerDefinitionItem> Grammars = new();
 
-        public readonly Dictionary<string, List<ProducerDefinitionItem>> StartWordsMapping =
+
+        private readonly Dictionary<string, List<ProducerDefinitionItem>> _produceMapping =
             new();
 
         public readonly HashSet<string> Terminations = new();
-        public HashSet<string> NonTerminationWords => StartWordsMapping.Keys.ToHashSet();
+        public HashSet<string> NonTerminations => _produceMapping.Keys.ToHashSet();
 
-        public Dictionary<string, List<List<string>>> ProduceMapping;
-        public List<ProducerDefinitionItem> this[string nT] => StartWordsMapping[nT];
+        public Dictionary<string, List<List<string>>>? ProduceMappingList;
+        public List<ProducerDefinitionItem> this[string nT] => _produceMapping[nT];
+        
         public void AddTerminations(string expression)
         {
             foreach (var e in expression.Split("|"))
@@ -28,14 +30,14 @@ namespace YaccLexCS.ycomplier.LrParser
 
         public void InitProduceMapping()
         {
-            ProduceMapping = SplitProduceWord();
+            ProduceMappingList = SplitProduceWord();
         }
         
         
         private Dictionary<string, List<List<string>>> SplitProduceWord()
         {
             var res = new Dictionary<string, List<List<string>>>();
-            var kSet = Terminations.Union(NonTerminationWords).ToHashSet(null);
+            var kSet = Terminations.Union(NonTerminations).ToHashSet(null);
             
             kSet.DebugPrintCollectionToConsole();
             
@@ -57,7 +59,6 @@ namespace YaccLexCS.ycomplier.LrParser
         public CfgProducerDefinition(IEnumerable<string> grammarsDefinition, string terminationsExp, string startWord)
         {
             AddGrammars(grammarsDefinition.SelectMany(ProducerDefinitionItem.ParseProducerExpression));
-            Grammars.PrintEnumerationToConsole();
             AddTerminations(terminationsExp);
             StartWord = startWord;
         }
@@ -70,9 +71,9 @@ namespace YaccLexCS.ycomplier.LrParser
         public void AddGrammar(ProducerDefinitionItem item)
         {
             Grammars.Add(item);
-            if (!NonTerminationWords.Contains(item.LeftSymbol))
-                StartWordsMapping[item.LeftSymbol] = new List<ProducerDefinitionItem>();
-            StartWordsMapping[item.LeftSymbol].Add(item);
+            if (!NonTerminations.Contains(item.LeftSymbol))
+                _produceMapping[item.LeftSymbol] = new List<ProducerDefinitionItem>();
+            _produceMapping[item.LeftSymbol].Add(item);
         }
         public void AddGrammars(IEnumerable<ProducerDefinitionItem> item)
         {

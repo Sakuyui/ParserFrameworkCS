@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Linq;
-using CIExam.Complier;
 using YaccLexCS.ycomplier.util;
 
 namespace YaccLexCS.ycomplier.LrParser
@@ -43,12 +42,10 @@ namespace YaccLexCS.ycomplier.LrParser
         public Lr1Table(CfgProducerDefinition definition)
         {
             var terminations = definition.Terminations;
-            var nonTerminations = definition.NonTerminationWords;
+            var nonTerminations = definition.NonTerminations;
             _goto = new DataFrame(nonTerminations.ToArray().Prepend("I(X)"));
             _transition = new DataFrame(terminations.ToArray().Prepend("I(X)").Append("$"));
-                
-            _goto.PrintToConsole();
-            _transition.PrintToConsole();
+            
         }
     }
 }

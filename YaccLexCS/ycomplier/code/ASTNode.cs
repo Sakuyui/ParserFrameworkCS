@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace YaccLexCS.ycomplier.code
 {
@@ -35,6 +36,24 @@ namespace YaccLexCS.ycomplier.code
         public override string ToString()
         {
             return $"({NodeName}:{ChildrenCount})";
+        }
+
+        public string GetTreeShapeDescribe()
+        {
+            StringBuilder r = new();
+            Dfs(this, 0);
+            void Dfs(ASTNode node, int dept)
+            {
+                r.Append("+ ".PadRight((dept) * 2, '-'));
+                r.Append($"({dept})" + node.NodeName + "\r\n");
+                if (node.IsLeaf) return;
+                foreach (var c in node.Children())
+                {
+                    Dfs(c, dept + 1);
+                }
+            }
+
+            return r.ToString();
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace YaccLexCS.ycomplier
 {
-    public class ParserContext
+    public class CompilerContext
     {
         private readonly Dictionary<string, object> _kvComp = new();
 
@@ -19,12 +19,12 @@ namespace YaccLexCS.ycomplier
             set => this["v_tokenVal"] = value;
         }
 
-        public ParserContext()
+        public CompilerContext()
         {
             this["v_tokenSourceText"] = "";
             this["v_tokenVal"] = null!;
         }
-        public object this[string key]
+        public object? this[string key]
         {
             get => _kvComp[key];
             set => _kvComp[key] = value;

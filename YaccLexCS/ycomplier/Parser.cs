@@ -3,21 +3,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
 using CIExam.Complier;
-using YaccLexCS.ycomplier;
 using YaccLexCS.ycomplier.code;
 using YaccLexCS.ycomplier.LrParser;
 
-namespace YaccLexCS
+namespace YaccLexCS.ycomplier
 {
     
     public abstract class Parser
     {
-        public ParserContext Context ;
-        public readonly CfgProducerDefinition Definitions;
+        protected CompilerContext? Context ;
+        protected readonly CfgProducerDefinition Definitions;
 
-        public Parser SetContext(ParserContext context)
+        public Parser SetContext(CompilerContext context)
         {
             Context = context;
             return this;
@@ -28,7 +26,7 @@ namespace YaccLexCS
             
             Definitions = definitions;
         }
-        protected Parser(CfgProducerDefinition definitions, ParserContext context)
+        protected Parser(CfgProducerDefinition definitions, CompilerContext context)
         {
             Definitions = definitions;
             Context = context;
@@ -41,11 +39,15 @@ namespace YaccLexCS
             this[name] = obj;
             return obj;
         }
-        protected object this[string key]
+        protected object? this[string key]
         {
-            set => Context[key] = value;
-            get => Context[key];
-        } 
+            set
+            {
+                if (Context != null) Context[key] = value;
+            }
+            get => Context?[key];
+        }
+
         public bool CykJudge(string input) {
             var n = input.Length;
             var cykTable = new List<List<string>>();
@@ -113,12 +115,12 @@ namespace YaccLexCS
         private readonly Stack<int> _stateStack = new();
         public Lr1Table? Lr1Table { get; private set; }
         private Dictionary<int, MethodInfo>? _methodMap = null;
-        
+        private Dictionary<string, Type>? _typeMap = null;
         public Lr1Parser(CfgProducerDefinition definitions) : base(definitions)
         {
         }
 
-        public Lr1Parser(ParserContext context, CfgProducerDefinition definitions) : base(definitions, context)
+        public Lr1Parser(CompilerContext context, CfgProducerDefinition definitions) : base(definitions, context)
         {
         }
 
@@ -127,8 +129,10 @@ namespace YaccLexCS
             throw new System.NotImplementedException();
         }
 
+        public Stack<ASTNode> GetCurrentStack() => _codeStack;
         public override void ParseFromCurrentState(Token token)
         {
+            
             if (Context == null)
                 throw new Exception(
                     "parser should have a Context, may use SetContext(new ParserContext()) to solve this problem.");
@@ -158,47 +162,51 @@ namespace YaccLexCS
             if (t[0] == 'r')
             {
                 //reduction 规约后一定对应一个新状态
-                var grammarCode = int.Parse(t[1..]);
-                $"reduction by ({grammarCode}) : {Definitions.Grammars[grammarCode]}".PrintToConsole();
+                var grammarID = int.Parse(t[1..]);
+                $"reduction by ({grammarID}) : {Definitions.Grammars[grammarID]}".PrintToConsole();
 
-                ASTNode reducedNode; 
                 //callback
-                if (_methodMap != null && _methodMap.ContainsKey(grammarCode))
+                if (_methodMap != null && _methodMap.ContainsKey(grammarID))
                 {
-                    var m = _methodMap[grammarCode];
+                    var m = _methodMap[grammarID];
                     if (m.GetParameters().Any())
                     {
-                        Context["parser_reduction"] = Definitions.Grammars[grammarCode];
+                        Context["parser_reduction"] = Definitions.Grammars[grammarID];
                         m.Invoke(null, new object[] {Context});
                         
                     }
                     else
                     {
-                        _methodMap[grammarCode].Invoke(null, Array.Empty<object>());
+                        _methodMap[grammarID].Invoke(null, Array.Empty<object>());
                     }
                 }
                     
-                var g = Definitions.Grammars[grammarCode];
+                var g = Definitions.Grammars[grammarID];
                     
                
-                var list = g.ProduceItem.Split(" ").ToList();
-                list.PrintEnumerationToConsole();
+                var itemList = g.ProduceItem.Split(" ").ToList();
+                itemList.PrintEnumerationToConsole();
 
                 var nodeList = new List<ASTNode>();
-                foreach (var node in list.Select(s => _codeStack.Pop()))
+                foreach (var node in itemList.Select(_ => _codeStack.Pop()))
                 {
                     nodeList.Add(node);
                     _stateStack.Pop();
                 }
                 
                 _codeStack.Push(new ASTNonTerminalNode(nodeList ,g.LeftSymbol));
-                var gotoNext = Lr1Table?.Goto[_stateStack.Peek()][_codeStack.Peek().NodeName].ToString();
-                    
-                $"goto => {_stateStack.Peek()}".PrintToConsole();
-                _stateStack.Push(int.Parse(gotoNext));
+
+                var gotoNext = Lr1Table?.Goto[_stateStack.Peek()][_codeStack.Peek().NodeName];
+                do
+                {
+                    $"goto => {_stateStack.Peek()}".PrintToConsole();
+                    _stateStack.Push(int.Parse(gotoNext.ToString()));
+                    gotoNext = Lr1Table?.Goto[_stateStack.Peek()][_codeStack.Peek().NodeName];
+                } while (gotoNext != null);
 
 
-                    
+
+
                 $"code Stack = {_codeStack.ToEnumerationString()}".PrintToConsole();
                 $"state Stack = {_stateStack.GetMultiDimensionString()}".PrintToConsole();
                 ParseFromCurrentState(token);
@@ -206,19 +214,31 @@ namespace YaccLexCS
 
         }
 
-        public void SetParserMethod(Dictionary<string, MethodInfo> methodInfos)
+        public void InitGrammarMapping(Dictionary<string, MethodInfo> produceMethodMapping)
         {
             _methodMap ??= new Dictionary<int, MethodInfo>();
             _methodMap.Clear();
-            foreach (var (key, value) in methodInfos)
+            
+            foreach (var (grammar, method) in produceMethodMapping)
             {
-                var g = Definitions.Grammars.FindIndex(g => (g.LeftSymbol + "->" + g.ProduceItem) == key);
-                _methodMap[g] = value;
+                var index = Definitions.Grammars.FindIndex(produce => produce.LeftSymbol + "->" + produce.ProduceItem == grammar);
+                _methodMap[index] = method;
+                
             }
 
             return;
         }
 
+        public void InitTypeMapping(Dictionary<string, Type> map)
+        {
+            _typeMap ??= new Dictionary<string, Type>();
+            _typeMap.Clear();
+            _typeMap = map;
+        }
+        public void SetTypeMapping(Dictionary<string, Type> typeMapping)
+        {
+            
+        }
         public override Lr1Parser InitParser()
         {
             "".DebugOutPut();
@@ -227,16 +247,16 @@ namespace YaccLexCS
       
             Definitions.InitProduceMapping();
             "==========================================P SET===================================".DebugOutPut();
-            foreach (var s in Definitions.ProduceMapping)
-            {
-                ("[" + s.Key +"] => " + s.Value.Select(e => e.ToEnumerationString()).ToEnumerationString()).DebugOutPut();
-            }
-            
-            
+            if (Definitions.ProduceMappingList != null)
+                foreach (var (key, value) in Definitions.ProduceMappingList)
+                {
+                    ("[" + key + "] => " + value.Select(e => e.ToEnumerationString()).ToEnumerationString())
+                        .DebugOutPut();
+                }
+
+
             "==========================================FIRST SET===================================".DebugOutPut();
-            var dict = new Dictionary<int, ProjectSet>();
             
-         
             
             
             "============================================I(0)=======================================".PrintToConsole();
@@ -246,11 +266,11 @@ namespace YaccLexCS
          
             curPSet.ApplyClosure(Definitions);
             curPSet.GetProjectItemsDesc().DebugOutPut();
-            //curPSet.PrintToConsole();
+            
             var fi = CfgTools.GetFirstSet(Definitions);
-            foreach (var keyValuePair in fi)
+            foreach (var (key, value) in fi)
             {
-                $"first({keyValuePair.Key}) = [{keyValuePair.Value.AggregateOneOrMore((a, b) => a + ","+ b)}]".PrintToConsole();
+                $"first({key}) = [{value.AggregateOneOrMore((a, b) => a + ","+ b)}]".PrintToConsole();
             }
             
            
@@ -268,11 +288,10 @@ namespace YaccLexCS
                 changed = false;
                 
                 var count = projects.Count;
-                for (var i = last; i < projects.Count; i++)
+                for (var i = last; i < count; i++)
                 {
                     var p = projects[i];
                     MoveProject(new KeyValuePair<int, ProjectSet>(i, p), projects, Lr1Table, products);
-                    
                 }
 
                 if (projects.Count != last)
@@ -281,7 +300,7 @@ namespace YaccLexCS
                     last = count;
                 }
             }
-            
+            //throw new Exception();
             Lr1Table.Goto.DebugOutPut();
             Lr1Table.Transition.DebugOutPut();
             Lr1Table.OutputToFilesAsCsv("d:\\pl\\goto.csv", "d:\\pl\\trans.csv");
@@ -320,10 +339,7 @@ namespace YaccLexCS
         {
             var (curId, value) = projectSet;
             $">> From I({curId}) Move".DebugOutPut();
-            foreach (var d in value.Where(e => e.IsReductionItem()))
-            {
-                //table.Transition[curId, d]
-            }
+            
             var cSet = value.Where(e => !e.IsReductionItem())
                 .Select(e => e.ProduceItems[e.DotPos]).ToHashSet(null);
 
@@ -402,7 +418,7 @@ namespace YaccLexCS
                 }
                 
                 //处理移进和Goto
-                if (Definitions.NonTerminationWords.Contains(c))
+                if (Definitions.NonTerminations.Contains(c))
                 {
                     table.Goto[curId][c] = newCode;
                 }else if (Definitions.Terminations.Contains(c))
@@ -413,7 +429,6 @@ namespace YaccLexCS
                 //存在规约项目，那么要填表
                 if (ps.Any(p => p.IsReductionItem()))
                 {
-                    
                     
                     //需要规约的项目
                     var reduction= ps.Where(p => p.IsReductionItem()).ToList();
