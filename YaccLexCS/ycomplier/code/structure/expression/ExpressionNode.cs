@@ -1,13 +1,20 @@
-﻿using System.Collections.Generic;
 
-namespace YaccLexCS.ycomplier.code.structure
+using System.Collections.Generic;
+using YaccLexCS.ycomplier;
+using YaccLexCS.ycomplier.attribution;
+using YaccLexCS.ycomplier.code;
+using YaccLexCS.ycomplier.code.structure;
+namespace YaccLexCS.code.structure
 {
-    public class ExpressionNode : ASTNonTerminalNode
-    {
-        private ASTNode? _expression => _children.Count == 1 ? _children[0] : null;
-        public ExpressionNode(IEnumerable<ASTNode> child) : base(child, "expression")
-        {
-            
-        }
-    }
+		[GrammarConfiguration]
+		public class ExpressionNode : ASTNonTerminalNode
+		{
+				public override dynamic Eval(CompilerContext context)
+				{
+						return EvaluationConfiguration.ClassNameMapping[GetType().Name].Invoke(null, new object[]{this, context});
+				}
+				public ExpressionNode(IEnumerable<ASTNode> child) : base(child, "expression")
+				{
+				}
+		}
 }

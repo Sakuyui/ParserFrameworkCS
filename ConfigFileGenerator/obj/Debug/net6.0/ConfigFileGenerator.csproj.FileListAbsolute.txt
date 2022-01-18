@@ -1,0 +1,15 @@
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\ConfigFileGenerator\bin\Debug\net6.0\ConfigFileGenerator.exe
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\ConfigFileGenerator\bin\Debug\net6.0\ConfigFileGenerator.deps.json
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\ConfigFileGenerator\bin\Debug\net6.0\ConfigFileGenerator.runtimeconfig.json
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\ConfigFileGenerator\bin\Debug\net6.0\ConfigFileGenerator.dll
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\ConfigFileGenerator\bin\Debug\net6.0\ConfigFileGenerator.pdb
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\ConfigFileGenerator\obj\Debug\net6.0\ConfigFileGenerator.csproj.AssemblyReference.cache
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\ConfigFileGenerator\obj\Debug\net6.0\ConfigFileGenerator.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\ConfigFileGenerator\obj\Debug\net6.0\ConfigFileGenerator.AssemblyInfoInputs.cache
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\ConfigFileGenerator\obj\Debug\net6.0\ConfigFileGenerator.AssemblyInfo.cs
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\ConfigFileGenerator\obj\Debug\net6.0\ConfigFileGenerator.csproj.CoreCompileInputs.cache
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\ConfigFileGenerator\obj\Debug\net6.0\ConfigFileGenerator.dll
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\ConfigFileGenerator\obj\Debug\net6.0\ref\ConfigFileGenerator.dll
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\ConfigFileGenerator\obj\Debug\net6.0\ConfigFileGenerator.pdb
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\ConfigFileGenerator\obj\Debug\net6.0\ConfigFileGenerator.genruntimeconfig.cache
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\ConfigFileGenerator\obj\Debug\net6.0\refint\ConfigFileGenerator.dll

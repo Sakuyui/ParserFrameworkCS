@@ -1,13 +1,20 @@
-﻿using System.Collections.Generic;
 
-namespace YaccLexCS.ycomplier.code.structure
+using System.Collections.Generic;
+using YaccLexCS.ycomplier;
+using YaccLexCS.ycomplier.attribution;
+using YaccLexCS.ycomplier.code;
+using YaccLexCS.ycomplier.code.structure;
+namespace YaccLexCS.code.structure
 {
-    public class WhileStatementNode : ASTNonTerminalNode
-    {
-        public ExpressionNode? Condition => _children.Count == 5 ? (ExpressionNode?)_children[2] : null;
-        public BlockNode? Block => _children.Count == 5 ? (BlockNode?)_children[4] : null;
-        public WhileStatementNode(IEnumerable<ASTNode> child) : base(child, "while_statement")
-        {
-        }
-    }
+		[GrammarConfiguration]
+		public class WhileStatementNode : ASTNonTerminalNode
+		{
+				public override dynamic Eval(CompilerContext context)
+				{
+						return EvaluationConfiguration.ClassNameMapping[GetType().Name].Invoke(null, new object[]{this, context});
+				}
+				public WhileStatementNode(IEnumerable<ASTNode> child) : base(child, "while_statement")
+				{
+				}
+		}
 }

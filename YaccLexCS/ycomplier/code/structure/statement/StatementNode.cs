@@ -1,16 +1,20 @@
-﻿using System.Buffers.Text;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace YaccLexCS.ycomplier.code.structure
+using System.Collections.Generic;
+using YaccLexCS.ycomplier;
+using YaccLexCS.ycomplier.attribution;
+using YaccLexCS.ycomplier.code;
+using YaccLexCS.ycomplier.code.structure;
+namespace YaccLexCS.code.structure
 {
-    public class StatementNode : ASTNonTerminalNode
-    {
-        private ASTNode? ExpressionOrStatement => _children.Any() ? _children[0] : null;
-        
-        public StatementNode(IEnumerable<ASTNode> child) : base(child, "statement")
-        {
-            
-        }
-    }
+		[GrammarConfiguration]
+		public class StatementNode : ASTNonTerminalNode
+		{
+				public override dynamic Eval(CompilerContext context)
+				{
+						return EvaluationConfiguration.ClassNameMapping[GetType().Name].Invoke(null, new object[]{this, context});
+				}
+				public StatementNode(IEnumerable<ASTNode> child) : base(child, "statement")
+				{
+				}
+		}
 }

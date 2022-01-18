@@ -5,7 +5,7 @@ namespace YaccLexCS.config{
 	[GrammarConfiguration]
 	public static class GrammarCompileUnit{
 
-		[GrammarDefinition("compile_unit","definition_or_statement","program definition_or_statement")]
+		[BeginningGrammarDefinition("compile_unit","definition_or_statement","compile_unit definition_or_statement")]
 		public static void compile_unit(CompilerContext context){
 
 		}

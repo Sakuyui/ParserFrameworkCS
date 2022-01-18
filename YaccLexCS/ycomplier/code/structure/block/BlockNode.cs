@@ -1,25 +1,20 @@
-﻿using System.Collections.Generic;
 
-namespace YaccLexCS.ycomplier.code.structure
+using System.Collections.Generic;
+using YaccLexCS.ycomplier;
+using YaccLexCS.ycomplier.attribution;
+using YaccLexCS.ycomplier.code;
+using YaccLexCS.ycomplier.code.structure;
+namespace YaccLexCS.code.structure
 {
-    public class BlockNode : ASTNonTerminalNode
-    {
-        private StatementListNode? Statements => 
-            (StatementListNode?) (_children.Count switch
-            {
-                3 => _children[1],
-                2 => new StatementListNode(),
-                _ => null
-            });
-
-        public BlockNode(IEnumerable<ASTNode> children) : base(children, "block")
-        {
-            
-        }
-
-        public override string ToString()
-        {
-            return Statements.ToString() ?? "null";
-        }
-    }
+		[GrammarConfiguration]
+		public class BlockNode : ASTNonTerminalNode
+		{
+				public override dynamic Eval(CompilerContext context)
+				{
+						return EvaluationConfiguration.ClassNameMapping[GetType().Name].Invoke(null, new object[]{this, context});
+				}
+				public BlockNode(IEnumerable<ASTNode> child) : base(child, "block")
+				{
+				}
+		}
 }

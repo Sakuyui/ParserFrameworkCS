@@ -26,7 +26,8 @@ namespace YaccLexCS.ycomplier
         }
         public object? this[string key]
         {
-            get => _kvComp[key];
+            get  { return _kvComp.ContainsKey(key) ? _kvComp[key] : null; }
+ 
             set => _kvComp[key] = value;
         }
     }

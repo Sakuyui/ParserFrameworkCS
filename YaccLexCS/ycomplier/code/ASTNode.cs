@@ -9,15 +9,22 @@ namespace YaccLexCS.ycomplier.code
     {
         public readonly string NodeName;
 
+        public dynamic Val { get; private set; }
         protected ASTNode(string nodeName)
         {
             NodeName = nodeName;
         }
 
+        public abstract dynamic Eval(CompilerContext context);
+        
         public abstract ASTNode? Child(int i);
-        public int ChildrenCount => Children().Count();
+        
         public abstract IEnumerable<ASTNode> Children();
         public abstract string Location();
+        
+        
+        public int ChildrenCount => Children().Count();
+        
 
         public bool IsLeaf => ChildrenCount == 0;
        

@@ -28,6 +28,7 @@ namespace YaccLexCS.ycomplier.util
             var result = methods
                 .Where(m => m.GetCustomAttributes(typeof(T)).Any() && m.IsStatic)
                 .SelectMany(m => m.GetCustomAttributes<T>().Select(attr => (attr, m)));
+            
             return result;
         }
     }

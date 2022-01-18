@@ -2,18 +2,19 @@
 {
     public class Token
     {
-        private readonly string _sourceText;
+        public readonly string SourceText;
+        
         public string Type { get; }
         public int LineNum;
         public Token(string sourceText, string type)
         {
-            _sourceText = sourceText;
+            SourceText = sourceText;
             Type = type;
         }
 
         public override string ToString()
         {
-            return $"<{Type}, {_sourceText}>";
+            return $"<{Type}, {SourceText}>";
         }
     }
 }

@@ -1,24 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 
-namespace YaccLexCS.ycomplier.code.structure
+using System.Collections.Generic;
+using YaccLexCS.ycomplier;
+using YaccLexCS.ycomplier.attribution;
+using YaccLexCS.ycomplier.code;
+using YaccLexCS.ycomplier.code.structure;
+namespace YaccLexCS.code.structure
 {
-    public class StatementListNode : ASTNonTerminalNode
-    {
-        private StatementNode? _statementNode =>
-            (StatementNode?) (_children.Count switch
-            {
-                1 => _children[0],
-                2 => _children[1],
-                _ => null
-            });
-        
-        public StatementListNode(IEnumerable<ASTNode> child) : base(child, "statement_list")
-        {
-        }
-        public StatementListNode() : base(ArraySegment<ASTNode>.Empty, "statement_list")
-        {
-        }
-    }
+		[GrammarConfiguration]
+		public class StatementListNode : ASTNonTerminalNode
+		{
+				public override dynamic Eval(CompilerContext context)
+				{
+						return EvaluationConfiguration.ClassNameMapping[GetType().Name].Invoke(null, new object[]{this, context});
+				}
+				public StatementListNode(IEnumerable<ASTNode> child) : base(child, "statement_list")
+				{
+				}
+		}
 }

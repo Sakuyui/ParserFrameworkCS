@@ -6,6 +6,7 @@ namespace YaccLexCS.ycomplier.code
     public class ASTTerminalNode : ASTNode
     {
         public Token Token { get; }
+        public dynamic Value { get; }
 
         public ASTTerminalNode(Token token) : base(token.Type)
         {
@@ -16,7 +17,11 @@ namespace YaccLexCS.ycomplier.code
         {
             return null;
         }
-        
+
+        public override dynamic Eval(CompilerContext context)
+        {
+            return Token;
+        }
 
         public override IEnumerable<ASTNode> Children()
         {

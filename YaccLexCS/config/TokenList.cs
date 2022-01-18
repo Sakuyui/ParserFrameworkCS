@@ -20,9 +20,6 @@ namespace YaccLexCS.config
             $"meet operator {content.TokenText}".PrintToConsole();
         }
         
-        
-        
-        
         [TokenDefinition("EQ", "==")]
         public static void Eq(CompilerContext content)
         {

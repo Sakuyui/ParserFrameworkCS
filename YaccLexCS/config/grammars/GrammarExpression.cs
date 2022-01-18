@@ -3,9 +3,9 @@ using YaccLexCS.ycomplier.attribution;
 
 namespace YaccLexCS.config{
 	[GrammarConfiguration]
-	public static class GrammarExpress{
+	public static class GrammarExpression{
 
-		[GrammarDefinition("expression","terminal_expression assign_expression","additive_expression","multiplicative_expression","unary_expression","primary_expression")]
+		[GrammarDefinition("expression","terminal_expression","assign_expression","additive_expression","multiplicative_expression","unary_expression","primary_expression")]
 		public static void expression(CompilerContext context){
 
 		}
@@ -17,7 +17,7 @@ namespace YaccLexCS.config{
 		}
 
 
-		[GrammarDefinition("terminal_expression","ID DOUBLE_LITERAL STRING")]
+		[GrammarDefinition("terminal_expression","ID","DOUBLE_LITERAL","STRING")]
 		public static void terminal_expression(CompilerContext context){
 
 		}

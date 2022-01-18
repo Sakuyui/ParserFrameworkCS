@@ -111,7 +111,7 @@ namespace YaccLexCS.ycomplier
     public class Lr1Parser : Parser
     {
        
-        private readonly Stack<ASTNode> _codeStack = new();
+        private readonly Stack<ASTNode?> _codeStack = new();
         private readonly Stack<int> _stateStack = new();
         public Lr1Table? Lr1Table { get; private set; }
         private Dictionary<int, MethodInfo>? _methodMap = null;
@@ -173,7 +173,6 @@ namespace YaccLexCS.ycomplier
                     {
                         Context["parser_reduction"] = Definitions.Grammars[grammarID];
                         m.Invoke(null, new object[] {Context});
-                        
                     }
                     else
                     {
@@ -193,8 +192,10 @@ namespace YaccLexCS.ycomplier
                     nodeList.Add(node);
                     _stateStack.Pop();
                 }
-                
-                _codeStack.Push(new ASTNonTerminalNode(nodeList ,g.LeftSymbol));
+
+                nodeList.Reverse();
+                //通过反射寻找对应的AST节点
+                _codeStack.Push((ASTNode) Activator.CreateInstance(_typeMap[g.LeftSymbol], new[] {nodeList}));
 
                 var gotoNext = Lr1Table?.Goto[_stateStack.Peek()][_codeStack.Peek().NodeName];
                 do
@@ -243,8 +244,9 @@ namespace YaccLexCS.ycomplier
         {
             "".DebugOutPut();
             $"Grammar List = {Definitions.Grammars.GetMultiDimensionString()}\n".DebugOutPut();
+           
             Definitions.AddGrammar(new ProducerDefinitionItem("<S'>->"+Definitions.StartWord));
-      
+           
             Definitions.InitProduceMapping();
             "==========================================P SET===================================".DebugOutPut();
             if (Definitions.ProduceMappingList != null)
@@ -253,13 +255,13 @@ namespace YaccLexCS.ycomplier
                     ("[" + key + "] => " + value.Select(e => e.ToEnumerationString()).ToEnumerationString())
                         .DebugOutPut();
                 }
-
+           
 
             "==========================================FIRST SET===================================".DebugOutPut();
             
             
             
-            "============================================I(0)=======================================".PrintToConsole();
+            "============================================I(0)=======================================".DebugOutPut();
             var curPSet = new ProjectSet(new []{new Lr1Item("<S'>", 
                 new List<string>(new []{Definitions.StartWord}),
                 new List<string>(new []{"$"}))});
@@ -283,6 +285,7 @@ namespace YaccLexCS.ycomplier
                 .ToDictionary(k => k.i, v => v.e);
             
             var last = 0;
+            
             while (changed)
             {
                 changed = false;
@@ -291,6 +294,7 @@ namespace YaccLexCS.ycomplier
                 for (var i = last; i < count; i++)
                 {
                     var p = projects[i];
+                    //为第i个项目集(p)，向右移1
                     MoveProject(new KeyValuePair<int, ProjectSet>(i, p), projects, Lr1Table, products);
                 }
 
@@ -300,25 +304,25 @@ namespace YaccLexCS.ycomplier
                     last = count;
                 }
             }
-            //throw new Exception();
-            Lr1Table.Goto.DebugOutPut();
-            Lr1Table.Transition.DebugOutPut();
-            Lr1Table.OutputToFilesAsCsv("d:\\pl\\goto.csv", "d:\\pl\\trans.csv");
+            //
+            // Lr1Table.Goto.DebugOutPut();
+            // Lr1Table.Transition.DebugOutPut();
+            // Lr1Table.OutputToFilesAsCsv("d:\\pl\\goto.csv", "d:\\pl\\trans.csv");
             
             "=================================Init Finish, Goto and transition Table Generated===============================".PrintToConsole();
             "==============================Project sets===================".PrintToConsole();
             $"count = {projects.Count}".DebugOutPut();
 
-            if(File.Exists("d:\\pl\\projects.txt"))
-                File.Delete("d:\\pl\\projects.txt");
-            var f = File.Open("d:\\pl\\projects.txt", FileMode.OpenOrCreate);
-            projects.ElementInvoke((p, i) =>
-            {
-                var ps = p.GetProjectItemsDesc();
-                f.Write($"I({i}): {ps}".ToCharArray().Select(e => (byte)e).Append((byte)'\n').ToArray());
-            });
-            
-            f.Close();
+            // if(File.Exists("d:\\pl\\projects.txt"))
+            //     File.Delete("d:\\pl\\projects.txt");
+            // var f = File.Open("d:\\pl\\projects.txt", FileMode.OpenOrCreate);
+            // projects.ElementInvoke((p, i) =>
+            // {
+            //     var ps = p.GetProjectItemsDesc();
+            //     f.Write($"I({i}): {ps}".ToCharArray().Select(e => (byte)e).Append((byte)'\n').ToArray());
+            // });
+            //
+            // f.Close();
 
 
             "==============================Project sets Out to File===================".PrintToConsole();
@@ -343,10 +347,8 @@ namespace YaccLexCS.ycomplier
             var cSet = value.Where(e => !e.IsReductionItem())
                 .Select(e => e.ProduceItems[e.DotPos]).ToHashSet(null);
 
-            if (!cSet.Any())
-            {
-                return;
-            }
+            if (!cSet.Any()) return;
+            
 
             
            
@@ -407,7 +409,6 @@ namespace YaccLexCS.ycomplier
                 var newCode = result.Count;
                 if (!result.Contains(ps))
                 {
-                   
                     result.Add(ps);
                     table.AddRow();
                 }
@@ -440,7 +441,6 @@ namespace YaccLexCS.ycomplier
                         var forwardSearch = r.SearchWordList;
                         foreach (var f in forwardSearch)
                         {
-                            
                             //$"{f}".PrintToConsole();
                             var k = definitionItems.First(d =>
                             {

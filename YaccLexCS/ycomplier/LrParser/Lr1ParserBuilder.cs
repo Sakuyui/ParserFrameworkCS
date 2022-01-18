@@ -30,7 +30,9 @@ namespace YaccLexCS.ycomplier.LrParser
             void CheckDef()
             {
                 var except = symbolsAppearInCfg.Except(tokenNames).Except(cfgDefSet);
-                var startGrammar = gs.Select(g => g.tokenDef).FirstOrDefault(d => d is BeginningGrammarDefinition,null);
+                var startGrammar = gs.Select(g => g.tokenDef)
+                    .FirstOrDefault(d => d is BeginningGrammarDefinition);
+              
                 if (startGrammar == null)
                     throw new Exception("can find beginning word definition");
                 startWord = startGrammar.Name;

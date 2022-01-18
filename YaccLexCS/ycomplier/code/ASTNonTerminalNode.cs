@@ -3,14 +3,17 @@ using System.Linq;
 
 namespace YaccLexCS.ycomplier.code
 {
-    public class ASTNonTerminalNode : ASTNode
+    public abstract class ASTNonTerminalNode : ASTNode
     {
         protected List<ASTNode> _children;
-
+        
         public ASTNonTerminalNode(IEnumerable<ASTNode> child, string nodeName) : base(nodeName)
         {
             _children = child.ToList();
         }
+
+        public abstract override dynamic Eval(CompilerContext context);
+
         public override ASTNode? Child(int i)
         {
             return _children[i];
