@@ -4,6 +4,7 @@ using YaccLexCS.ycomplier.util;
 
 namespace YaccLexCS.ycomplier.LrParser
 {
+    [Serializable]
     public class Lr1Table
     {
         private DataFrame _goto;
@@ -39,6 +40,7 @@ namespace YaccLexCS.ycomplier.LrParser
             File.WriteAllText(gotoTablePath, this._goto.CsvText);
             File.WriteAllText(transitionTablePath, this._transition.CsvText);
         }
+        public Lr1Table() { }
         public Lr1Table(CfgProducerDefinition definition)
         {
             var terminations = definition.Terminations;

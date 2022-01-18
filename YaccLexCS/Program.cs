@@ -4,9 +4,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Timers;
+using System.Xml.Serialization;
 using YaccLexCS.ycomplier;
 using YaccLexCS.ycomplier.automata;
 using YaccLexCS.ycomplier.automata.re;
@@ -40,11 +43,15 @@ namespace YaccLexCS
             var tokenList = new List<Token>();
             
             //create parser
-            Lr1Parser parser = Lr1ParserBuilder.ConfigureFromPackages(lexer.TokenNames, new[] {"YaccLexCS.config"});
-            parser.InitParser().SetContext(context);
-            
-            
-            
+            /*Lr1Parser parser = Lr1ParserBuilder
+                .ConfigureFromPackages(lexer.TokenNames, new[] {"YaccLexCS.config"});*/
+
+            Lr1Parser parser = Lr1ParserBuilder
+                .DeSerializeFromFile("1.bin",lexer.TokenNames, new[] { "YaccLexCS.config" });
+            //parser.Serialize("1.bin");
+            parser.SetContext(context);
+
+
             //在流中词法分析。
             lexer.ParseInStream(r, token =>  //callback function
             {

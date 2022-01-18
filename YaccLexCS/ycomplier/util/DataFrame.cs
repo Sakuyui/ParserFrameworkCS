@@ -18,7 +18,7 @@ namespace YaccLexCS.ycomplier.util
     }
     
     
-    
+    [Serializable]
     public class DataFrame : IEnumerable<Serial>
     {
       

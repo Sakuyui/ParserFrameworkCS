@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace CIExam.Complier
 {
+    [Serializable]
     public class ProducerDefinitionItem
     {
         public readonly string LeftSymbol;

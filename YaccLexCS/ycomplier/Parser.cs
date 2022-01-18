@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
 using CIExam.Complier;
 using YaccLexCS.ycomplier.code;
 using YaccLexCS.ycomplier.LrParser;
@@ -10,9 +11,11 @@ using YaccLexCS.ycomplier.LrParser;
 namespace YaccLexCS.ycomplier
 {
     
+    [Serializable]
     public abstract class Parser
     {
-        protected CompilerContext? Context ;
+        [NonSerialized]
+        protected CompilerContext? Context;
         protected readonly CfgProducerDefinition Definitions;
 
         public Parser SetContext(CompilerContext context)
@@ -108,22 +111,33 @@ namespace YaccLexCS.ycomplier
 
 
 
+    [Serializable]
     public class Lr1Parser : Parser
     {
-       
-        private readonly Stack<ASTNode?> _codeStack = new();
+        [NonSerialized]
+        private Stack<ASTNode?> _codeStack = new();
         private readonly Stack<int> _stateStack = new();
         public Lr1Table? Lr1Table { get; private set; }
-        private Dictionary<int, MethodInfo>? _methodMap = null;
+
+        [NonSerialized]
+        private Dictionary<int, MethodInfo>? _methodMap = null; //serialization
+        [NonSerialized]
         private Dictionary<string, Type>? _typeMap = null;
         public Lr1Parser(CfgProducerDefinition definitions) : base(definitions)
         {
         }
+        public Lr1Parser() : base(null!) { }
 
         public Lr1Parser(CompilerContext context, CfgProducerDefinition definitions) : base(definitions, context)
         {
         }
 
+        public void Serialize(string path)
+        {
+            var xs = new BinaryFormatter();
+            FileStream fs = File.Open("1.bin", FileMode.OpenOrCreate);
+            xs.Serialize(fs, this);
+        }
         public override void Parse()
         {
             throw new System.NotImplementedException();
@@ -132,7 +146,6 @@ namespace YaccLexCS.ycomplier
         public Stack<ASTNode> GetCurrentStack() => _codeStack;
         public override void ParseFromCurrentState(Token token)
         {
-            
             if (Context == null)
                 throw new Exception(
                     "parser should have a Context, may use SetContext(new ParserContext()) to solve this problem.");
@@ -229,7 +242,7 @@ namespace YaccLexCS.ycomplier
 
             return;
         }
-
+        
         public void InitTypeMapping(Dictionary<string, Type> map)
         {
             _typeMap ??= new Dictionary<string, Type>();
@@ -326,10 +339,9 @@ namespace YaccLexCS.ycomplier
 
 
             "==============================Project sets Out to File===================".PrintToConsole();
-            
-            
-            _codeStack.Push(new ASTTerminalNode(new Token("$", "$")));
-            _stateStack.Push(0);
+
+
+            InitStatus();
 
             
             "============================== Can Begin Parse ===================".PrintToConsole();
@@ -338,6 +350,14 @@ namespace YaccLexCS.ycomplier
             return this;
         }
 
+        public void InitStatus()
+        {
+            _codeStack ??= new();
+            _codeStack.Clear();
+            _stateStack.Clear();
+            _codeStack.Push(new ASTTerminalNode(new Token("$", "$")));
+            _stateStack.Push(0);
+        }
         private void MoveProject(KeyValuePair<int, ProjectSet> projectSet, List<ProjectSet> result, Lr1Table table, 
             Dictionary<int, ProducerDefinitionItem> definitionItems)
         {

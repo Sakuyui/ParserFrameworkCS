@@ -7,6 +7,7 @@ using CIExam.Complier;
 
 namespace YaccLexCS.ycomplier.LrParser
 {
+    [Serializable]
     public class CfgProducerDefinition : IEnumerable<ProducerDefinitionItem>
     {
         public readonly string StartWord = "";

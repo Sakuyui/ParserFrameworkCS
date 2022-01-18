@@ -14,12 +14,30 @@ namespace YaccLexCS.config
         [TokenDefinition("MUL", "*")]
         [TokenDefinition("MOD", "%")]
         [TokenDefinition("DIV", "/")]
-        [TokenDefinition("LOGIC_OP", @"&&|\|\|", true)]
+       
         public static void Operator(CompilerContext content)
         {
             $"meet operator {content.TokenText}".PrintToConsole();
         }
+        [TokenDefinition("LOGICAL_OR", @"\|\|", true)]
+        [TokenDefinition("LOGICAL_AND", "&&")]
+        [TokenDefinition("NE", "!=")]
+        [TokenDefinition("LT", "<")]
+        [TokenDefinition("LE", "<=")]
+        [TokenDefinition("GT", ">")]
+        [TokenDefinition("GE", ">=")]
+
+        public static void Relation(CompilerContext content)
+        {
+
+        }
         
+        [TokenDefinition("COMMA", ",")]
+        public static void Romma(CompilerContext content)
+        {
+
+        }
+
         [TokenDefinition("EQ", "==")]
         public static void Eq(CompilerContext content)
         {
@@ -58,7 +76,14 @@ namespace YaccLexCS.config
         [TokenDefinition("WHILE", "while")]
         [TokenDefinition("IF", "if")]
         [TokenDefinition("ELSE", "else")]
+        [TokenDefinition("ELSIF", "elsif")]
         [TokenDefinition("FOR", "for")]
+        [TokenDefinition("FALSE","false")]
+        [TokenDefinition("TRUE", "true")]
+        [TokenDefinition("NULL", "null")]
+        [TokenDefinition("CONTINUE", "continue")]
+        [TokenDefinition("RETURN", "return")]
+        [TokenDefinition("BREAK", "break")]
         public static void KeyWord()
         {
             

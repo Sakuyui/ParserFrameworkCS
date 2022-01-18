@@ -5,9 +5,9 @@ using System.Linq;
 
 namespace YaccLexCS.ycomplier.util
 {
+    [Serializable]
     public class Serial : IEnumerable<object>
     {
-        
         public Dictionary<string, object> DataMap {get; private set; } = new Dictionary<string, object>();
         public List<string> ColumnNames => DataMap.Keys.ToList();
         public List<object> Values => DataMap.Values.ToList();
