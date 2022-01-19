@@ -4,52 +4,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using YaccLexCS.code.structure;
+using YaccLexCS.runtime;
+
 namespace YaccLexCS.ycomplier.code.structure
 {
-	public enum SpecialValue
-	{
-		BREAK,
-		CONTINUE,
-		NoMatch
-	}
-	public static class InterpreterHelper
+    public static class EvaluationConfiguration
     {
-		
-		public static dynamic BasicTypesValueExtract(ASTTerminalNode terminalNode, RuntimeContext context)
-        {
-            switch (terminalNode.Token.Type)
-            {
-				case "ID":
-					return context.GetCurrentCommonFrame().GetLocalVar(terminalNode.Token.SourceText);
-				case "STRING":
-					return terminalNode.Token.SourceText;
-				case "DOUBLE_LITERAL":
-					return double.Parse(terminalNode.Token.SourceText);
-				case "TRUE_T":
-					return 1;
-				case "FALSE_T":
-					return 0;
-				case "BREAK":
-					return SpecialValue.BREAK;
-				case "CONTINUE":
-					return SpecialValue.CONTINUE;
-			}
-			return null;
-        }
-	}
-		public static class EvaluationConfiguration
-		{
-				public static readonly Dictionary<string, MethodInfo> ClassNameMapping
+        public static readonly Dictionary<string, MethodInfo> ClassNameMapping
 						= new Lazy<Dictionary<string, MethodInfo>>(() =>
-						{
+		{
 								 var methods = typeof(EvaluationConfiguration).GetMethods();
 								 var result = methods
 								 .Where(m => m.IsStatic)
 								 .ToDictionary(kv => kv.Name, kv => kv);
 								return result;
-						}).Value;
+		}).Value;
 
-				public static dynamic CompileUnitNode(CompileUnitNode node, ycomplier.RuntimeContext context)
+		public static dynamic CompileUnitNode(CompileUnitNode node, RuntimeContext context)
 				{
 						/*definition_or_statement*/
 						if(node.Count() == 1 
@@ -69,8 +40,8 @@ namespace YaccLexCS.ycomplier.code.structure
 				}
 
 
-				public static dynamic DefinitionOrStatementNode(DefinitionOrStatementNode node, ycomplier.RuntimeContext context)
-				{
+		public static dynamic DefinitionOrStatementNode(DefinitionOrStatementNode node, RuntimeContext context)
+        {
 						//throw new NotImplementedException();
 						/*statement*/
 						if(node.Count() == 1 
@@ -82,7 +53,7 @@ namespace YaccLexCS.ycomplier.code.structure
 				}
 
 
-		public static dynamic StatementNode(StatementNode node, ycomplier.RuntimeContext context)
+		public static dynamic StatementNode(StatementNode node, RuntimeContext context)
 		{
 
 			/*if_statement*/
@@ -117,13 +88,16 @@ namespace YaccLexCS.ycomplier.code.structure
 			if (node.Count() == 1
 					 && node[0].GetType().IsAssignableFrom(typeof(BlockNode)))
 			{
-				return node[0].Eval(context);
+				InterpreterHelper.EntreNewBlock(context);
+				var val = node[0].Eval(context);
+				InterpreterHelper.LeaveBlock(context);
+				return val;
 			}
 			return null;
         }
 
 
-		public static dynamic WhileStatementNode(WhileStatementNode node, ycomplier.RuntimeContext context)
+		public static dynamic WhileStatementNode(WhileStatementNode node, RuntimeContext context)
         {
 						$"begin while!".PrintToConsole();
 			/*WHILE LP expression RP statement*/
@@ -153,7 +127,7 @@ namespace YaccLexCS.ycomplier.code.structure
 		}
 
 
-		public static dynamic IfStatementNode(IfStatementNode node, ycomplier.RuntimeContext context)
+		public static dynamic IfStatementNode(IfStatementNode node, RuntimeContext context)
 		{
 			"enter if stat".PrintToConsole();
 			/*IF LP expression RP statement*/
@@ -262,7 +236,7 @@ namespace YaccLexCS.ycomplier.code.structure
 			}
 			return null;
 		}
-		public static dynamic StatementListNode(StatementListNode node, ycomplier.RuntimeContext context)
+		public static dynamic StatementListNode(StatementListNode node, RuntimeContext context)
 		{
 
             /*statement*/
@@ -284,7 +258,7 @@ namespace YaccLexCS.ycomplier.code.structure
 		}
 
 
-				public static dynamic ExpressionNode(ExpressionNode node, ycomplier.RuntimeContext context)
+				public static dynamic ExpressionNode(ExpressionNode node, RuntimeContext context)
 				{
 			/*relational_expression*/
 			if (node.Count() == 1
@@ -355,7 +329,7 @@ namespace YaccLexCS.ycomplier.code.structure
 				}
 
 
-				public static dynamic AssignExpressionNode(AssignExpressionNode node, ycomplier.RuntimeContext context)
+				public static dynamic AssignExpressionNode(AssignExpressionNode node, RuntimeContext context)
 				{
 						/*ID ASSIGN expression*/
 						if(node.Count() == 3 
@@ -367,7 +341,7 @@ namespace YaccLexCS.ycomplier.code.structure
 							var exp = node[2];
 							var val = exp.Eval(context); //right side
 														 //put variable to memory
-				context.GetCurrentCommonFrame().SetLocalVar(id, val);
+				context.GetCurrentCommonFrame().FindAndSetVar(id, val);
 							$"set {id} = {val}".PrintToConsole();
 							return val;
 						}
@@ -375,7 +349,7 @@ namespace YaccLexCS.ycomplier.code.structure
 				}
 
 
-				public static dynamic TerminalExpressionNode(TerminalExpressionNode node, ycomplier.RuntimeContext context)
+				public static dynamic TerminalExpressionNode(TerminalExpressionNode node, RuntimeContext context)
 				{
 						/*ID*/
 						if(node.Count() == 1 
@@ -399,7 +373,7 @@ namespace YaccLexCS.ycomplier.code.structure
 				}
 
 
-				public static dynamic AdditiveExpressionNode(AdditiveExpressionNode node, ycomplier.RuntimeContext context)
+				public static dynamic AdditiveExpressionNode(AdditiveExpressionNode node, RuntimeContext context)
 				{
 						
 						/*additive_expression ADD multiplicative_expression*/
@@ -422,7 +396,7 @@ namespace YaccLexCS.ycomplier.code.structure
 				}
 
 
-				public static dynamic MultiplicativeExpressionNode(MultiplicativeExpressionNode node, ycomplier.RuntimeContext context)
+				public static dynamic MultiplicativeExpressionNode(MultiplicativeExpressionNode node, RuntimeContext context)
 				{
 						
 						/*unary_expression*/
@@ -465,7 +439,7 @@ namespace YaccLexCS.ycomplier.code.structure
         }
 
 
-		public static dynamic UnaryExpressionNode(UnaryExpressionNode node, ycomplier.RuntimeContext context)
+		public static dynamic UnaryExpressionNode(UnaryExpressionNode node, RuntimeContext context)
 		{
 
             /*primary_expression*/
@@ -485,7 +459,7 @@ namespace YaccLexCS.ycomplier.code.structure
 		}
 
 
-		public static dynamic PrimaryExpressionNode(PrimaryExpressionNode node, ycomplier.RuntimeContext context)
+		public static dynamic PrimaryExpressionNode(PrimaryExpressionNode node, RuntimeContext context)
 		{
 			/*LP expression RP*/
 			if (node.Count() == 3
@@ -507,7 +481,7 @@ namespace YaccLexCS.ycomplier.code.structure
 		}
 
 
-		public static dynamic BlockNode(BlockNode node, ycomplier.RuntimeContext context)
+		public static dynamic BlockNode(BlockNode node, RuntimeContext context)
 		{
 			/*LC statement_list RC*/
 			if(node.Count() == 3 
@@ -529,7 +503,7 @@ namespace YaccLexCS.ycomplier.code.structure
         }
 
 
-		public static dynamic LogicalAndExpressionNode(LogicalAndExpressionNode node, ycomplier.RuntimeContext context)
+		public static dynamic LogicalAndExpressionNode(LogicalAndExpressionNode node, RuntimeContext context)
 		{
 			/*equality_expression*/
 			if (node.Count() == 1
@@ -549,7 +523,7 @@ namespace YaccLexCS.ycomplier.code.structure
 		}
 
 
-		public static dynamic LogicalOrExpressionNode(LogicalOrExpressionNode node, ycomplier.RuntimeContext context)
+		public static dynamic LogicalOrExpressionNode(LogicalOrExpressionNode node, RuntimeContext context)
 		{
 			/*logical_and_expression*/
 			if (node.Count() == 1
@@ -569,7 +543,7 @@ namespace YaccLexCS.ycomplier.code.structure
 		}
 
 
-		public static dynamic RelationalExpressionNode(RelationalExpressionNode node, ycomplier.RuntimeContext context)
+		public static dynamic RelationalExpressionNode(RelationalExpressionNode node, RuntimeContext context)
 		{
 
 			/*additive_expression*/
@@ -607,7 +581,7 @@ namespace YaccLexCS.ycomplier.code.structure
 		}
 
 
-		public static dynamic EqualityExpressionNode(EqualityExpressionNode node, ycomplier.RuntimeContext context)
+		public static dynamic EqualityExpressionNode(EqualityExpressionNode node, RuntimeContext context)
 		{
 			/*relational_expression*/
 			if (node.Count() == 1

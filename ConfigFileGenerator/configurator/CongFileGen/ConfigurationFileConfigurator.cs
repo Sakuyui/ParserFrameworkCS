@@ -11,6 +11,14 @@ namespace ConfigFileGenerator.configurator.CongFileGen
         private readonly List<TokenMethod> _ts;
         private readonly List<GrammarFileStrut> _gs;
 
+
+        public string GenEvaluationHelperFile(string outPath = null)
+        {
+            var res = EvaluationListFileGen.GenFileContentString(ConfigurationFileConfigurator.GetCFGList(_ts, _gs));
+            if(outPath != null)
+                File.WriteAllText(outPath + "EvaluationConfiguration.cs", res);
+            return res;
+        }
         public ConfigurationFileConfigurator(string filePath)
         {
             _configFileParser = new ConfigFileParser(filePath);
@@ -19,10 +27,19 @@ namespace ConfigFileGenerator.configurator.CongFileGen
             _gs = _configFileParser.ParseTokensGrammar();
         }
 
-        public string GenTokenConfigFile()
+        public string GenTokenConfigFile(string outPath = null)
         {
-            return TokensConfigFileGen.GenFileContentString(_configFileParser.ParseTokensConfig());
+            var tc = TokensConfigFileGen.GenFileContentString(_ts);
+            if (outPath != null)
+            {
+                if(!Directory.Exists(outPath)) Directory.CreateDirectory(outPath);
+                if(File.Exists(outPath + "TokenList.cs"))
+                    File.Delete(outPath + "TokenList.cs");
+                File.WriteAllText(outPath + "TokenList.cs", tc);
+            }
+            return tc;
         }
+        
         public Dictionary<string, string> GenASTFiles(string outPath)
         {
             var res =  GenAstNodes(_ts, _gs);
@@ -46,10 +63,21 @@ namespace ConfigFileGenerator.configurator.CongFileGen
             }
             return res;
         }
-        public Dictionary<string, string> GenGrammarConfigFiles()
+        public Dictionary<string, string> GenGrammarConfigFiles(string outPath = null)
         {
-            var gs = _configFileParser.ParseTokensGrammar();
-            return gs.ToDictionary(k => k.FileName, GrammarConfigFileGen.GenFileContentString);
+            var dict = _gs.ToDictionary(k => k.FileName, GrammarConfigFileGen.GenFileContentString);
+            foreach(var f in dict)
+            {
+                if (outPath != null)
+                {
+                    if (!Directory.Exists(outPath)) Directory.CreateDirectory(outPath);
+                    if (File.Exists(outPath))
+                        File.Delete(outPath);
+                    File.WriteAllText(outPath + "\\" + f.Key + ".cs" , f.Value);
+                }
+            }
+            
+            return dict;
         }
         public string GenGrammarConfigFile()
         {

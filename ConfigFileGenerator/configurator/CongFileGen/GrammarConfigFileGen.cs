@@ -11,13 +11,14 @@ namespace ConfigFileGenerator.configurator.CongFileGen
             "using System;",
             "using System.Collections.Generic;",
             "using YaccLexCS.ycomplier;",
+            "using YaccLexCS.runtime;",
             "using YaccLexCS.ycomplier.attribution;"
         };
 
         public static string NameSpace = "YaccLexCS.config";
         
-        const string T6 = "\t\t\t\t\t\t";
-        const string T4 = "\t\t\t\t";
+        const string T6 = "            ";
+        const string T4 = "        ";
         const string LE = "\r\n";
 
         private static string MethodGen(GrammarFileStrut.GrammarMethodDesc method)
@@ -50,11 +51,11 @@ namespace ConfigFileGenerator.configurator.CongFileGen
             sb.Append(Header.Aggregate("", (a, b) => a + "\r\n" + b));
             sb.Append("\r\n");
             sb.Append("namespace " + NameSpace + "\r\n{\r\n");
-            sb.Append("\t\t[GrammarConfiguration]\r\n");
-            sb.Append("\t\tpublic static class " + className + "\r\n\t\t{\r\n");
+            sb.Append("    [GrammarConfiguration]\r\n");
+            sb.Append("    public static class " + className + "\r\n    {\r\n");
             foreach (var m in fileStrut.Descs) 
                 sb.Append("\r\n" + MethodGen(m) + "\r\n");
-            sb.Append("\t\t}\r\n");
+            sb.Append("    }\r\n");
             sb.Append('}');
             sb.PrintToConsole();
             

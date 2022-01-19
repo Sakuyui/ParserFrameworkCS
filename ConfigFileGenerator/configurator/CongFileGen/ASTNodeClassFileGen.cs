@@ -13,12 +13,13 @@ namespace ConfigFileGenerator.configurator.CongFileGen
             "using YaccLexCS.ycomplier.attribution;",
             "using YaccLexCS.ycomplier.code;",
             "using YaccLexCS.ycomplier.code.structure;"
+            ,"using YaccLexCS.runtime;"
         };
 
         public static string NameSpace = "YaccLexCS.code.structure";
         public static string EvaluationConfigurationHelperClassName = "EvaluationConfiguration";
-        const string T6 = "\t\t\t\t\t\t";
-        const string T4 = "\t\t\t\t";
+        const string T6 = "            ";
+        const string T4 = "        ";
         const string LE = "\r\n";
          public static string GenASTNode(string nodeName, List<string> generateList)
          {
@@ -29,8 +30,8 @@ namespace ConfigFileGenerator.configurator.CongFileGen
              sb.Append(Header.Aggregate("", (a, b) => a + "\r\n" + b));
              sb.Append("\r\n");
              sb.Append("namespace " + NameSpace + "\r\n{\r\n");
-             sb.Append("\t\t[GrammarConfiguration]\r\n");
-             sb.Append("\t\tpublic class " + className + " : ASTNonTerminalNode\r\n\t\t{\r\n");
+             sb.Append("    [GrammarConfiguration]\r\n");
+             sb.Append("    public class " + className + " : ASTNonTerminalNode\r\n    {\r\n");
              
              sb.Append($"{T4}public override dynamic Eval(RuntimeContext context)\r\n{T4}" + "{\r\n" +
              $"{T6}return {EvaluationConfigurationHelperClassName}.ClassNameMapping[GetType().Name]" +
@@ -41,7 +42,7 @@ namespace ConfigFileGenerator.configurator.CongFileGen
              
              // foreach (var m in fileStrut.Descs) 
              //     sb.Append("\r\n" + MethodGen(m) + "\r\n");
-             sb.Append("\t\t}\r\n");
+             sb.Append("    }\r\n");
              sb.Append('}');
              sb.PrintToConsole();
             

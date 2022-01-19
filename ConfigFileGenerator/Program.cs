@@ -22,21 +22,21 @@ public class Program
     
     public static void Main(string[] args)
     {
-        var configParser = new ConfigFileParser("d:\\d.txt").Init();
+        //var configParser = new ConfigFileParser("d:\\d.txt").Init();
         var gfc = new ConfigurationFileConfigurator("d:\\d.txt");
-        gfc.GenTokenConfigFile();
-        var gc = gfc.GenGrammarConfigFiles();
-        var ts = configParser.ParseTokensConfig();
-        var gs = configParser.ParseTokensGrammar();
-        
         var outPath = "D:\\pl\\out\\";
-        
-        //var nodes = ConfigurationFileConfigurator.GenAstNodes(ts, gs);
+
+        gfc.GenTokenConfigFile(outPath);
+        gfc.GenGrammarConfigFiles(outPath + "grammars\\");
+        gfc.GenASTFiles(outPath);
+        gfc.GenEvaluationHelperFile(outPath + "structure\\");
+
+        /*//var nodes = ConfigurationFileConfigurator.GenAstNodes(ts, gs);
         var eval = EvaluationListFileGen.GenFileContentString(ConfigurationFileConfigurator.GetCFGList(ts, gs));
-        var res = ConfigurationFileConfigurator.GenAstNodes(ts, gs);
+        var res = ConfigurationFileConfigurator.GenAstNodes(ts, gs);*/
         
        
-
+/*
         foreach (var r in res)
         {
             var p = r.Key.Split("::");
@@ -63,6 +63,6 @@ public class Program
         {
             GrammarConfigFileGen.GenFileContentString(g);
             break;
-        }
+        }*/
     }
 }

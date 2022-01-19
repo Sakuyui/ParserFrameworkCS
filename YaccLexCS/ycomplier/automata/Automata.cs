@@ -206,7 +206,7 @@ namespace YaccLexCS.ycomplier.automata
             foreach(var node in Nodes)
             {
                 str += $"*** Node ID = {node.NodeId}:\n";
-                str = NodeNext[node.NodeId].Aggregate(str, (current, e) => current + $"\t* Edge_{i++}: {e}\n");
+                str = NodeNext[node.NodeId].Aggregate(str, (current, e) => current + $"  * Edge_{i++}: {e}\n");
                 
                 str += "\n";
             }

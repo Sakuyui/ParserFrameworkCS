@@ -7,7 +7,7 @@ namespace YaccLexCS.config{
 	public static class GrammarBlock{
 
 		[GrammarDefinition("block","LC statement_list RC","LC RC")]
-		public static void block(RuntimeContext context)
+		public static void block(CompilerContext context)
 		{
 		}
 

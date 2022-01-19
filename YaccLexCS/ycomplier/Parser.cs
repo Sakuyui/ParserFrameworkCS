@@ -15,10 +15,10 @@ namespace YaccLexCS.ycomplier
     public abstract class Parser
     {
         [NonSerialized]
-        protected RuntimeContext? Context;
+        protected CompilerContext? Context;
         protected readonly CfgProducerDefinition Definitions;
 
-        public Parser SetContext(RuntimeContext context)
+        public Parser SetContext(CompilerContext context)
         {
             Context = context;
             return this;
@@ -29,7 +29,7 @@ namespace YaccLexCS.ycomplier
             
             Definitions = definitions;
         }
-        protected Parser(CfgProducerDefinition definitions, RuntimeContext context)
+        protected Parser(CfgProducerDefinition definitions, CompilerContext context)
         {
             Definitions = definitions;
             Context = context;
@@ -128,7 +128,7 @@ namespace YaccLexCS.ycomplier
         }
         public Lr1Parser() : base(null!) { }
 
-        public Lr1Parser(RuntimeContext context, CfgProducerDefinition definitions) : base(definitions, context)
+        public Lr1Parser(CompilerContext context, CfgProducerDefinition definitions) : base(definitions, context)
         {
         }
 

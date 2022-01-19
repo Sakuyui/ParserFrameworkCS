@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using YaccLexCS.runtime;
 
 namespace YaccLexCS.ycomplier.code
 {

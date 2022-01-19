@@ -14,15 +14,16 @@ namespace ConfigFileGenerator.configurator
             "using System.Collections.Generic;",
             "using System.Linq;",
             "using System.Reflection;",
-            "using YaccLexCS.code.structure;"
+            "using YaccLexCS.code.structure;",
+            "using YaccLexCS.runtime;"
         };
 
         public static string NameSpace = "YaccLexCS.ycomplier.code.structure";
         public static string ClassName = "EvaluationConfiguration";
-        const string T6 = "\t\t\t\t\t\t";
-        const string T4 = "\t\t\t\t";
-        const string T2 = "\t\t";
-        const string T8 = "\t\t\t\t\t\t\t\t";
+        const string T6 = "            ";
+        const string T4 = "        ";
+        const string T2 = "    ";
+        const string T8 = "                ";
         const string LE = "\r\n";
         private const string LB4 = $"{T4}" + "{";
         private const string RB4 = $"{T4}" + "}";
@@ -99,13 +100,13 @@ namespace ConfigFileGenerator.configurator
             sb.Append(Header.Aggregate("", (a, b) => a + "\r\n" + b));
             sb.Append("\r\n");
             sb.Append("namespace " + NameSpace + "\r\n{\r\n");
-            //sb.Append("\t\t[TokenConfiguration]\r\n");
-            sb.Append("\t\tpublic static class " + ClassName + "\r\n\t\t{\r\n");
+            //sb.Append("    [TokenConfiguration]\r\n");
+            sb.Append("    public static class " + ClassName + "\r\n    {\r\n");
          
             sb.Append(LazyMappingCode);
             foreach (var m in memo) 
                 sb.Append("\r\n" + MethodGen(m, nonTerminals) + "\r\n");
-            sb.Append("\t\t}\r\n");
+            sb.Append("    }\r\n");
             sb.Append('}');
             sb.PrintToConsole();
             return sb + "";

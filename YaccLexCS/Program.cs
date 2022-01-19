@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Timers;
 using System.Xml.Serialization;
+using YaccLexCS.runtime;
 using YaccLexCS.ycomplier;
 using YaccLexCS.ycomplier.automata;
 using YaccLexCS.ycomplier.automata.re;
@@ -29,13 +30,11 @@ namespace YaccLexCS
         public static void Main()
         {
 
-
-            //YCompilerConfigurator.GenerateGrammarDefinitionFileFrom("d:\\d.txt", "c:\\out");
-
-            var context = new RuntimeContext();
+            var compilerContext = new CompilerContext();
+            var runtimeContext = new RuntimeContext();
 
             //在指定命名空间扫描配置
-            var lexer = Lexer.ConfigureFromPackages(new[] { "YaccLexCS.config" }, context);
+            var lexer = Lexer.ConfigureFromPackages(new[] { "YaccLexCS.config" }, compilerContext);
 
             //create input stream
             var r = (TextReader)new StringReader("" +
@@ -67,7 +66,7 @@ namespace YaccLexCS
 
             Lr1Parser parser = Lr1ParserBuilder
                 .DeSerializeFromFile("1.bin", lexer.TokenNames, new[] { "YaccLexCS.config" });
-            parser.SetContext(context);
+            parser.SetContext(compilerContext);
 
             /*
              问题：生成器。对于非终结字符，要多一个类型判断
@@ -89,7 +88,7 @@ namespace YaccLexCS
             var root = parser.GetCurrentStack().Peek();
             root.GetTreeShapeDescribe().PrintToConsole();
             
-            root.Eval(context);
+            root.Eval(runtimeContext);
             
 
             
