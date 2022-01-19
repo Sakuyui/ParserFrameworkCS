@@ -84,6 +84,8 @@ namespace YaccLexCS.config
         [TokenDefinition("CONTINUE", "continue")]
         [TokenDefinition("RETURN", "return")]
         [TokenDefinition("BREAK", "break")]
+        [TokenDefinition("LET", "let")]
+        [TokenDefinition("VAR", "var")]
         public static void KeyWord()
         {
             

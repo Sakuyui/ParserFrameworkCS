@@ -28,5 +28,10 @@ namespace YaccLexCS.config{
 
 		}
 
+		[GrammarDefinition("for_statement", "FOR LP expression SEMICOLON expression SEMICOLON expression RP block")]
+		public static void for_statement(RuntimeContext context)
+		{
+
+		}
 	}
 }

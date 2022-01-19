@@ -28,21 +28,25 @@ namespace YaccLexCS
     {
         public static void Main()
         {
-            
-            
+
+
             //YCompilerConfigurator.GenerateGrammarDefinitionFileFrom("d:\\d.txt", "c:\\out");
-           
+
             var context = new RuntimeContext();
-            
+
             //在指定命名空间扫描配置
-            var lexer = Lexer.ConfigureFromPackages(new []{"YaccLexCS.config"}, context);
-          
+            var lexer = Lexer.ConfigureFromPackages(new[] { "YaccLexCS.config" }, context);
+
             //create input stream
-            var r = (TextReader) new StringReader("" +
-                "sum = 0;" +
-                "i = 0;" +
+            var r = (TextReader)new StringReader("" +
+                "let sum = 0;" +
+                "let i = 0;" +
                 "while(i <= 10){" +
                 "   i = i + 1;" +
+                "   if(i==7){" +
+                "   " +
+                "       break;" +
+                "   }" +
                 "   sum = sum + i;" +
                 "   continue;" +
                 "   break;" +
@@ -51,12 +55,13 @@ namespace YaccLexCS
             var tokenList = new List<Token>();
 
             //create parser
-            /*Lr1Parser parser = Lr1ParserBuilder.ConfigureFromPackages(lexer.TokenNames, new[] { "YaccLexCS.config" });
+            Lr1Parser parser = Lr1ParserBuilder.ConfigureFromPackages(lexer.TokenNames, new[] { "YaccLexCS.config" });
             parser.InitParser().SetContext(context);
-            parser.Serialize("1.bin");*/
-            Lr1Parser parser = Lr1ParserBuilder
+            if (File.Exists("1.bin")) File.Delete("1.bin");
+            parser.Serialize("1.bin");
+           /* Lr1Parser parser = Lr1ParserBuilder
                 .DeSerializeFromFile("1.bin", lexer.TokenNames, new[] { "YaccLexCS.config" });
-            parser.SetContext(context);
+            parser.SetContext(context);*/
 
             /*
              问题：生成器。对于非终结字符，要多一个类型判断
@@ -68,8 +73,10 @@ namespace YaccLexCS
             {
                 if (token.Type == "Skip") return;
                 tokenList.Add(token);
-                parser.ParseFromCurrentState(token);
+               // parser.ParseFromCurrentState(token);
             });
+            tokenList.PrintEnumerationToConsole();
+            return;
             tokenList.PrintEnumerationToConsole();
             
             parser.ParseFromCurrentState(new Token("$", "$"));

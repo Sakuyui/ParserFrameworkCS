@@ -19,7 +19,7 @@ namespace YaccLexCS.ycomplier.code.structure
             switch (terminalNode.Token.Type)
             {
 				case "ID":
-					return context[terminalNode.Token.SourceText];
+					return context.GetCurrentCommonFrame().GetLocalVar(terminalNode.Token.SourceText);
 				case "STRING":
 					return terminalNode.Token.SourceText;
 				case "DOUBLE_LITERAL":
@@ -88,7 +88,7 @@ namespace YaccLexCS.ycomplier.code.structure
 						if(node.Count() == 1 
 								 && node[0].GetType().IsAssignableFrom(typeof(IfStatementNode)))
 						{
-								return null;
+				return node[0].Eval(context);
 						}
 						/*while_statement*/
 						if(node.Count() == 1 
@@ -141,7 +141,7 @@ namespace YaccLexCS.ycomplier.code.structure
 
 				public static dynamic IfStatementNode(IfStatementNode node, ycomplier.RuntimeContext context)
 				{
-						throw new NotImplementedException();
+			"enter if stat".PrintToConsole();
 						/*IF LP expression RP block*/
 						if(node.Count() == 5 
 								 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
@@ -149,10 +149,15 @@ namespace YaccLexCS.ycomplier.code.structure
 								 && node[2].GetType().IsAssignableFrom(typeof(ExpressionNode))
 								 && node[3].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 								 && node[4].GetType().IsAssignableFrom(typeof(BlockNode)))
-						{
-								return null;
-						}
-				}
+            {
+				var cond = node[2].Eval(context);
+				if (cond == 0)
+					return null;
+				"if is true".PrintToConsole();
+				return node[4].Eval(context);
+            }
+			return null;
+		}
 
 
 				public static dynamic StatementListNode(StatementListNode node, ycomplier.RuntimeContext context)
@@ -206,9 +211,9 @@ namespace YaccLexCS.ycomplier.code.structure
 			/*terminal_expression*/
 			if (node.Count() == 1 
 								 && node[0].GetType().IsAssignableFrom(typeof(TerminalExpressionNode)))
-						{
+			{
 				return node[0].Eval(context);
-						}
+			}
 						/*assign_expression*/
 						if(node.Count() == 1 
 								 && node[0].GetType().IsAssignableFrom(typeof(AssignExpressionNode)))
@@ -233,12 +238,17 @@ namespace YaccLexCS.ycomplier.code.structure
 						{
 				return node[0].Eval(context);
 						}
-						/*primary_expression*/
-						if(node.Count() == 1 
-								 && node[0].GetType().IsAssignableFrom(typeof(PrimaryExpressionNode)))
-						{
+            /*primary_expression*/
+            if (node.Count() == 1
+                     && node[0].GetType().IsAssignableFrom(typeof(PrimaryExpressionNode)))
+            {
 							return node[0].Eval(context);
-						}
+            }
+			/*define_var_expression*/
+			if(node.Count() == 1 && node[0].GetType().IsAssignableFrom(typeof(DefineVarExpressionNode)))
+            {
+				return node[0].Eval(context);
+            }
 			return null;
 				}
 
@@ -255,7 +265,7 @@ namespace YaccLexCS.ycomplier.code.structure
 							var exp = node[2];
 							var val = exp.Eval(context); //right side
 														 //put variable to memory
-							context[id] = val;
+				context.GetCurrentCommonFrame().SetLocalVar(id, val);
 							$"set {id} = {val}".PrintToConsole();
 							return val;
 						}
@@ -328,49 +338,49 @@ namespace YaccLexCS.ycomplier.code.structure
 				var exp1 = node[0].Eval(context);
 				var exp2 = node[2].Eval(context);
 				return exp1 * exp2;
-						}
-						/*multiplicative_expression DIV unary_expression*/
-						if(node.Count() == 3 
-								 && node[0].GetType().IsAssignableFrom(typeof(MultiplicativeExpressionNode))
+            }
+            /*multiplicative_expression DIV unary_expression*/
+            if (node.Count() == 3
+                     && node[0].GetType().IsAssignableFrom(typeof(MultiplicativeExpressionNode))
 								 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 								 && node[2].GetType().IsAssignableFrom(typeof(UnaryExpressionNode)))
-						{
+			{
 				var exp1 = node[0].Eval(context);
 				var exp2 = node[2].Eval(context);
 				return exp1 / exp2;
 			}
-						/*multiplicative_expression MOD unary_expression*/
-						if(node.Count() == 3 
-								 && node[0].GetType().IsAssignableFrom(typeof(MultiplicativeExpressionNode))
+            /*multiplicative_expression MOD unary_expression*/
+            if (node.Count() == 3
+                     && node[0].GetType().IsAssignableFrom(typeof(MultiplicativeExpressionNode))
 								 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 								 && node[2].GetType().IsAssignableFrom(typeof(UnaryExpressionNode)))
-						{
+            {
 				var exp1 = node[0].Eval(context);
 				var exp2 = node[2].Eval(context);
 				return exp1 % exp2;
 			}
 			return null;
-				}
+        }
 
 
-				public static dynamic UnaryExpressionNode(UnaryExpressionNode node, ycomplier.RuntimeContext context)
-				{
-						
-						/*primary_expression*/
-						if(node.Count() == 1 
-								 && node[0].GetType().IsAssignableFrom(typeof(PrimaryExpressionNode)))
-						{
+		public static dynamic UnaryExpressionNode(UnaryExpressionNode node, ycomplier.RuntimeContext context)
+		{
+
+            /*primary_expression*/
+            if (node.Count() == 1
+                     && node[0].GetType().IsAssignableFrom(typeof(PrimaryExpressionNode)))
+            {
 								return node[0].Eval(context);
-						}
-						/*SUB unary_expression*/
-						if(node.Count() == 2 
-								 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+            }
+			/*SUB unary_expression*/
+			if (node.Count() == 2
+					 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 								 && node[1].GetType().IsAssignableFrom(typeof(UnaryExpressionNode)))
-						{
+			{
 								return -node[1].Eval(context);
-						}
+			}
 			return null;
-				}
+		}
 
 
 		public static dynamic PrimaryExpressionNode(PrimaryExpressionNode node, ycomplier.RuntimeContext context)
@@ -395,26 +405,26 @@ namespace YaccLexCS.ycomplier.code.structure
 		}
 
 
-				public static dynamic BlockNode(BlockNode node, ycomplier.RuntimeContext context)
-				{	
-						/*LC statement_list RC*/
-						if(node.Count() == 3 
+		public static dynamic BlockNode(BlockNode node, ycomplier.RuntimeContext context)
+		{
+			/*LC statement_list RC*/
+			if(node.Count() == 3 
 								 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 								 && node[1].GetType().IsAssignableFrom(typeof(StatementListNode))
 								 && node[2].GetType().IsAssignableFrom(typeof(ASTTerminalNode)))
-						{
+			{
 				var bVal = node[1].Eval(context); ;
 				return bVal;
-						}
-						/*LC RC*/
-						if(node.Count() == 2 
-								 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+            }
+            /*LC RC*/
+            if (node.Count() == 2
+                     && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 								 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode)))
-						{
+            {
 								return null;
-						}
+            }
 			return null;
-				}
+        }
 
 
 		public static dynamic LogicalAndExpressionNode(LogicalAndExpressionNode node, ycomplier.RuntimeContext context)
@@ -516,12 +526,34 @@ namespace YaccLexCS.ycomplier.code.structure
 					 && node[0].GetType().IsAssignableFrom(typeof(EqualityExpressionNode))
 					 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 					 && node[2].GetType().IsAssignableFrom(typeof(RelationalExpressionNode)))
-			{
+            {
 				return (node[0].Eval(context) != node[2].Eval(context)) ? 1 : 0;
 			}
 			return null;
 		}
 
+		public static dynamic DefineVarExpressionNode(DefineVarExpressionNode node, RuntimeContext context)
+		{
+			
+			/*LET ID ASSIGN expression*/
+			/*VAR ID ASSIGN expression*/
+			if (node.Count() == 4
+					 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[2].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[3].GetType().IsAssignableFrom(typeof(ExpressionNode)))
+			{
+				//still need to complete
+				
+				var id = (node[1] as ASTTerminalNode).Token.SourceText;
+				var expVal = node[3].Eval(context);
+				$"create {id} = {expVal}".PrintToConsole();
+				context.GetCurrentCommonFrame().SetLocalVar(id, expVal);
+				return expVal;
+			}
+			return null;
+			
+		}
 
 	}
 }

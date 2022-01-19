@@ -32,7 +32,7 @@ namespace ConfigFileGenerator.configurator.CongFileGen
              sb.Append("\t\t[GrammarConfiguration]\r\n");
              sb.Append("\t\tpublic class " + className + " : ASTNonTerminalNode\r\n\t\t{\r\n");
              
-             sb.Append($"{T4}public override dynamic Eval(CompilerContext context)\r\n{T4}" + "{\r\n" +
+             sb.Append($"{T4}public override dynamic Eval(RuntimeContext context)\r\n{T4}" + "{\r\n" +
              $"{T6}return {EvaluationConfigurationHelperClassName}.ClassNameMapping[GetType().Name]" +
                  ".Invoke(null, new object[]{this, context});\r\n"  
                  + T4 + "}\r\n");

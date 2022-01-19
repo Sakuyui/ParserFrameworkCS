@@ -49,7 +49,8 @@ namespace ConfigFileGenerator.configurator
             {
                
                 var sb2 = new StringBuilder();
-                var typeMatchString = typeNames.Select((t, i) => $"node[{i}].GetType().IsAssignableFrom(typeof({t + "Node"}))");
+                var typeMatchString = typeNames.Select((t, i) => $"node[{i}].GetType().IsAssignableFrom(typeof("+
+                t == "ASTTerminalNode" ? t : t + "Node" + "))");
                 sb2.Append($"{T6}if(node.Count() == {count} "
                            + typeMatchString.Aggregate("", (a, b) => a + "\r\n"+ T8 + " && " + b)
                );
@@ -70,7 +71,7 @@ namespace ConfigFileGenerator.configurator
             var nodeName = FormalizeName(method.Key) + "Node";
             
             void AddMethodLine(string funcName) => 
-                sb.Append($"{T4}public static dynamic {funcName}({funcName} node, CompilerContext context)\r\n");
+                sb.Append($"{T4}public static dynamic {funcName}({funcName} node, RuntimeContext context)\r\n");
 
             AddMethodLine(nodeName);
             sb.Append(LB4 + LE);

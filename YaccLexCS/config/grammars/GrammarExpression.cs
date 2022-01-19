@@ -8,19 +8,26 @@ namespace YaccLexCS.config{
 		[GrammarDefinition("expression",
 			"terminal_expression","assign_expression","additive_expression","multiplicative_expression",
 			"unary_expression","primary_expression",
-			"relational_expression", "equality_expression","logical_or_expression", "logical_and_expression")]
+			"relational_expression", "equality_expression","logical_or_expression", "logical_and_expression",
+			"define_var_expression"
+			)]
 		public static void expression(RuntimeContext context){
 
 		}
 
-		[GrammarDefinition("logical_and_expression", "equality_expression",
-			"logical_and_expression LOGICAL_AND equality_expression")]
-		public static void logical_and_expression(RuntimeContext context)
+		[GrammarDefinition("define_var_expression", "LET ID ASSIGN expression", "VAR ID ASSIGN expression")]
+		public static void define_var_expression(RuntimeContext context)
 		{
 		}
+
+		[GrammarDefinition("logical_and_expression", "equality_expression",
+			"logical_and_expression LOGICAL_AND equality_expression")]
+		public static void logical_and_expression(RuntimeContext context) { }
+
 		[GrammarDefinition("logical_or_expression", "logical_and_expression", 
 			"logical_or_expression LOGICAL_OR logical_and_expression")]
 		public static void logical_or_expression(RuntimeContext context) { }
+
 		[GrammarDefinition("relational_expression", "additive_expression", 
 			"relational_expression GT additive_expression", "relational_expression GE additive_expression",
 			"relational_expression LT additive_expression", "relational_expression LE additive_expression")]
