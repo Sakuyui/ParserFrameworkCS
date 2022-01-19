@@ -83,15 +83,22 @@ namespace YaccLexCS.ycomplier.code.structure
 
 				public static dynamic StatementNode(StatementNode node, ycomplier.RuntimeContext context)
 				{
-					
-						/*if_statement*/
-						if(node.Count() == 1 
-								 && node[0].GetType().IsAssignableFrom(typeof(IfStatementNode)))
-						{
+
+			/*if_statement*/
+			if (node.Count() == 1
+					 && node[0].GetType().IsAssignableFrom(typeof(IfStatementNode)))
+            {
 				return node[0].Eval(context);
-						}
-						/*while_statement*/
-						if(node.Count() == 1 
+            }
+
+			/*for_statement*/
+			if (node.Count() == 1
+					 && node[0].GetType().IsAssignableFrom(typeof(ForStatementNode)))
+			{
+				return node[0].Eval(context);
+			}
+			/*while_statement*/
+			if (node.Count() == 1 
 								 && node[0].GetType().IsAssignableFrom(typeof(WhileStatementNode)))
 						{
 								return node[0].Eval(context);
@@ -553,6 +560,42 @@ namespace YaccLexCS.ycomplier.code.structure
 			}
 			return null;
 			
+		}
+		public static dynamic ForStatementNode(ForStatementNode node, RuntimeContext context)
+		{
+			/*FOR LP expression SEMICOLON expression SEMICOLON expression RP block*/
+			if (node.Count() == 9
+					 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[2].GetType().IsAssignableFrom(typeof(ExpressionNode))
+					 && node[3].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[4].GetType().IsAssignableFrom(typeof(ExpressionNode))
+					 && node[5].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[6].GetType().IsAssignableFrom(typeof(ExpressionNode))
+					 && node[7].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[8].GetType().IsAssignableFrom(typeof(BlockNode)))
+			{
+				$"entre for stat".PrintToConsole();
+				var initExp = node[2];
+				var condNode = node[4];
+				var next = node[6];
+				var body = node[8];
+				initExp.Eval(context); //init first
+				var cond = condNode.Eval(context);
+				object res = null;
+				while(cond != 0)
+                {
+					var bodyVal = body.Eval(context);
+					if((bodyVal is SpecialValue v))
+                    {
+						if (v == SpecialValue.BREAK) break;
+						if (v == SpecialValue.CONTINUE) continue;
+                    }
+					next.Eval(context);
+                }
+				return res;
+			}
+			return null;
 		}
 
 	}

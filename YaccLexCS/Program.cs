@@ -44,7 +44,9 @@ namespace YaccLexCS
                 "while(i <= 10){" +
                 "   i = i + 1;" +
                 "   if(i==7){" +
-                "   " +
+                "       for(var j = 0; i < 8; j = j + 1){" +
+                "           if(j > 5){break;}" +
+                "       }" +
                 "       break;" +
                 "   }" +
                 "   sum = sum + i;" +
@@ -55,13 +57,13 @@ namespace YaccLexCS
             var tokenList = new List<Token>();
 
             //create parser
-            Lr1Parser parser = Lr1ParserBuilder.ConfigureFromPackages(lexer.TokenNames, new[] { "YaccLexCS.config" });
+          /*  Lr1Parser parser = Lr1ParserBuilder.ConfigureFromPackages(lexer.TokenNames, new[] { "YaccLexCS.config" });
             parser.InitParser().SetContext(context);
             if (File.Exists("1.bin")) File.Delete("1.bin");
-            parser.Serialize("1.bin");
-           /* Lr1Parser parser = Lr1ParserBuilder
+            parser.Serialize("1.bin");*/
+            Lr1Parser parser = Lr1ParserBuilder
                 .DeSerializeFromFile("1.bin", lexer.TokenNames, new[] { "YaccLexCS.config" });
-            parser.SetContext(context);*/
+            parser.SetContext(context);
 
             /*
              问题：生成器。对于非终结字符，要多一个类型判断
@@ -73,17 +75,16 @@ namespace YaccLexCS
             {
                 if (token.Type == "Skip") return;
                 tokenList.Add(token);
-               // parser.ParseFromCurrentState(token);
+                parser.ParseFromCurrentState(token);
             });
+           
             tokenList.PrintEnumerationToConsole();
-            return;
-            tokenList.PrintEnumerationToConsole();
-            
+           
             parser.ParseFromCurrentState(new Token("$", "$"));
             
             var root = parser.GetCurrentStack().Peek();
             root.GetTreeShapeDescribe().PrintToConsole();
-           
+            
             root.Eval(context);
             
 

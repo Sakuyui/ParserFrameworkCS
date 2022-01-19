@@ -5,7 +5,7 @@ namespace YaccLexCS.config{
 	[GrammarConfiguration]
 	public static class GrammarStatement{
 
-		[GrammarDefinition("statement","if_statement","while_statement","expression SEMICOLON")]
+		[GrammarDefinition("statement","if_statement","while_statement","expression SEMICOLON", "for_statement")]
 		public static void statement(RuntimeContext context){
 
 		}
@@ -13,7 +13,7 @@ namespace YaccLexCS.config{
 
 		[GrammarDefinition("while_statement","WHILE LP expression RP block")]
 		public static void while_statement(RuntimeContext context){
-
+			
 		}
 
 
