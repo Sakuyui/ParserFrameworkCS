@@ -76,7 +76,7 @@ namespace YaccLexCS.config
         [TokenDefinition("WHILE", "while")]
         [TokenDefinition("IF", "if")]
         [TokenDefinition("ELSE", "else")]
-        [TokenDefinition("ELSEIF", "elsif")]
+        [TokenDefinition("ELSIF", "elsif")]
         [TokenDefinition("FOR", "for")]
         [TokenDefinition("FLASE","false")]
         [TokenDefinition("TRUE_T", "true")]

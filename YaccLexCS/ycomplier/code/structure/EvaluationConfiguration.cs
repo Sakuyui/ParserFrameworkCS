@@ -146,12 +146,12 @@ namespace YaccLexCS.ycomplier.code.structure
 				}
 
 
-				public static dynamic IfStatementNode(IfStatementNode node, ycomplier.RuntimeContext context)
-				{
+		public static dynamic IfStatementNode(IfStatementNode node, ycomplier.RuntimeContext context)
+		{
 			"enter if stat".PrintToConsole();
-						/*IF LP expression RP block*/
-						if(node.Count() == 5 
-								 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+            /*IF LP expression RP block*/
+            if (node.Count() == 5
+                     && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 								 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 								 && node[2].GetType().IsAssignableFrom(typeof(ExpressionNode))
 								 && node[3].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
@@ -163,6 +163,43 @@ namespace YaccLexCS.ycomplier.code.structure
 				"if is true".PrintToConsole();
 				return node[4].Eval(context);
             }
+
+			/*IF LP expression RP block ELSE block*/
+			if (node.Count() == 7
+					 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[2].GetType().IsAssignableFrom(typeof(ExpressionNode))
+					 && node[3].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[4].GetType().IsAssignableFrom(typeof(BlockNode))
+					 && node[5].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[6].GetType().IsAssignableFrom(typeof(BlockNode)))
+			{
+				return null;
+			}
+			/*IF LP expression RP block elsif_list*/
+			if (node.Count() == 6
+					 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[2].GetType().IsAssignableFrom(typeof(ExpressionNode))
+					 && node[3].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[4].GetType().IsAssignableFrom(typeof(BlockNode))
+					 && node[5].GetType().IsAssignableFrom(typeof(ElsifListNode)))
+			{
+				return null;
+			}
+			/*IF LP expression RP block elsif_list ELSE block*/
+			if (node.Count() == 8
+					 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[2].GetType().IsAssignableFrom(typeof(ExpressionNode))
+					 && node[3].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[4].GetType().IsAssignableFrom(typeof(BlockNode))
+					 && node[5].GetType().IsAssignableFrom(typeof(ElsifListNode))
+					 && node[6].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[7].GetType().IsAssignableFrom(typeof(BlockNode)))
+			{
+				return null;
+			}
 			return null;
 		}
 

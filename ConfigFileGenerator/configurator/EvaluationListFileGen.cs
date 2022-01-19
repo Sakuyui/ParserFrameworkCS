@@ -49,8 +49,9 @@ namespace ConfigFileGenerator.configurator
             {
                
                 var sb2 = new StringBuilder();
-                var typeMatchString = typeNames.Select((t, i) => $"node[{i}].GetType().IsAssignableFrom(typeof("+
-                t == "ASTTerminalNode" ? t : t + "Node" + "))");
+                var typeMatchString = typeNames.Select((t, i) => $"node[{i}].GetType().IsAssignableFrom(typeof({t}"
+                    + (t == "ASTTerminalNode" ?"" : "Node")+
+                "))");
                 sb2.Append($"{T6}if(node.Count() == {count} "
                            + typeMatchString.Aggregate("", (a, b) => a + "\r\n"+ T8 + " && " + b)
                );

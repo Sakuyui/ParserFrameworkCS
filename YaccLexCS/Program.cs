@@ -57,7 +57,7 @@ namespace YaccLexCS
             var tokenList = new List<Token>();
 
             //create parser
-          /*  Lr1Parser parser = Lr1ParserBuilder.ConfigureFromPackages(lexer.TokenNames, new[] { "YaccLexCS.config" });
+            /*Lr1Parser parser = Lr1ParserBuilder.ConfigureFromPackages(lexer.TokenNames, new[] { "YaccLexCS.config" });
             parser.InitParser().SetContext(context);
             if (File.Exists("1.bin")) File.Delete("1.bin");
             parser.Serialize("1.bin");*/
