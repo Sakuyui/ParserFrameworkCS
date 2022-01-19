@@ -9,7 +9,8 @@ namespace YaccLexCS.ycomplier.code.structure
 	public enum SpecialValue
 	{
 		BREAK,
-		CONTINUE
+		CONTINUE,
+		NoMatch
 	}
 	public static class InterpreterHelper
     {
@@ -174,7 +175,10 @@ namespace YaccLexCS.ycomplier.code.structure
 					 && node[5].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 					 && node[6].GetType().IsAssignableFrom(typeof(BlockNode)))
 			{
-				return null;
+				var cond = node[2].Eval(context);
+				if(cond != 0)
+					return node[4].Eval(context);
+				return node[6].Eval(context);
 			}
 			/*IF LP expression RP block elsif_list*/
 			if (node.Count() == 6
@@ -185,7 +189,10 @@ namespace YaccLexCS.ycomplier.code.structure
 					 && node[4].GetType().IsAssignableFrom(typeof(BlockNode))
 					 && node[5].GetType().IsAssignableFrom(typeof(ElsifListNode)))
 			{
-				return null;
+				var cond = node[2].Eval(context);
+				if (cond != 0)
+					return node[4].Eval(context);
+				return node[5].Eval(context);
 			}
 			/*IF LP expression RP block elsif_list ELSE block*/
 			if (node.Count() == 8
@@ -198,14 +205,57 @@ namespace YaccLexCS.ycomplier.code.structure
 					 && node[6].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 					 && node[7].GetType().IsAssignableFrom(typeof(BlockNode)))
 			{
-				return null;
+				var cond = node[2].Eval(context);
+				if (cond != 0)
+				{
+					return node[3].Eval(context);
+				}
+				var elistVal = node[5].Eval(context); //elselist should return a tuple (int code, any val)
+				if((elistVal is SpecialValue v) && v == SpecialValue.NoMatch)
+					return node[7].Eval(context);
+				return elistVal;
 			}
 			return null;
 		}
 
-
-				public static dynamic StatementListNode(StatementListNode node, ycomplier.RuntimeContext context)
-				{
+		public static dynamic ElsifListNode(ElsifListNode node, RuntimeContext context)
+		{
+			throw new NotImplementedException();
+			/*elsif*/
+			if (node.Count() == 1
+					 && node[0].GetType().IsAssignableFrom(typeof(ElsifNode)))
+			{
+				return node[0].Eval(context);
+			}
+			/*elsif_list elsif*/
+			if (node.Count() == 2
+					 && node[0].GetType().IsAssignableFrom(typeof(ElsifListNode))
+					 && node[1].GetType().IsAssignableFrom(typeof(ElsifNode)))
+			{
+				var elistVal = node[0].Eval(context);
+				if((elistVal is SpecialValue v) && v == SpecialValue.NoMatch)
+					return node[1].Eval(context);
+				return elistVal;
+			}
+		}
+		public static dynamic ElsifNode(ElsifNode node, RuntimeContext context)
+		{
+			throw new NotImplementedException();
+			/*ELSIF LP expression RP block*/
+			if (node.Count() == 5
+					 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[2].GetType().IsAssignableFrom(typeof(ExpressionNode))
+					 && node[3].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[4].GetType().IsAssignableFrom(typeof(BlockNode)))
+			{
+				var cond = node[2].Eval(context);
+				if (cond == 0) return SpecialValue.NoMatch;
+				return node[4].Eval(context);
+			}
+		}
+		public static dynamic StatementListNode(StatementListNode node, ycomplier.RuntimeContext context)
+		{
 					
 						/*statement*/
 						if(node.Count() == 1 
