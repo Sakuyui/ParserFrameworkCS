@@ -10,7 +10,7 @@ namespace YaccLexCS.config{
 			"terminal_expression","assign_expression","additive_expression","multiplicative_expression",
 			"unary_expression","primary_expression",
 			"relational_expression", "equality_expression","logical_or_expression", "logical_and_expression",
-			"define_var_expression"
+			"define_var_expression", "lambda_expression"
 			)]
 		public static void expression(CompilerContext context){
 
@@ -72,6 +72,11 @@ namespace YaccLexCS.config{
 			"BREAK", "CONTINUE", "RETURN")]
 		public static void primary_expression(CompilerContext context){
 
+		}
+
+		[GrammarDefinition("lambda_expression", "LAMBDA LP params_list RP INTRODUCE statement")]
+		public static void lambda_expression()
+		{
 		}
 
 	}

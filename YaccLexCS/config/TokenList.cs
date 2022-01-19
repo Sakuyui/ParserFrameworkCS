@@ -43,7 +43,11 @@ namespace YaccLexCS.config
         {
             $"meet operator {content.TokenText}".PrintToConsole();
         }
-        
+        [TokenDefinition("INTRODUCE", "=>")]
+        public static void Introduce(CompilerContext context)
+        {
+
+        }
         [TokenDefinition("ASSIGN", "=")]
         public static void Assign(CompilerContext content)
         {
@@ -86,12 +90,14 @@ namespace YaccLexCS.config
         [TokenDefinition("BREAK", "break")]
         [TokenDefinition("LET", "let")]
         [TokenDefinition("VAR", "var")]
+        [TokenDefinition("LAMBDA", "lambda")]
+
         public static void KeyWord()
         {
             
         }
 
-        [TokenDefinition("ID", @"[A-Z_a-z]+", true, 1)]
+        [TokenDefinition("ID", @"[A-Z_a-z]+|[A-Z_a-z]+[0-9_A-Za-z]", true, 1)]
         public static void Id(CompilerContext context)
         {
             

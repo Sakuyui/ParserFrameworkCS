@@ -1,5 +1,5 @@
 using YaccLexCS.ycomplier;
-using YaccLexCS.ycomplier.attribution;
+using YaccLexCS.ycomplier.attribution;	
 namespace YaccLexCS.config{
 	[GrammarConfiguration]
 	public static class GrammarStatement{
