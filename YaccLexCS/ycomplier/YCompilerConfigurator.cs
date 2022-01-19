@@ -99,7 +99,7 @@ namespace YaccLexCS.ycomplier
                         var className = left.Trim('"') == beginWord ? "BeginningGrammarDefinition" : "GrammarDefinition";
                         (left.Trim('"') == beginWord, left.Trim('"'),beginWord).PrintToConsole();
                         sb.Append("\r\n" + $"\t\t[{className}({left},{right.Trim(',')})]\r\n");
-                        sb.Append($"\t\tpublic static void {left.Trim('"')}(CompilerContext context)" + "{\r\n\r\n\t\t}\r\n\r\n");
+                        sb.Append($"\t\tpublic static void {left.Trim('"')}(RuntimeContext context)" + "{\r\n\r\n\t\t}\r\n\r\n");
                         
                         var cName = left.Trim('"').Split("_").Select(e => (e[0] + "").ToUpper() + e[1..])
                             .Aggregate("", (a, b) => a + b) + "Node";
@@ -118,7 +118,7 @@ namespace YaccLexCS.ycomplier
                            
 
                             classContext.Append("\r\n\t\t}\r\n");
-                            classContext.Append("\t\tpublic override dynamic Eval(CompilerContext context)\r\n\t\t{\r\n" +
+                            classContext.Append("\t\tpublic override dynamic Eval(RuntimeContext context)\r\n\t\t{\r\n" +
                                                 "\t\t\t\treturn EvaluationConfiguration.ClassNameMapping[GetType().Name].Invoke(null, new object[]{this, context});\r\n");
                             classContext.Append("\t\t}\r\n\t}\r\n}");
                             File.WriteAllText(astClassPath + "\\\\" +cName + ".cs", classContext + "");
@@ -191,7 +191,7 @@ namespace YaccLexCS.ycomplier
                         {
                             
                             evalCsFileContext +=
-                                $"\r\n\t\t\t\tpublic static dynamic {cName}({cName} node, CompilerContext context)\r\n\t\t\t\t" + "{\r\n\t\t\t\t\r\n" +
+                                $"\r\n\t\t\t\tpublic static dynamic {cName}({cName} node, RuntimeContext context)\r\n\t\t\t\t" + "{\r\n\t\t\t\t\r\n" +
                                 "\t\t\t\t\t\tthrow new NotImplementedException();\r\n" +
                                 "\t\t\t\t}\r\n";
                            

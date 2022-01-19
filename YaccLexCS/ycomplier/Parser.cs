@@ -15,10 +15,10 @@ namespace YaccLexCS.ycomplier
     public abstract class Parser
     {
         [NonSerialized]
-        protected CompilerContext? Context;
+        protected RuntimeContext? Context;
         protected readonly CfgProducerDefinition Definitions;
 
-        public Parser SetContext(CompilerContext context)
+        public Parser SetContext(RuntimeContext context)
         {
             Context = context;
             return this;
@@ -29,7 +29,7 @@ namespace YaccLexCS.ycomplier
             
             Definitions = definitions;
         }
-        protected Parser(CfgProducerDefinition definitions, CompilerContext context)
+        protected Parser(CfgProducerDefinition definitions, RuntimeContext context)
         {
             Definitions = definitions;
             Context = context;
@@ -128,7 +128,7 @@ namespace YaccLexCS.ycomplier
         }
         public Lr1Parser() : base(null!) { }
 
-        public Lr1Parser(CompilerContext context, CfgProducerDefinition definitions) : base(definitions, context)
+        public Lr1Parser(RuntimeContext context, CfgProducerDefinition definitions) : base(definitions, context)
         {
         }
 
@@ -163,6 +163,7 @@ namespace YaccLexCS.ycomplier
             token.PrintToConsole();
             if (t[0] == 's') //如果开头是s就移进 = 新状态压栈 + 新符号从输入队列弹出压栈
             {
+                
                 //shift
                 var nextState = int.Parse(t[1..]);
                 $"shift to {nextState}".DebugOutPut();

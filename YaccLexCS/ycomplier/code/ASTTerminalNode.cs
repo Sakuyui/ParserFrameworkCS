@@ -18,7 +18,7 @@ namespace YaccLexCS.ycomplier.code
             return null;
         }
 
-        public override dynamic Eval(CompilerContext context)
+        public override dynamic Eval(RuntimeContext context)
         {
             return Token;
         }

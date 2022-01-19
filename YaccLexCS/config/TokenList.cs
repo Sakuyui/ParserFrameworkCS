@@ -15,7 +15,7 @@ namespace YaccLexCS.config
         [TokenDefinition("MOD", "%")]
         [TokenDefinition("DIV", "/")]
        
-        public static void Operator(CompilerContext content)
+        public static void Operator(RuntimeContext content)
         {
             $"meet operator {content.TokenText}".PrintToConsole();
         }
@@ -27,30 +27,30 @@ namespace YaccLexCS.config
         [TokenDefinition("GT", ">")]
         [TokenDefinition("GE", ">=")]
 
-        public static void Relation(CompilerContext content)
+        public static void Relation(RuntimeContext content)
         {
 
         }
         
         [TokenDefinition("COMMA", ",")]
-        public static void Romma(CompilerContext content)
+        public static void Romma(RuntimeContext content)
         {
 
         }
 
         [TokenDefinition("EQ", "==")]
-        public static void Eq(CompilerContext content)
+        public static void Eq(RuntimeContext content)
         {
             $"meet operator {content.TokenText}".PrintToConsole();
         }
         
         [TokenDefinition("ASSIGN", "=")]
-        public static void Assign(CompilerContext content)
+        public static void Assign(RuntimeContext content)
         {
             $"meet operator {content.TokenText}".PrintToConsole();
         }
         [TokenDefinition("STRING", "\".*\"", true)]
-        public static void StringType(CompilerContext context)
+        public static void StringType(RuntimeContext context)
         {
             var v = context.TokenText;
             $"get string = {v}".PrintToConsole();
@@ -76,10 +76,10 @@ namespace YaccLexCS.config
         [TokenDefinition("WHILE", "while")]
         [TokenDefinition("IF", "if")]
         [TokenDefinition("ELSE", "else")]
-        [TokenDefinition("ELSIF", "elsif")]
+        [TokenDefinition("ELSEIF", "elsif")]
         [TokenDefinition("FOR", "for")]
-        [TokenDefinition("FALSE","false")]
-        [TokenDefinition("TRUE", "true")]
+        [TokenDefinition("FLASE","false")]
+        [TokenDefinition("TRUE_T", "true")]
         [TokenDefinition("NULL", "null")]
         [TokenDefinition("CONTINUE", "continue")]
         [TokenDefinition("RETURN", "return")]
@@ -90,12 +90,12 @@ namespace YaccLexCS.config
         }
 
         [TokenDefinition("ID", @"[A-Z_a-z]+", true, 1)]
-        public static void Id(CompilerContext context)
+        public static void Id(RuntimeContext context)
         {
             
         }
         [TokenDefinition("DOUBLE_LITERAL", @"[0-9]+\.[0-9]+|[1-9][0-9]*|0", true)]
-        public static void DoubleLiteral(CompilerContext context)
+        public static void DoubleLiteral(RuntimeContext context)
         {
             $"DOUBLE_LITERAL with val = {context.TokenText}".PrintToConsole();
             var val = double.Parse(context.TokenText);

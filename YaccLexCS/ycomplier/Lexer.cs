@@ -18,16 +18,16 @@ namespace YaccLexCS.ycomplier
 
     public class Lexer
     {
-        public Lexer(CompilerContext compilerContext)
+        public Lexer(RuntimeContext compilerContext)
         {
             CompilerContext = compilerContext;
         }
-        public readonly CompilerContext CompilerContext;
+        public readonly RuntimeContext CompilerContext;
         private readonly Dictionary<TokenDefinition, MethodInfo> _patternMap = new();
 
         public Dictionary<TokenDefinition, MethodInfo> PatternMap => _patternMap;
         public HashSet<string> TokenNames => _patternMap.Select(e => e.Key.TokenName).ToHashSet();
-        public static Lexer ConfigureFromPackages(IEnumerable<string> scanPackage, CompilerContext context)
+        public static Lexer ConfigureFromPackages(IEnumerable<string> scanPackage, RuntimeContext context)
         {
             var lexer = new Lexer(context);
             YCompilerConfigurator.GetAllTokenDefinitions(

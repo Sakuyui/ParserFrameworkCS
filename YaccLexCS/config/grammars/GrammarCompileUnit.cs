@@ -6,13 +6,13 @@ namespace YaccLexCS.config{
 	public static class GrammarCompileUnit{
 
 		[BeginningGrammarDefinition("compile_unit","definition_or_statement","compile_unit definition_or_statement")]
-		public static void compile_unit(CompilerContext context){
+		public static void compile_unit(RuntimeContext context){
 
 		}
 
 
 		[GrammarDefinition("definition_or_statement","statement")]
-		public static void definition_or_statement(CompilerContext context){
+		public static void definition_or_statement(RuntimeContext context){
 
 		}
 

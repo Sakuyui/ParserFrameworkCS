@@ -9,7 +9,7 @@ namespace YaccLexCS.code.structure
 		[GrammarConfiguration]
 		public class LogicalAndExpressionNode : ASTNonTerminalNode
 		{
-				public override dynamic Eval(CompilerContext context)
+				public override dynamic Eval(ycomplier.RuntimeContext context)
 				{
 						return EvaluationConfiguration.ClassNameMapping[GetType().Name].Invoke(null, new object[]{this, context});
 				}

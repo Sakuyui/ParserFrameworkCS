@@ -32,25 +32,36 @@ namespace YaccLexCS
             
             //YCompilerConfigurator.GenerateGrammarDefinitionFileFrom("d:\\d.txt", "c:\\out");
            
-            var context = new CompilerContext();
+            var context = new RuntimeContext();
             
             //在指定命名空间扫描配置
             var lexer = Lexer.ConfigureFromPackages(new []{"YaccLexCS.config"}, context);
           
             //create input stream
-            var r = (TextReader) new StringReader("sum = 0;i = 0;while(1){i = i + 1; sum = sum + i;}");
+            var r = (TextReader) new StringReader("" +
+                "sum = 0;" +
+                "i = 0;" +
+                "while(i <= 10){" +
+                "   i = i + 1;" +
+                "   sum = sum + i;" +
+                "   continue;" +
+                "   break;" +
+                "}");
             
             var tokenList = new List<Token>();
-            
-            //create parser
-            /*Lr1Parser parser = Lr1ParserBuilder
-                .ConfigureFromPackages(lexer.TokenNames, new[] {"YaccLexCS.config"});*/
 
+            //create parser
+            /*Lr1Parser parser = Lr1ParserBuilder.ConfigureFromPackages(lexer.TokenNames, new[] { "YaccLexCS.config" });
+            parser.InitParser().SetContext(context);
+            parser.Serialize("1.bin");*/
             Lr1Parser parser = Lr1ParserBuilder
-                .DeSerializeFromFile("1.bin",lexer.TokenNames, new[] { "YaccLexCS.config" });
-            //parser.Serialize("1.bin");
+                .DeSerializeFromFile("1.bin", lexer.TokenNames, new[] { "YaccLexCS.config" });
             parser.SetContext(context);
 
+            /*
+             问题：生成器。对于非终结字符，要多一个类型判断
+
+             */
 
             //在流中词法分析。
             lexer.ParseInStream(r, token =>  //callback function
@@ -59,9 +70,9 @@ namespace YaccLexCS
                 tokenList.Add(token);
                 parser.ParseFromCurrentState(token);
             });
-
+            tokenList.PrintEnumerationToConsole();
+            
             parser.ParseFromCurrentState(new Token("$", "$"));
-            //tokenList.PrintCollectionToConsole();
             
             var root = parser.GetCurrentStack().Peek();
             root.GetTreeShapeDescribe().PrintToConsole();
@@ -71,10 +82,13 @@ namespace YaccLexCS
 
             return;
             
-            //it can also used to parsed a whole text if you want. Simply use it as follow. This Function will return a IEnumerable<Token>,
-            //you can also provide a callback function to process a token as soon as a token is parsed.
             
-            var tokens = lexer.ParseWholeText("while i < 10 {\n    sum = sum + i\n i = i + 1 \n } sum")
+            var tokens = lexer.ParseWholeText("while i < 10 {\n    " +
+                "sum = sum + i;\n " +
+                "i = i + 1; \n " +
+                "continue;" + 
+                "break;\n" +
+                "} sum")
                 .Where(e => e.Type != "Skip");
             
             tokens.PrintEnumerationToConsole();

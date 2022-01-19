@@ -12,7 +12,7 @@ namespace YaccLexCS.ycomplier.code
             _children = child.ToList();
         }
 
-        public abstract override dynamic Eval(CompilerContext context);
+        public abstract override dynamic Eval(RuntimeContext context);
 
         public override ASTNode? Child(int i)
         {

@@ -15,7 +15,7 @@ namespace YaccLexCS.ycomplier.code
             NodeName = nodeName;
         }
 
-        public abstract dynamic Eval(CompilerContext context);
+        public abstract dynamic Eval(RuntimeContext context);
         
         public abstract ASTNode? Child(int i);
         

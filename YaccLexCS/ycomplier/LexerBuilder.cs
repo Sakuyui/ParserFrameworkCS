@@ -3,7 +3,7 @@
 namespace YaccLexCS.ycomplier
 {
     public class LexerBuilder : Builder{
-        public static Lexer ConfigureFromPackages(IEnumerable<string> scanPackage, CompilerContext context)
+        public static Lexer ConfigureFromPackages(IEnumerable<string> scanPackage, RuntimeContext context)
         {
             var lexer = new Lexer(context);
             YCompilerConfigurator.GetAllTokenDefinitions(

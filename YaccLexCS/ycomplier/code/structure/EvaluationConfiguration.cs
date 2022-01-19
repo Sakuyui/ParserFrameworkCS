@@ -6,6 +6,36 @@ using System.Reflection;
 using YaccLexCS.code.structure;
 namespace YaccLexCS.ycomplier.code.structure
 {
+	public enum SpecialValue
+	{
+		BREAK,
+		CONTINUE
+	}
+	public static class InterpreterHelper
+    {
+		
+		public static dynamic BasicTypesValueExtract(ASTTerminalNode terminalNode, RuntimeContext context)
+        {
+            switch (terminalNode.Token.Type)
+            {
+				case "ID":
+					return context[terminalNode.Token.SourceText];
+				case "STRING":
+					return terminalNode.Token.SourceText;
+				case "DOUBLE_LITERAL":
+					return double.Parse(terminalNode.Token.SourceText);
+				case "TRUE_T":
+					return 1;
+				case "FALSE_T":
+					return 0;
+				case "BREAK":
+					return SpecialValue.BREAK;
+				case "CONTINUE":
+					return SpecialValue.CONTINUE;
+			}
+			return null;
+        }
+	}
 		public static class EvaluationConfiguration
 		{
 				public static readonly Dictionary<string, MethodInfo> ClassNameMapping
@@ -18,7 +48,7 @@ namespace YaccLexCS.ycomplier.code.structure
 								return result;
 						}).Value;
 
-				public static dynamic CompileUnitNode(CompileUnitNode node, CompilerContext context)
+				public static dynamic CompileUnitNode(CompileUnitNode node, ycomplier.RuntimeContext context)
 				{
 						/*definition_or_statement*/
 						if(node.Count() == 1 
@@ -38,7 +68,7 @@ namespace YaccLexCS.ycomplier.code.structure
 				}
 
 
-				public static dynamic DefinitionOrStatementNode(DefinitionOrStatementNode node, CompilerContext context)
+				public static dynamic DefinitionOrStatementNode(DefinitionOrStatementNode node, ycomplier.RuntimeContext context)
 				{
 						//throw new NotImplementedException();
 						/*statement*/
@@ -51,7 +81,7 @@ namespace YaccLexCS.ycomplier.code.structure
 				}
 
 
-				public static dynamic StatementNode(StatementNode node, CompilerContext context)
+				public static dynamic StatementNode(StatementNode node, ycomplier.RuntimeContext context)
 				{
 					
 						/*if_statement*/
@@ -72,14 +102,14 @@ namespace YaccLexCS.ycomplier.code.structure
 								 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode)))
 						{
 				$"expression;".PrintToConsole();
-								node[0].Eval(context);
-								return null;
-						}
+								
+								return node[0].Eval(context);
+			}
 			return null;
 				}
 
 
-				public static dynamic WhileStatementNode(WhileStatementNode node, CompilerContext context)
+				public static dynamic WhileStatementNode(WhileStatementNode node, ycomplier.RuntimeContext context)
 				{
 						$"begin while!".PrintToConsole();
 						
@@ -96,7 +126,12 @@ namespace YaccLexCS.ycomplier.code.structure
 				var condVal = condExp.Eval(context);
 				$"now cond = {condVal}".PrintToConsole();
 				if (condVal == null || condVal == 0) return null;
-				block.Eval(context);
+				var blockVal = block.Eval(context);
+				if ((blockVal is SpecialValue v) && (v == SpecialValue.BREAK))
+				{
+					$"while break;".PrintToConsole();
+					return null;
+				}
 				$"while next".PrintToConsole();
 				return WhileStatementNode(node, context);
 						}
@@ -104,7 +139,7 @@ namespace YaccLexCS.ycomplier.code.structure
 				}
 
 
-				public static dynamic IfStatementNode(IfStatementNode node, CompilerContext context)
+				public static dynamic IfStatementNode(IfStatementNode node, ycomplier.RuntimeContext context)
 				{
 						throw new NotImplementedException();
 						/*IF LP expression RP block*/
@@ -120,7 +155,7 @@ namespace YaccLexCS.ycomplier.code.structure
 				}
 
 
-				public static dynamic StatementListNode(StatementListNode node, CompilerContext context)
+				public static dynamic StatementListNode(StatementListNode node, ycomplier.RuntimeContext context)
 				{
 					
 						/*statement*/
@@ -134,14 +169,15 @@ namespace YaccLexCS.ycomplier.code.structure
 								 && node[0].GetType().IsAssignableFrom(typeof(StatementListNode))
 								 && node[1].GetType().IsAssignableFrom(typeof(StatementNode)))
 						{
-				node[0].Eval(context);
-								return node[1].Eval(context);
+				var v = node[0].Eval(context);
+				if (v is SpecialValue && (v == SpecialValue.BREAK || v == SpecialValue.CONTINUE)) return v;
+ 								return node[1].Eval(context);
 						}
 			return null;
 				}
 
 
-				public static dynamic ExpressionNode(ExpressionNode node, CompilerContext context)
+				public static dynamic ExpressionNode(ExpressionNode node, ycomplier.RuntimeContext context)
 				{
 			/*relational_expression*/
 			if (node.Count() == 1
@@ -207,7 +243,7 @@ namespace YaccLexCS.ycomplier.code.structure
 				}
 
 
-				public static dynamic AssignExpressionNode(AssignExpressionNode node, CompilerContext context)
+				public static dynamic AssignExpressionNode(AssignExpressionNode node, ycomplier.RuntimeContext context)
 				{
 						/*ID ASSIGN expression*/
 						if(node.Count() == 3 
@@ -227,7 +263,7 @@ namespace YaccLexCS.ycomplier.code.structure
 				}
 
 
-				public static dynamic TerminalExpressionNode(TerminalExpressionNode node, CompilerContext context)
+				public static dynamic TerminalExpressionNode(TerminalExpressionNode node, ycomplier.RuntimeContext context)
 				{
 						/*ID*/
 						if(node.Count() == 1 
@@ -251,7 +287,7 @@ namespace YaccLexCS.ycomplier.code.structure
 				}
 
 
-				public static dynamic AdditiveExpressionNode(AdditiveExpressionNode node, CompilerContext context)
+				public static dynamic AdditiveExpressionNode(AdditiveExpressionNode node, ycomplier.RuntimeContext context)
 				{
 						
 						/*additive_expression ADD multiplicative_expression*/
@@ -274,7 +310,7 @@ namespace YaccLexCS.ycomplier.code.structure
 				}
 
 
-				public static dynamic MultiplicativeExpressionNode(MultiplicativeExpressionNode node, CompilerContext context)
+				public static dynamic MultiplicativeExpressionNode(MultiplicativeExpressionNode node, ycomplier.RuntimeContext context)
 				{
 						
 						/*unary_expression*/
@@ -317,7 +353,7 @@ namespace YaccLexCS.ycomplier.code.structure
 				}
 
 
-				public static dynamic UnaryExpressionNode(UnaryExpressionNode node, CompilerContext context)
+				public static dynamic UnaryExpressionNode(UnaryExpressionNode node, ycomplier.RuntimeContext context)
 				{
 						
 						/*primary_expression*/
@@ -337,7 +373,7 @@ namespace YaccLexCS.ycomplier.code.structure
 				}
 
 
-		public static dynamic PrimaryExpressionNode(PrimaryExpressionNode node, CompilerContext context)
+		public static dynamic PrimaryExpressionNode(PrimaryExpressionNode node, ycomplier.RuntimeContext context)
 		{
 			/*LP expression RP*/
 			if (node.Count() == 3
@@ -347,31 +383,19 @@ namespace YaccLexCS.ycomplier.code.structure
 			{
 				return node[1].Eval(context);
 			}
-			/*ID DOUBLE_LITERAL STRING*/
+			/*ID DOUBLE_LITERAL STRING BREAK CONTINUE RETURN ...*/
 			if (node.Count() == 1
 								 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode)))
 			{
-				var t = (node[0] as ASTTerminalNode).Token;
-				switch (t.Type)
-				{
-					case "DOUBLE_LITERAL":
-						return double.Parse(t.SourceText);
-						break;
-					case "ID":
-						return context[t.SourceText];
-						break;
-					case "STRING":
-						return t.SourceText;
-
-				}
-
+				
+				return InterpreterHelper.BasicTypesValueExtract(node[0] as ASTTerminalNode, context);
 				
 			}
 			return null;
 		}
 
 
-				public static dynamic BlockNode(BlockNode node, CompilerContext context)
+				public static dynamic BlockNode(BlockNode node, ycomplier.RuntimeContext context)
 				{	
 						/*LC statement_list RC*/
 						if(node.Count() == 3 
@@ -379,7 +403,8 @@ namespace YaccLexCS.ycomplier.code.structure
 								 && node[1].GetType().IsAssignableFrom(typeof(StatementListNode))
 								 && node[2].GetType().IsAssignableFrom(typeof(ASTTerminalNode)))
 						{
-				return node[1].Eval(context);
+				var bVal = node[1].Eval(context); ;
+				return bVal;
 						}
 						/*LC RC*/
 						if(node.Count() == 2 
@@ -392,7 +417,7 @@ namespace YaccLexCS.ycomplier.code.structure
 				}
 
 
-		public static dynamic LogicalAndExpressionNode(LogicalAndExpressionNode node, CompilerContext context)
+		public static dynamic LogicalAndExpressionNode(LogicalAndExpressionNode node, ycomplier.RuntimeContext context)
 		{
 			/*equality_expression*/
 			if (node.Count() == 1
@@ -412,7 +437,7 @@ namespace YaccLexCS.ycomplier.code.structure
 		}
 
 
-		public static dynamic LogicalOrExpressionNode(LogicalOrExpressionNode node, CompilerContext context)
+		public static dynamic LogicalOrExpressionNode(LogicalOrExpressionNode node, ycomplier.RuntimeContext context)
 		{
 			/*logical_and_expression*/
 			if (node.Count() == 1
@@ -432,7 +457,7 @@ namespace YaccLexCS.ycomplier.code.structure
 		}
 
 
-		public static dynamic RelationalExpressionNode(RelationalExpressionNode node, CompilerContext context)
+		public static dynamic RelationalExpressionNode(RelationalExpressionNode node, ycomplier.RuntimeContext context)
 		{
 
 			/*additive_expression*/
@@ -441,43 +466,36 @@ namespace YaccLexCS.ycomplier.code.structure
 			{
 				return node[0].Eval(context);
 			}
+
 			/*relational_expression GT additive_expression*/
-			if (node.Count() == 3
-					 && node[0].GetType().IsAssignableFrom(typeof(RelationalExpressionNode))
-					 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
-					 && node[2].GetType().IsAssignableFrom(typeof(AdditiveExpressionNode)))
-			{
-				return node[0].Eval(context) > node[2].Eval(context);
-			}
 			/*relational_expression GE additive_expression*/
-			if (node.Count() == 3
-					 && node[0].GetType().IsAssignableFrom(typeof(RelationalExpressionNode))
-					 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
-					 && node[2].GetType().IsAssignableFrom(typeof(AdditiveExpressionNode)))
-			{
-				return node[0].Eval(context) >= node[2].Eval(context);
-			}
 			/*relational_expression LT additive_expression*/
-			if (node.Count() == 3
-					 && node[0].GetType().IsAssignableFrom(typeof(RelationalExpressionNode))
-					 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
-					 && node[2].GetType().IsAssignableFrom(typeof(AdditiveExpressionNode)))
-			{
-				return node[0].Eval(context) < node[2].Eval(context);
-			}
 			/*relational_expression LE additive_expression*/
+
 			if (node.Count() == 3
 					 && node[0].GetType().IsAssignableFrom(typeof(RelationalExpressionNode))
-					 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode)) 
 					 && node[2].GetType().IsAssignableFrom(typeof(AdditiveExpressionNode)))
 			{
-				return node[0].Eval(context) <= node[2].Eval(context);
+				switch ((node[1] as ASTTerminalNode).Token.Type)
+                {
+					case "GT":
+						return (node[0].Eval(context) > node[2].Eval(context)) ? 1 : 0;
+					case "GE":
+						return (node[0].Eval(context) >= node[2].Eval(context)) ? 1 : 0;
+					case "LT":
+						return (node[0].Eval(context) < node[2].Eval(context)) ? 1 : 0;
+					case "LE":
+						return (node[0].Eval(context) <= node[2].Eval(context)) ? 1 : 0;
+				}
+				
 			}
+			
 			return null;
 		}
 
 
-		public static dynamic EqualityExpressionNode(EqualityExpressionNode node, CompilerContext context)
+		public static dynamic EqualityExpressionNode(EqualityExpressionNode node, ycomplier.RuntimeContext context)
 		{
 			/*relational_expression*/
 			if (node.Count() == 1
@@ -491,7 +509,7 @@ namespace YaccLexCS.ycomplier.code.structure
 					 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 					 && node[2].GetType().IsAssignableFrom(typeof(RelationalExpressionNode)))
 			{
-				return node[0].Eval(context) == node[2].Eval(context);
+				return (node[0].Eval(context) == node[2].Eval(context)) ? 1 : 0;
 			}
 			/*equality_expression NE relational_expression*/
 			if (node.Count() == 3
@@ -499,7 +517,7 @@ namespace YaccLexCS.ycomplier.code.structure
 					 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 					 && node[2].GetType().IsAssignableFrom(typeof(RelationalExpressionNode)))
 			{
-				return node[0].Eval(context) != node[2].Eval(context);
+				return (node[0].Eval(context) != node[2].Eval(context)) ? 1 : 0;
 			}
 			return null;
 		}
