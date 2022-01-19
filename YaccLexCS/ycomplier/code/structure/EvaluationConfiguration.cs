@@ -82,8 +82,8 @@ namespace YaccLexCS.ycomplier.code.structure
 				}
 
 
-				public static dynamic StatementNode(StatementNode node, ycomplier.RuntimeContext context)
-				{
+		public static dynamic StatementNode(StatementNode node, ycomplier.RuntimeContext context)
+		{
 
 			/*if_statement*/
 			if (node.Count() == 1
@@ -101,7 +101,7 @@ namespace YaccLexCS.ycomplier.code.structure
 			/*while_statement*/
 			if (node.Count() == 1 
 								 && node[0].GetType().IsAssignableFrom(typeof(WhileStatementNode)))
-						{
+            {
 								return node[0].Eval(context);
 						}
 						/*expression SEMICOLON*/
@@ -113,22 +113,27 @@ namespace YaccLexCS.ycomplier.code.structure
 								
 								return node[0].Eval(context);
 			}
+			/*block*/
+			if (node.Count() == 1
+					 && node[0].GetType().IsAssignableFrom(typeof(BlockNode)))
+			{
+				return node[0].Eval(context);
+			}
 			return null;
-				}
+        }
 
 
-				public static dynamic WhileStatementNode(WhileStatementNode node, ycomplier.RuntimeContext context)
-				{
+		public static dynamic WhileStatementNode(WhileStatementNode node, ycomplier.RuntimeContext context)
+        {
 						$"begin while!".PrintToConsole();
-						
-						/*WHILE LP expression RP block*/
-						if(node.Count() == 5 
-								 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
-								 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
-								 && node[2].GetType().IsAssignableFrom(typeof(ExpressionNode))
-								 && node[3].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
-								 && node[4].GetType().IsAssignableFrom(typeof(BlockNode)))
-						{
+			/*WHILE LP expression RP statement*/
+			if (node.Count() == 5
+					 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[2].GetType().IsAssignableFrom(typeof(ExpressionNode))
+					 && node[3].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[4].GetType().IsAssignableFrom(typeof(StatementNode)))
+			{
 				var condExp = node[2];
 				var block = node[4];
 				var condVal = condExp.Eval(context);
@@ -142,51 +147,51 @@ namespace YaccLexCS.ycomplier.code.structure
 				}
 				$"while next".PrintToConsole();
 				return WhileStatementNode(node, context);
-						}
+			}
+			
 			return null;
-				}
+		}
 
 
 		public static dynamic IfStatementNode(IfStatementNode node, ycomplier.RuntimeContext context)
 		{
 			"enter if stat".PrintToConsole();
-            /*IF LP expression RP block*/
-            if (node.Count() == 5
-                     && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
-								 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
-								 && node[2].GetType().IsAssignableFrom(typeof(ExpressionNode))
-								 && node[3].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
-								 && node[4].GetType().IsAssignableFrom(typeof(BlockNode)))
-            {
+			/*IF LP expression RP statement*/
+			if (node.Count() == 5
+					 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[2].GetType().IsAssignableFrom(typeof(ExpressionNode))
+					 && node[3].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+					 && node[4].GetType().IsAssignableFrom(typeof(StatementNode)))
+			{
 				var cond = node[2].Eval(context);
 				if (cond == 0)
 					return null;
 				"if is true".PrintToConsole();
 				return node[4].Eval(context);
-            }
-
-			/*IF LP expression RP block ELSE block*/
+			}
+			/*IF LP expression RP statement ELSE statement*/
 			if (node.Count() == 7
 					 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 					 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 					 && node[2].GetType().IsAssignableFrom(typeof(ExpressionNode))
 					 && node[3].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
-					 && node[4].GetType().IsAssignableFrom(typeof(BlockNode))
+					 && node[4].GetType().IsAssignableFrom(typeof(StatementNode))
 					 && node[5].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
-					 && node[6].GetType().IsAssignableFrom(typeof(BlockNode)))
+					 && node[6].GetType().IsAssignableFrom(typeof(StatementNode)))
 			{
 				var cond = node[2].Eval(context);
-				if(cond != 0)
+				if (cond != 0)
 					return node[4].Eval(context);
-				return node[6].Eval(context);
+				return node[6].Eval(context); 
 			}
-			/*IF LP expression RP block elsif_list*/
+			/*IF LP expression RP statement elsif_list*/
 			if (node.Count() == 6
 					 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 					 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 					 && node[2].GetType().IsAssignableFrom(typeof(ExpressionNode))
 					 && node[3].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
-					 && node[4].GetType().IsAssignableFrom(typeof(BlockNode))
+					 && node[4].GetType().IsAssignableFrom(typeof(StatementNode))
 					 && node[5].GetType().IsAssignableFrom(typeof(ElsifListNode)))
 			{
 				var cond = node[2].Eval(context);
@@ -194,16 +199,16 @@ namespace YaccLexCS.ycomplier.code.structure
 					return node[4].Eval(context);
 				return node[5].Eval(context);
 			}
-			/*IF LP expression RP block elsif_list ELSE block*/
+			/*IF LP expression RP statement elsif_list ELSE statement*/
 			if (node.Count() == 8
 					 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 					 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 					 && node[2].GetType().IsAssignableFrom(typeof(ExpressionNode))
 					 && node[3].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
-					 && node[4].GetType().IsAssignableFrom(typeof(BlockNode))
+					 && node[4].GetType().IsAssignableFrom(typeof(StatementNode))
 					 && node[5].GetType().IsAssignableFrom(typeof(ElsifListNode))
 					 && node[6].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
-					 && node[7].GetType().IsAssignableFrom(typeof(BlockNode)))
+					 && node[7].GetType().IsAssignableFrom(typeof(StatementNode)))
 			{
 				var cond = node[2].Eval(context);
 				if (cond != 0)
@@ -211,16 +216,18 @@ namespace YaccLexCS.ycomplier.code.structure
 					return node[3].Eval(context);
 				}
 				var elistVal = node[5].Eval(context); //elselist should return a tuple (int code, any val)
-				if((elistVal is SpecialValue v) && v == SpecialValue.NoMatch)
+				if ((elistVal is SpecialValue v) && v == SpecialValue.NoMatch)
 					return node[7].Eval(context);
 				return elistVal;
 			}
+			
+
+			
 			return null;
 		}
 
 		public static dynamic ElsifListNode(ElsifListNode node, RuntimeContext context)
 		{
-			throw new NotImplementedException();
 			/*elsif*/
 			if (node.Count() == 1
 					 && node[0].GetType().IsAssignableFrom(typeof(ElsifNode)))
@@ -237,43 +244,44 @@ namespace YaccLexCS.ycomplier.code.structure
 					return node[1].Eval(context);
 				return elistVal;
 			}
+			return null;
 		}
 		public static dynamic ElsifNode(ElsifNode node, RuntimeContext context)
 		{
-			throw new NotImplementedException();
-			/*ELSIF LP expression RP block*/
+			/*ELSIF LP expression RP statement*/
 			if (node.Count() == 5
 					 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 					 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 					 && node[2].GetType().IsAssignableFrom(typeof(ExpressionNode))
 					 && node[3].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
-					 && node[4].GetType().IsAssignableFrom(typeof(BlockNode)))
+					 && node[4].GetType().IsAssignableFrom(typeof(StatementNode)))
 			{
 				var cond = node[2].Eval(context);
 				if (cond == 0) return SpecialValue.NoMatch;
 				return node[4].Eval(context);
 			}
+			return null;
 		}
 		public static dynamic StatementListNode(StatementListNode node, ycomplier.RuntimeContext context)
 		{
-					
-						/*statement*/
-						if(node.Count() == 1 
-								 && node[0].GetType().IsAssignableFrom(typeof(StatementNode)))
-						{
+
+            /*statement*/
+            if (node.Count() == 1
+                     && node[0].GetType().IsAssignableFrom(typeof(StatementNode)))
+            {
 								return node[0].Eval(context);
-						}
-						/*statement_list statement*/
-						if(node.Count() == 2 
-								 && node[0].GetType().IsAssignableFrom(typeof(StatementListNode))
+            }
+            /*statement_list statement*/
+            if (node.Count() == 2
+                     && node[0].GetType().IsAssignableFrom(typeof(StatementListNode))
 								 && node[1].GetType().IsAssignableFrom(typeof(StatementNode)))
-						{
+            {
 				var v = node[0].Eval(context);
 				if (v is SpecialValue && (v == SpecialValue.BREAK || v == SpecialValue.CONTINUE)) return v;
  								return node[1].Eval(context);
-						}
+			}
 			return null;
-				}
+		}
 
 
 				public static dynamic ExpressionNode(ExpressionNode node, ycomplier.RuntimeContext context)
@@ -650,7 +658,7 @@ namespace YaccLexCS.ycomplier.code.structure
 		}
 		public static dynamic ForStatementNode(ForStatementNode node, RuntimeContext context)
 		{
-			/*FOR LP expression SEMICOLON expression SEMICOLON expression RP block*/
+			/*FOR LP expression SEMICOLON expression SEMICOLON expression RP statement*/
 			if (node.Count() == 9
 					 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 					 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
@@ -660,7 +668,7 @@ namespace YaccLexCS.ycomplier.code.structure
 					 && node[5].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 					 && node[6].GetType().IsAssignableFrom(typeof(ExpressionNode))
 					 && node[7].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
-					 && node[8].GetType().IsAssignableFrom(typeof(BlockNode)))
+					 && node[8].GetType().IsAssignableFrom(typeof(StatementNode)))
 			{
 				$"entre for stat".PrintToConsole();
 				var initExp = node[2];

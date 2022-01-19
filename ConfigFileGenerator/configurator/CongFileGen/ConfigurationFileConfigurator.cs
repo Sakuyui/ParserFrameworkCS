@@ -8,16 +8,43 @@ namespace ConfigFileGenerator.configurator.CongFileGen
     public class ConfigurationFileConfigurator
     {
         private readonly ConfigFileParser _configFileParser;
-  
+        private readonly List<TokenMethod> _ts;
+        private readonly List<GrammarFileStrut> _gs;
+
         public ConfigurationFileConfigurator(string filePath)
         {
             _configFileParser = new ConfigFileParser(filePath);
             _configFileParser.Init();
+            _ts = _configFileParser.ParseTokensConfig();
+            _gs = _configFileParser.ParseTokensGrammar();
         }
 
         public string GenTokenConfigFile()
         {
             return TokensConfigFileGen.GenFileContentString(_configFileParser.ParseTokensConfig());
+        }
+        public Dictionary<string, string> GenASTFiles(string outPath)
+        {
+            var res =  GenAstNodes(_ts, _gs);
+            foreach (var r in res)
+            {
+                var p = r.Key.Split("::");
+                var fold = p[0].ToLower();
+                var fName = p[1].Split("_").Select(s => (s[0] + "").ToUpper() + s[1..])
+                    .Aggregate("", (a, b) => a + b);
+                if (File.Exists(outPath + "structure\\" + fold + "\\" + fName))
+                {
+                    File.Delete(outPath + "structure\\" + fold + "\\" + fName);
+                }
+
+                if (!Directory.Exists(outPath + "structure\\" + fold))
+                {
+                    Directory.CreateDirectory(outPath + "structure\\" + fold);
+                }
+                File.WriteAllText(outPath + "structure\\" + fold + "\\" + fName + "Node.cs", r.Value);
+                r.Key.PrintToConsole();
+            }
+            return res;
         }
         public Dictionary<string, string> GenGrammarConfigFiles()
         {

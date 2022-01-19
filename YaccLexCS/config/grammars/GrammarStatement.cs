@@ -5,20 +5,21 @@ namespace YaccLexCS.config{
 	[GrammarConfiguration]
 	public static class GrammarStatement{
 
-		[GrammarDefinition("statement","if_statement","while_statement","expression SEMICOLON", "for_statement")]
+		[GrammarDefinition("statement","if_statement","while_statement","expression SEMICOLON", "for_statement",
+			"block")]
 		public static void statement(RuntimeContext context){
 
 		}
 
 
-		[GrammarDefinition("while_statement","WHILE LP expression RP block")]
+		[GrammarDefinition("while_statement","WHILE LP expression RP statement")]
 		public static void while_statement(RuntimeContext context){
 			
 		}
 
 
-		[GrammarDefinition("if_statement","IF LP expression RP block", "IF LP expression RP block ELSE block",
-			"IF LP expression RP block elsif_list", "IF LP expression RP block elsif_list ELSE block")]
+		[GrammarDefinition("if_statement","IF LP expression RP statement", "IF LP expression RP statement ELSE statement",
+			"IF LP expression RP statement elsif_list", "IF LP expression RP statement elsif_list ELSE statement")]
 		public static void if_statement(RuntimeContext context){
 
 		}
@@ -27,7 +28,7 @@ namespace YaccLexCS.config{
 		{
 
 		}
-		[GrammarDefinition("elsif", "ELSIF LP expression RP block")]
+		[GrammarDefinition("elsif", "ELSIF LP expression RP statement")]
 		public static void eliif(RuntimeContext context)
 		{
 			
@@ -38,7 +39,7 @@ namespace YaccLexCS.config{
 
 		}
 
-		[GrammarDefinition("for_statement", "FOR LP expression SEMICOLON expression SEMICOLON expression RP block")]
+		[GrammarDefinition("for_statement", "FOR LP expression SEMICOLON expression SEMICOLON expression RP statement")]
 		public static void for_statement(RuntimeContext context)
 		{
 

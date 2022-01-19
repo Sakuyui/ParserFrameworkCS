@@ -45,6 +45,9 @@ namespace YaccLexCS
                 "   i = i + 1;" +
                 "   if(i==7){" +
                 "       for(var j = 0; i < 8; j = j + 1){" +
+                "           {" +
+                "               i = i + 1;" +
+                "           }" +
                 "           if(j > 5){break;}" +
                 "       }" +
                 "       break;" +
@@ -57,10 +60,11 @@ namespace YaccLexCS
             var tokenList = new List<Token>();
 
             //create parser
-            /*Lr1Parser parser = Lr1ParserBuilder.ConfigureFromPackages(lexer.TokenNames, new[] { "YaccLexCS.config" });
-            parser.InitParser().SetContext(context);
-            if (File.Exists("1.bin")) File.Delete("1.bin");
-            parser.Serialize("1.bin");*/
+            /* Lr1Parser parser = Lr1ParserBuilder.ConfigureFromPackages(lexer.TokenNames, new[] { "YaccLexCS.config" });
+             parser.InitParser().SetContext(context);
+             if (File.Exists("1.bin")) File.Delete("1.bin");
+             parser.Serialize("1.bin");*/
+
             Lr1Parser parser = Lr1ParserBuilder
                 .DeSerializeFromFile("1.bin", lexer.TokenNames, new[] { "YaccLexCS.config" });
             parser.SetContext(context);
@@ -79,7 +83,7 @@ namespace YaccLexCS
             });
            
             tokenList.PrintEnumerationToConsole();
-           
+            
             parser.ParseFromCurrentState(new Token("$", "$"));
             
             var root = parser.GetCurrentStack().Peek();
@@ -88,10 +92,10 @@ namespace YaccLexCS
             root.Eval(context);
             
 
-            return;
             
             
-            var tokens = lexer.ParseWholeText("while i < 10 {\n    " +
+            
+          /*  var tokens = lexer.ParseWholeText("while i < 10 {\n    " +
                 "sum = sum + i;\n " +
                 "i = i + 1; \n " +
                 "continue;" + 
@@ -99,7 +103,7 @@ namespace YaccLexCS
                 "} sum")
                 .Where(e => e.Type != "Skip");
             
-            tokens.PrintEnumerationToConsole();
+            tokens.PrintEnumerationToConsole();*/
             
         }
 

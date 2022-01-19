@@ -38,6 +38,7 @@ namespace YaccLexCS.ycomplier
         }
         private readonly RuntimeMemory _runtimeMemory = new();
         private Stack<CommonStackFrame> _stackFrames = new();
+
         public RuntimeContext()
         {
             this["v_tokenSourceText"] = "";
