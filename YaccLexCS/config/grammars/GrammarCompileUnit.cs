@@ -11,7 +11,7 @@ namespace YaccLexCS.config{
 
 		}
 
-		[GrammarDefinition("definition_or_statement","statement")]
+		[GrammarDefinition("definition_or_statement","statement", "definition")]
 		public static void definition_or_statement(CompilerContext context){
 
 		}

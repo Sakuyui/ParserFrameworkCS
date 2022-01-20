@@ -9,6 +9,15 @@ namespace YaccLexCS.config
     [GrammarConfiguration]
     public static class GrammarFunction
     {
+        [GrammarDefinition("augument_list", "augument_list COMMA augument", "augument")]
+        public static void augument_list()
+        {
+        }
+
+        [GrammarDefinition("augument", "expression")]
+        public static void augument()
+        {
+        }
 
         [GrammarDefinition("params_list", "params_list COMMA param",  "param")]
         public static void params_list()

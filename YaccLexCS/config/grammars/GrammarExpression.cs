@@ -62,7 +62,7 @@ namespace YaccLexCS.config{
 		}
 
 
-		[GrammarDefinition("unary_expression","primary_expression","SUB unary_expression")]
+		[GrammarDefinition("unary_expression","primary_expression","SUB unary_expression", "ID LP augument_list RP")]
 		public static void unary_expression(CompilerContext context){
 
 		}

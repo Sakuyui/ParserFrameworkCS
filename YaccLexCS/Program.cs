@@ -35,9 +35,7 @@ namespace YaccLexCS
 
             //在指定命名空间扫描配置
             var lexer = Lexer.ConfigureFromPackages(new[] { "YaccLexCS.config" }, compilerContext);
-           /* var test = "let l1 = a + 2;";
-            lexer.ParseWholeText(test).PrintCollectionToConsole();
-            return;*/
+           
             //create input stream
             var r = (TextReader)new StringReader("" +
                 "let sum = 0;" +
@@ -52,24 +50,32 @@ namespace YaccLexCS
                 "           if(j > 5){break;}" +
                 "       }" +
                 "       let l = lambda(x, y)=>{x + y;};" + 
+                "       let a = l(sum, i);" +
+                "       a = fact(10)" +
                 "       break;" +
                 "   }" +
                 "   sum = sum + i;" +
                 "   continue;" +
                 "   break;" +
-                "}");
+                "}" +
+                "" +
+                "dyfn fact(n){" +
+                "   if(n==1) return 1;" +
+                "   return n * fact(n)" +
+                "}" +
+                ""); 
             
             var tokenList = new List<Token>();
 
             //create parser
-            /*Lr1Parser parser = Lr1ParserBuilder.ConfigureFromPackages(lexer.TokenNames, new[] { "YaccLexCS.config" });
+            Lr1Parser parser = Lr1ParserBuilder.ConfigureFromPackages(lexer.TokenNames, new[] { "YaccLexCS.config" });
             parser.InitParser().SetContext(compilerContext);
             if (File.Exists("1.bin")) File.Delete("1.bin");
-            parser.Serialize("1.bin");*/
+            parser.Serialize("1.bin");
 
-            Lr1Parser parser = Lr1ParserBuilder
+           /* Lr1Parser parser = Lr1ParserBuilder
                 .DeSerializeFromFile("1.bin", lexer.TokenNames, new[] { "YaccLexCS.config" });
-            parser.SetContext(compilerContext);
+            parser.SetContext(compilerContext);*/
 
             /*
              问题：生成器。对于非终结字符，要多一个类型判断
@@ -90,7 +96,7 @@ namespace YaccLexCS
             
             var root = parser.GetCurrentStack().Peek();
             root.GetTreeShapeDescribe().PrintToConsole();
-            return;
+            
             root.Eval(runtimeContext);
             
 
