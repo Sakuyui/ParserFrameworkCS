@@ -6,7 +6,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.RegularExpressions;
 using YaccLexCS.ycomplier.util;
-
 namespace YaccLexCS.ycomplier
 {
       public static class FunctionExt

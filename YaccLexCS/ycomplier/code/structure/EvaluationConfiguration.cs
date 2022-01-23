@@ -22,38 +22,98 @@ namespace YaccLexCS.ycomplier.code.structure
 		}).Value;
 
 		public static dynamic CompileUnitNode(CompileUnitNode node, RuntimeContext context)
-				{
-						/*definition_or_statement*/
-						if(node.Count() == 1 
-								 && node[0].GetType().IsAssignableFrom(typeof(DefinitionOrStatementNode)))
-						{
-								return node[0].Eval(context);
-						}
-						/*compile_unit definition_or_statement*/
-						if(node.Count() == 2 
-								 && node[0].GetType().IsAssignableFrom(typeof(CompileUnitNode))
+        {
+			
+            /*definition_or_statement*/
+            if (node.Count() == 1
+                     && node[0].GetType().IsAssignableFrom(typeof(DefinitionOrStatementNode)))
+            {
+				(node[0].Eval(context) as ASTNode).Eval(context);
+            }
+            /*compile_unit definition_or_statement*/
+            if(node.Count() == 2 
+								 && node[0].GetType().IsAssignableFrom(typeof(CompileUnitNode)) //返回一个list
 								 && node[1].GetType().IsAssignableFrom(typeof(DefinitionOrStatementNode)))
-						{
-								node[0].Eval(context);
-								return node[1].Eval(context);
-						}
-						return null;
-				}
-
+            {
+				var l = node[0];
+				var r = node[1].Eval(context); //希望提前暴露定义
+				if(r is DefinitionNode dNode)
+                {
+					context.RuntimeStatus |= RuntimeStatusCode.DefinGlobalFunction;
+					dNode.Eval(context);
+					context.RuntimeStatus &= ~RuntimeStatusCode.DefinGlobalFunction;
+					return l.Eval(context);
+                }
+                else
+                {
+					l.Eval(context);
+					var val = r.Eval(context);
+					return val;
+                }
+            }
+			return null;
+        }
+		
 
 		public static dynamic DefinitionOrStatementNode(DefinitionOrStatementNode node, RuntimeContext context)
         {
-						//throw new NotImplementedException();
-						/*statement*/
-						if(node.Count() == 1 
-								 && node[0].GetType().IsAssignableFrom(typeof(StatementNode)))
-						{
-								return node[0].Eval(context);
-						}
+			//throw new NotImplementedException();
+			/*statement*/
+			if (node.Count() == 1
+					 && node[0].GetType().IsAssignableFrom(typeof(StatementNode)))
+			{
+				return node[0];
+            }
+			/*definition*/
+			if (node.Count() == 1
+				 && node[0].GetType().IsAssignableFrom(typeof(DefinitionNode)))
+			{
+				return node[0];
+			}
 			return null;
+        }
+		public static dynamic DefinitionNode(DefinitionNode node, RuntimeContext context)
+		{
+			/*function_definition*/
+			if (node.Count() == 1
+				 && node[0].GetType().IsAssignableFrom(typeof(FunctionDefinitionNode)))
+			{
+				
+				return node[0].Eval(context);
+			}
+			return null;
+		}
+		public static dynamic FunctionDefinitionNode(FunctionDefinitionNode node, RuntimeContext context)
+		{
+			
+			/*DYFN ID LP params_list RP block*/
+			if (node.Count() == 6
+				 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+				 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+				 && node[2].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+				 && node[3].GetType().IsAssignableFrom(typeof(ParamsListNode))
+				 && node[4].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+				 && node[5].GetType().IsAssignableFrom(typeof(BlockNode)))
+			{
+				var id = (node[1] as ASTTerminalNode).Token.SourceText;
+				var placeHolderList = node[3].Eval(context) as List<string>;
+				$"try define function {id}({placeHolderList.Aggregate("",(a, b) => a + "," +b ).Trim(',')})".PrintToConsole();
+				var func = new FunctionThunk(id, placeHolderList, node[5]!);
+				if((context.RuntimeStatus & RuntimeStatusCode.DefinGlobalFunction) == 0)
+                {
+					$"define local function {id}".PrintCollectionToConsole();
+					context.GetCurrentCommonFrame().SetLocalVar(id, func);
+                }
+                else
+                {
+					$"define global function {id}".PrintToConsole();
+					context.DefineGlobalFunction(func);
 				}
-
-
+				
+				return null;
+			}
+			return null;
+		}
 		public static dynamic StatementNode(StatementNode node, RuntimeContext context)
 		{
 
@@ -76,14 +136,13 @@ namespace YaccLexCS.ycomplier.code.structure
             {
 								return node[0].Eval(context);
 						}
-						/*expression SEMICOLON*/
-						if(node.Count() == 2 
-								 && node[0].GetType().IsAssignableFrom(typeof(ExpressionNode))
+            /*expression SEMICOLON*/
+            if (node.Count() == 2
+                     && node[0].GetType().IsAssignableFrom(typeof(ExpressionNode))
 								 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode)))
-						{
-				$"expression;".PrintToConsole();
-								
-								return node[0].Eval(context);
+            {
+				
+                return node[0].Eval(context);
 			}
 			/*block*/
 			if (node.Count() == 1
@@ -239,7 +298,6 @@ namespace YaccLexCS.ycomplier.code.structure
 		}
 		public static dynamic StatementListNode(StatementListNode node, RuntimeContext context)
 		{
-
             /*statement*/
             if (node.Count() == 1
                      && node[0].GetType().IsAssignableFrom(typeof(StatementNode)))
@@ -252,8 +310,20 @@ namespace YaccLexCS.ycomplier.code.structure
 								 && node[1].GetType().IsAssignableFrom(typeof(StatementNode)))
             {
 				var v = node[0].Eval(context);
-				if (v is SpecialValue && (v == SpecialValue.BREAK || v == SpecialValue.CONTINUE)) return v;
- 								return node[1].Eval(context);
+				if (v is SpecialValue && (v == SpecialValue.BREAK || v == SpecialValue.CONTINUE)) 
+					return v;
+				if (v is ReturnVal rVal)
+				{
+					return rVal.Value;
+				}
+				if((context.RuntimeStatus & RuntimeStatusCode.Returning) != 0)
+                {
+					$"return {v}".PrintToConsole();
+					context.RuntimeStatus &= ~RuntimeStatusCode.Returning;
+					return v;
+                }
+				return node[1].Eval(context);
+				
 			}
 			return null;
 		}
@@ -261,99 +331,61 @@ namespace YaccLexCS.ycomplier.code.structure
 
 		public static dynamic ExpressionNode(ExpressionNode node, RuntimeContext context)
         {
-			/*relational_expression*/
+			/*assign_expression*/
 			if (node.Count() == 1
-					 && node[0].GetType().IsAssignableFrom(typeof(RelationalExpressionNode)))
-			{
-				return node.Eval(context);
-			}
-			/*equality_expression*/
-			if (node.Count() == 1
-					 && node[0].GetType().IsAssignableFrom(typeof(EqualityExpressionNode)))
-			{
-				return node.Eval(context);
-			}
-			/*logical_or_expression*/
-			if (node.Count() == 1
-					 && node[0].GetType().IsAssignableFrom(typeof(LogicalOrExpressionNode)))
+				 && node[0].GetType().IsAssignableFrom(typeof(AssignExpressionNode)))
 			{
 				return node[0].Eval(context);
 			}
-			/*logical_and_expression*/
-			if (node.Count() == 1
-					 && node[0].GetType().IsAssignableFrom(typeof(LogicalAndExpressionNode)))
-			{
-				return node[0].Eval(context);
-			}
-			/*terminal_expression*/
-			if (node.Count() == 1 
-								 && node[0].GetType().IsAssignableFrom(typeof(TerminalExpressionNode)))
-			{
-				return node[0].Eval(context);
-			}
-            /*assign_expression*/
-            if (node.Count() == 1
-                     && node[0].GetType().IsAssignableFrom(typeof(AssignExpressionNode)))
-            {
-				                return node[0].Eval(context);
-            }
-            /*additive_expression*/
-            if (node.Count() == 1
-                     && node[0].GetType().IsAssignableFrom(typeof(AdditiveExpressionNode)))
-            {
-								return node[0].Eval(context);
-            }
-            /*multiplicative_expression*/
-            if (node.Count() == 1
-                     && node[0].GetType().IsAssignableFrom(typeof(MultiplicativeExpressionNode)))
-            {
-				return node[0].Eval(context);
-            }
-			/*unary_expression*/
-			if (node.Count() == 1
-					 && node[0].GetType().IsAssignableFrom(typeof(UnaryExpressionNode)))
-            {
-				return node[0].Eval(context);
-            }
-            /*primary_expression*/
-            if (node.Count() == 1
-                     && node[0].GetType().IsAssignableFrom(typeof(PrimaryExpressionNode)))
-            {
-							return node[0].Eval(context);
-            }
 			/*define_var_expression*/
-			if(node.Count() == 1 && node[0].GetType().IsAssignableFrom(typeof(DefineVarExpressionNode)))
-            {
-				return node[0].Eval(context);
-            }
-			
-			/*lambda_expression*/
-			if (node.Count() == 1 && node[0].GetType().IsAssignableFrom(typeof(LambdaExpressionNode)))
+			if (node.Count() == 1
+				 && node[0].GetType().IsAssignableFrom(typeof(DefineVarExpressionNode)))
 			{
 				return node[0].Eval(context);
+			}
+			/*lambda_expression*/
+			if (node.Count() == 1
+				 && node[0].GetType().IsAssignableFrom(typeof(LambdaExpressionNode)))
+			{
+				return node[0].Eval(context);
+			}
+			/*RETURN expression*/
+			if (node.Count() == 2
+				 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+				 && node[1].GetType().IsAssignableFrom(typeof(ExpressionNode)))
+			{
+				var val = node[1].Eval(context);
+				context.RuntimeStatus |= RuntimeStatusCode.Returning;
+				return val;
 			}
 			return null;
 		}
 
 
-				public static dynamic AssignExpressionNode(AssignExpressionNode node, RuntimeContext context)
-				{
-						/*ID ASSIGN expression*/
-						if(node.Count() == 3 
-								 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+		public static dynamic AssignExpressionNode(AssignExpressionNode node, RuntimeContext context)
+		{
+            /*ID ASSIGN expression*/
+            if (node.Count() == 3
+                     && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 								 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 								 && node[2].GetType().IsAssignableFrom(typeof(ExpressionNode)))
-						{
-							var id = ((ASTTerminalNode)node[0]).Token.SourceText;
-							var exp = node[2];
-							var val = exp.Eval(context); //right side
+            {
+				var id = ((ASTTerminalNode)node[0]).Token.SourceText;
+				var exp = node[2];
+				var val = exp.Eval(context); //right side
 														 //put variable to memory
 				context.GetCurrentCommonFrame().FindAndSetVar(id, val);
-							$"set {id} = {val}".PrintToConsole();
-							return val;
-						}
+				$"set {id} = {val}".PrintToConsole();
+				return val;
+            }
+			/*logical_or_expression*/
+			if (node.Count() == 1
+				 && node[0].GetType().IsAssignableFrom(typeof(LogicalOrExpressionNode)))
+			{
+				return node[0].Eval(context);
+			}
 			return null;
-				}
+        }
 
 
 				public static dynamic TerminalExpressionNode(TerminalExpressionNode node, RuntimeContext context)
@@ -377,47 +409,56 @@ namespace YaccLexCS.ycomplier.code.structure
 								return null;
 						}
 			return null;
-				}
+		}
 
 
-				public static dynamic AdditiveExpressionNode(AdditiveExpressionNode node, RuntimeContext context)
-				{
-						
-						/*additive_expression ADD multiplicative_expression*/
-						if(node.Count() == 3 
+		public static dynamic AdditiveExpressionNode(AdditiveExpressionNode node, RuntimeContext context)
+		{
+
+			/*additive_expression ADD multiplicative_expression*/
+			/*additive_expression SUB multiplicative_expression*/
+            if(node.Count() == 3 
 								 && node[0].GetType().IsAssignableFrom(typeof(AdditiveExpressionNode))
 								 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 								 && node[2].GetType().IsAssignableFrom(typeof(MultiplicativeExpressionNode)))
-						{
+			{
 				var exp1 = node[0].Eval(context);
+				var op = node[1] as ASTTerminalNode;
 				var exp2 = node[2].Eval(context);
-				return exp1 + exp2;
+                switch (op.Token.Type)
+                {
+					case "ADD":
+						return exp1 + exp2;
+					case "SUB":
+						return exp1 - exp2;
+                }
+				return null;
 			}
-						/*multiplicative_expression*/
-						if(node.Count() == 1 
+            /*multiplicative_expression*/
+            if(node.Count() == 1 
 								 && node[0].GetType().IsAssignableFrom(typeof(MultiplicativeExpressionNode)))
-						{
-								return node[0].Eval(context);
-						}
-						return null;
-				}
+            {
+                return node[0].Eval(context);
+            }
+            return null;
+		}
 
 
-				public static dynamic MultiplicativeExpressionNode(MultiplicativeExpressionNode node, RuntimeContext context)
-				{
-						
-						/*unary_expression*/
-						if(node.Count() == 1 
-								 && node[0].GetType().IsAssignableFrom(typeof(UnaryExpressionNode)))
-						{
+		public static dynamic MultiplicativeExpressionNode(MultiplicativeExpressionNode node, RuntimeContext context)
+		{
+
+            /*unary_expression*/
+            if (node.Count() == 1
+                     && node[0].GetType().IsAssignableFrom(typeof(UnaryExpressionNode)))
+            {
 				return node[0].Eval(context);
-						}
-						/*multiplicative_expression MUL unary_expression*/
-						if(node.Count() == 3 
-								 && node[0].GetType().IsAssignableFrom(typeof(MultiplicativeExpressionNode))
+			}
+            /*multiplicative_expression MUL unary_expression*/
+            if (node.Count() == 3
+                     && node[0].GetType().IsAssignableFrom(typeof(MultiplicativeExpressionNode))
 								 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 								 && node[2].GetType().IsAssignableFrom(typeof(UnaryExpressionNode)))
-						{
+			{
 				var exp1 = node[0].Eval(context);
 				var exp2 = node[2].Eval(context);
 				return exp1 * exp2;
@@ -448,19 +489,38 @@ namespace YaccLexCS.ycomplier.code.structure
 
 		public static dynamic UnaryExpressionNode(UnaryExpressionNode node, RuntimeContext context)
 		{
-
-            /*primary_expression*/
-            if (node.Count() == 1
-                     && node[0].GetType().IsAssignableFrom(typeof(PrimaryExpressionNode)))
-            {
-								return node[0].Eval(context);
-            }
+			/*access_expression*/
+			if (node.Count() == 1
+				 && node[0].GetType().IsAssignableFrom(typeof(AccessExpressionNode)))
+			{
+				return node[0].Eval(context);
+			}
 			/*SUB unary_expression*/
 			if (node.Count() == 2
 					 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 								 && node[1].GetType().IsAssignableFrom(typeof(UnaryExpressionNode)))
 			{
-								return -node[1].Eval(context);
+                return -node[1].Eval(context);
+			}
+			
+			return null;
+		}
+		public static dynamic AccessExpressionNode(AccessExpressionNode node, RuntimeContext context)
+		{
+			/*primary_expression*/
+			if (node.Count() == 1
+				 && node[0].GetType().IsAssignableFrom(typeof(PrimaryExpressionNode)))
+			{
+				return node[0].Eval(context);
+			}
+			/*ID LP RP*/
+			if (node.Count() == 3
+				 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+				 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+				 && node[2].GetType().IsAssignableFrom(typeof(ASTTerminalNode)))
+			{
+				throw new NotImplementedException($"call {(node[0] as ASTTerminalNode).Token.SourceText}");
+				return null;
 			}
 			/*ID LP augument_list RP*/
 			if (node.Count() == 4
@@ -469,32 +529,52 @@ namespace YaccLexCS.ycomplier.code.structure
 				 && node[2].GetType().IsAssignableFrom(typeof(AugumentListNode))
 				 && node[3].GetType().IsAssignableFrom(typeof(ASTTerminalNode)))
 			{
-				var func = InterpreterHelper.BasicTypesValueExtract(node[0] as ASTTerminalNode, context);
-				if (func == null) return null;
+				var id = (node[0] as ASTTerminalNode).Token.SourceText;
 				var list = node[2].Eval(context) as List<ASTNode>;
-				if(func is LambdaExpressionType lambdaType)
+				
+				dynamic func = InterpreterHelper.BasicTypesValueExtract(node[0] as ASTTerminalNode, context);
+				if(func == null)
+                {
+					func = context.GetGlobalFunction(id, paramsCount: list.Count);
+                }
+				if (func == null)
+				{
+					throw new Exception("Not define variable or func " + (node[0] as ASTTerminalNode).Token.SourceText);
+					return null;
+				}
+				
+
+				if (func is LambdaExpressionType lambdaExp)
+				{
+					var aList = list.Select(x => x.Eval(context)).ToList();
+					var val = lambdaExp.Eval(aList ,context);
+					return val;
+				}else if(func is FunctionThunk functionThunk)
                 {
 					var aList = list.Select(x => x.Eval(context)).ToList();
-					var val = lambdaType.Eval(aList, context);
-					return val;
+					return functionThunk.Eval(context, aList);
                 }
+                else
+                {
+					throw new Exception("Not define variable or func " + (node[0] as ASTTerminalNode).Token.SourceText);
+				}
 
 				return null;
+			}
+			/*LP expression RP*/
+			if (node.Count() == 3
+				 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+				 && node[1].GetType().IsAssignableFrom(typeof(ExpressionNode))
+				 && node[2].GetType().IsAssignableFrom(typeof(ASTTerminalNode)))
+			{
+				return node[1].Eval(context);
 			}
 			return null;
 		}
 
-
 		public static dynamic PrimaryExpressionNode(PrimaryExpressionNode node, RuntimeContext context)
 		{
-			/*LP expression RP*/
-			if (node.Count() == 3
-					 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
-					 && node[1].GetType().IsAssignableFrom(typeof(ExpressionNode))
-					 && node[2].GetType().IsAssignableFrom(typeof(ASTTerminalNode)))
-			{
-				return node[1].Eval(context);
-			}
+			
 			/*ID DOUBLE_LITERAL STRING BREAK CONTINUE RETURN ...*/
 			if (node.Count() == 1
 								 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode)))

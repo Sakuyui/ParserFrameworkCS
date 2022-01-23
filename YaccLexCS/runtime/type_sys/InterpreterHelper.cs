@@ -1,4 +1,5 @@
-﻿using YaccLexCS.ycomplier.code;
+﻿using YaccLexCS.runtime.types;
+using YaccLexCS.ycomplier.code;
 
 namespace YaccLexCS.runtime
 {
@@ -12,12 +13,16 @@ namespace YaccLexCS.runtime
         {
 			context.GetCurrentCommonFrame().RemoveNewestStorageBlock();
         }
+		
 		public static dynamic BasicTypesValueExtract(ASTTerminalNode terminalNode, RuntimeContext context)
         {
             switch (terminalNode.Token.Type)
             {
 				case "ID":
-					return context.GetCurrentCommonFrame().GetLocalVar(terminalNode.Token.SourceText);
+				{
+					var v = context.GetCurrentCommonFrame().GetLocalVar(terminalNode.Token.SourceText);
+					return v;
+				}
 				case "STRING":
 					return terminalNode.Token.SourceText;
 				case "DOUBLE_LITERAL":

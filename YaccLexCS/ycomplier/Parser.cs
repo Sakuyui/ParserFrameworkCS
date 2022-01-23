@@ -163,7 +163,6 @@ namespace YaccLexCS.ycomplier
             token.PrintToConsole();
             if (t[0] == 's') //如果开头是s就移进 = 新状态压栈 + 新符号从输入队列弹出压栈
             {
-                
                 //shift
                 var nextState = int.Parse(t[1..]);
                 $"shift to {nextState}".DebugOutPut();
@@ -209,8 +208,9 @@ namespace YaccLexCS.ycomplier
 
                 nodeList.Reverse();
                 //通过反射寻找对应的AST节点
-                _codeStack.Push((ASTNode) Activator.CreateInstance(_typeMap[g.LeftSymbol], new[] {nodeList}));
-
+                
+                _codeStack.Push((ASTNode)Activator.CreateInstance(_typeMap[g.LeftSymbol], new[] { nodeList }));
+                
                 var gotoNext = Lr1Table?.Goto[_stateStack.Peek()][_codeStack.Peek().NodeName];
                 do
                 {
@@ -256,6 +256,7 @@ namespace YaccLexCS.ycomplier
         }
         public override Lr1Parser InitParser()
         {
+            var Iset = "";
             "".DebugOutPut();
             $"Grammar List = {Definitions.Grammars.GetMultiDimensionString()}\n".DebugOutPut();
            
@@ -276,15 +277,19 @@ namespace YaccLexCS.ycomplier
             
             
             "============================================I(0)=======================================".DebugOutPut();
+            Iset += "============================================I(0)=======================================";
+            //当前的项目集I(0)
             var curPSet = new ProjectSet(new []{new Lr1Item("<S'>", 
                 new List<string>(new []{Definitions.StartWord}),
                 new List<string>(new []{"$"}))});
-         
+
+            //对一个项目集合使用闭包
             curPSet.ApplyClosure(Definitions);
             curPSet.GetProjectItemsDesc().DebugOutPut();
-            
-            var fi = CfgTools.GetFirstSet(Definitions);
-            foreach (var (key, value) in fi)
+            Iset += "\r\n" + curPSet.GetProjectItemsDesc();
+
+            var firstSet = CfgTools.GetFirstSet(Definitions);
+            foreach (var (key, value) in firstSet)
             {
                 $"first({key}) = [{value.AggregateOneOrMore((a, b) => a + ","+ b)}]".PrintToConsole();
             }
@@ -308,6 +313,8 @@ namespace YaccLexCS.ycomplier
                 for (var i = last; i < count; i++)
                 {
                     var p = projects[i];
+                    if (i == 103)
+                        "!!".PrintToConsole();
                     //为第i个项目集(p)，向右移1
                     MoveProject(new KeyValuePair<int, ProjectSet>(i, p), projects, Lr1Table, products);
                 }
@@ -326,17 +333,18 @@ namespace YaccLexCS.ycomplier
             "=================================Init Finish, Goto and transition Table Generated===============================".PrintToConsole();
             "==============================Project sets===================".PrintToConsole();
             $"count = {projects.Count}".DebugOutPut();
+            Iset += $"count = {projects.Count}\r\n";
 
-            // if(File.Exists("d:\\pl\\projects.txt"))
-            //     File.Delete("d:\\pl\\projects.txt");
-            // var f = File.Open("d:\\pl\\projects.txt", FileMode.OpenOrCreate);
-            // projects.ElementInvoke((p, i) =>
-            // {
-            //     var ps = p.GetProjectItemsDesc();
-            //     f.Write($"I({i}): {ps}".ToCharArray().Select(e => (byte)e).Append((byte)'\n').ToArray());
-            // });
-            //
-            // f.Close();
+             if(File.Exists("d:\\pl\\projects.txt"))
+                 File.Delete("d:\\pl\\projects.txt");
+             var f = File.Open("d:\\pl\\projects.txt", FileMode.OpenOrCreate);
+             projects.ElementInvoke((p, i) =>
+             {
+                 var ps = p.GetProjectItemsDesc();
+                 f.Write($"I({i}): {ps}".ToCharArray().Select(e => (byte)e).Append((byte)'\n').ToArray());
+             });
+            
+             f.Close();
 
 
             "==============================Project sets Out to File===================".PrintToConsole();
@@ -362,27 +370,24 @@ namespace YaccLexCS.ycomplier
         private void MoveProject(KeyValuePair<int, ProjectSet> projectSet, List<ProjectSet> result, Lr1Table table, 
             Dictionary<int, ProducerDefinitionItem> definitionItems)
         {
-            var (curId, value) = projectSet;
+            var (curId, value) = projectSet; //项目集ID和项目集内容
             $">> From I({curId}) Move".DebugOutPut();
             
-            var cSet = value.Where(e => !e.IsReductionItem())
+            var nextWords = value.Where(e => !e.IsReductionItem())
                 .Select(e => e.ProduceItems[e.DotPos]).ToHashSet(null);
-
-            if (!cSet.Any()) return;
-            
-
-            
-           
-            //projectSet.Value.PrintToConsole();
-            
+            if(curId == 276 || curId == 103)
+            {
+                "".PrintToConsole();
+                value.GetProjectItemsDesc().PrintToConsole();
+            }
             //解决规约填表
             if (value.Any(p => p.IsReductionItem()))
             {
-                var reduction= value.Where(p => p.IsReductionItem()).ToList();
+                var reduction = value.Where(p => p.IsReductionItem()).ToList();
                 foreach (var r in reduction)
                 {
                     var forwardSearch = r.SearchWordList;
-                    
+
                     foreach (var f in forwardSearch)
                     {
                         if (f == "$" && r.StartWord == "<S'>")
@@ -392,27 +397,53 @@ namespace YaccLexCS.ycomplier
                         else
                         {
                             $"cur = {r}".DebugOutPut();
-                            table.Transition[curId][f] = "r" + definitionItems.First(d =>
+                            var newVal = "r" + definitionItems.First(d =>
                             {
                                 var p = d.Value;
                                 if (r.StartWord != p.LeftSymbol)
                                     return false;
                                 //$"true with {p}".PrintToConsole();
                                 //$"now {p.ProduceItem.GetMultiDimensionString()}, {r.ProduceItems[0].GetMultiDimensionString()}".PrintToConsole();
-                                return p.ProduceItem == r.ProduceItems.Aggregate("",(a, b) => a + " " + b).Trim();
+                                return p.ProduceItem == r.ProduceItems.Aggregate("", (a, b) => a + " " + b).Trim();
                             }).Key;
+                       
+                            if (table.Transition[curId][f] != null && table.Transition[curId][f] + "" != "")
+                            {
+                                var source = table.Transition[curId][f];
+                                if (source + "" != newVal + "")
+                                {
+                                    $"found confilct {source} replace by {newVal}".PrintToConsole();
+                                    r.ProduceItems.Aggregate("", (a, b) => a + " " + b).Trim().PrintToConsole();
+                                }
+
+
+                            }
+
+                            table.Transition[curId][f] = newVal;
                         }
-                      
+
                     }
-                    
-                  
+
+
                 }
             }
+
+            if (!nextWords.Any()) return;
+            
+
+            
+           
+            //projectSet.Value.PrintToConsole();
+            
+            
             
             //move
-            var pSet = value.Where(p => !p.IsReductionItem()).ToList();
-
-            foreach (var c in cSet)
+            var pSet = value.Where(p => !p.IsReductionItem()).ToList(); //获取所有非规约的项目
+            if(curId + "" == "103")
+            {
+                value.GetProjectItemsDesc().PrintToConsole();
+            }
+            foreach (var c in nextWords)
             {
                 //$"input - {c}".DebugOutPut();
                 var items = pSet.Where(item => item.ProduceItems[item.DotPos] == c)
@@ -427,7 +458,7 @@ namespace YaccLexCS.ycomplier
                 ps.ApplyClosure(Definitions);
                 //$"closure after {result.Count}".PrintToConsole();
                 //判重
-                var newCode = result.Count;
+                var newProjectID = result.Count;
                 if (!result.Contains(ps))
                 {
                     result.Add(ps);
@@ -435,17 +466,17 @@ namespace YaccLexCS.ycomplier
                 }
                 else
                 {
-                    newCode = result.FindIndex(e => e.Equals(ps));
+                    newProjectID = result.FindIndex(e => e.Equals(ps));
                     //code.PrintToConsole();
                 }
                 
                 //处理移进和Goto
                 if (Definitions.NonTerminations.Contains(c))
                 {
-                    table.Goto[curId][c] = newCode;
+                    table.Goto[curId][c] = newProjectID;
                 }else if (Definitions.Terminations.Contains(c))
                 {
-                    table.Transition[curId][c] = "s" + newCode;
+                    table.Transition[curId][c] = "s" + newProjectID;
                 }
                 
                 //存在规约项目，那么要填表
@@ -474,9 +505,22 @@ namespace YaccLexCS.ycomplier
                                 //r.ProduceItems.Aggregate("", (a, b) => a + " " + b).Trim().PrintToConsole();
                                 return p.ProduceItem.Equals(r.ProduceItems.Aggregate("", (a, b) => a + " " + b).Trim());
                             }).Key;
-                            
+
                             //"归约" + definitionItems[k] + " " + k + " " + f).PrintToConsole();
-                            table.Transition[newCode][f] = r.StartWord == "<S'>" ? "ACC": "r" + k;
+                            if (curId == 103)
+                                "!!!".PrintToConsole();
+                           
+                            var newVal = r.StartWord == "<S'>" ? "ACC" : "r" + k;
+                            if ((table.Transition[newProjectID][f] != null || table.Transition[newProjectID][f] + "" != "")
+                                && table.Transition[newProjectID][f] + "" != newVal)
+                            {
+                                $"find confict {table.Transition[newProjectID][f]}, {newVal}, reduce = {r.StartWord}, keep source val".PrintToConsole();
+                            }
+                            else
+                            {
+                                table.Transition[newProjectID][f] = newVal;
+                            }
+                            
                         }
                     }
                 }

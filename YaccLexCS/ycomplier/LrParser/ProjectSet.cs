@@ -34,7 +34,9 @@ namespace YaccLexCS.ycomplier.LrParser
         public ProjectSet ApplyClosure(CfgProducerDefinition definition)
         {
             var changed = true;
-            var memo = new HashSet<Lr1Item>();
+            var memo = new HashSet<Lr1Item>(); //记忆化，防止重复记录相同项目
+            
+
             while (changed)
             {
                 changed = false;
@@ -46,27 +48,30 @@ namespace YaccLexCS.ycomplier.LrParser
                         continue;
                     }
                     
+
+                    //获取目前点号对着的下一个记号
                     var next = item.ProduceItems[item.DotPos];
                     
+                    //如果是终结符号，不需要引入新item.
                     if(definition.Terminations.Contains(next))
                         continue;
               
                     //导出导出式子
-                    memo.Add(item);
+                    memo.Add(item); //记录当前item
+                    //使用dfs引入新项目
                     ClosureDfs(next, definition, _items, item, 
                         definition.Terminations.Contains(next)? 
                             new HashSet<string>() 
                         :
                            item.DotPos == item.ProduceItems.Count - 1 ?
                                item.SearchWordList.ToHashSet(null):
-                               CfgTools.GetSequenceFirstSet(definition, new []{item.ProduceItems[item.DotPos + 1]}.ToList())    
+                               CfgTools
+                               .GetSequenceFirstSet(definition, new []{item.ProduceItems[item.DotPos + 1]}.ToList())    
                     );
                 }
                 
-                if (curSet.Count != _items.Count)
+                if (curSet.Count != _items.Count) //如果存在新增的项目
                     changed = true;
-                
-                
             }
            
             var g = 

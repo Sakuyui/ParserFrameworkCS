@@ -82,16 +82,16 @@ namespace YaccLexCS.config
         [TokenDefinition("ELSE", "else")]
         [TokenDefinition("ELSIF", "elsif")]
         [TokenDefinition("FOR", "for")]
-        [TokenDefinition("FLASE","false")]
+        [TokenDefinition("FALSE_T","false")]
         [TokenDefinition("TRUE_T", "true")]
-        [TokenDefinition("NULL", "null")]
+        [TokenDefinition("NULL_T", "null")]
         [TokenDefinition("CONTINUE", "continue")]
         [TokenDefinition("RETURN", "return")]
         [TokenDefinition("BREAK", "break")]
         [TokenDefinition("LET", "let")]
         [TokenDefinition("VAR", "var")]
         [TokenDefinition("LAMBDA", "lambda")]
-
+        [TokenDefinition("DYFN", "dyfn")]
         public static void KeyWord()
         {
             
