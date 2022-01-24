@@ -3,6 +3,9 @@ using YaccLexCS.ycomplier.code;
 
 namespace YaccLexCS.runtime
 {
+
+
+
     public static class InterpreterHelper
     {
 		public static Dictionary<string, object> EntreNewBlock(RuntimeContext context)
@@ -21,6 +24,9 @@ namespace YaccLexCS.runtime
 				case "ID":
 				{
 					var v = context.GetCurrentCommonFrame().GetLocalVar(terminalNode.Token.SourceText);
+					var d = terminalNode.Token.LexivalDistance;
+					//Console.WriteLine($"lexical distance of {terminalNode.Token.SourceText} = {d}");
+					//sConsole.WriteLine($"assert {v} == {context.GetCurrentCommonFrame().GetLocalVarLexical(d.depth, d.order)}");
 					return v;
 				}
 				case "STRING":

@@ -603,7 +603,7 @@ namespace YaccLexCS.ycomplier.code.structure
                      && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 								 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode)))
             {
-								return null;
+					return null;
             }
 			return null;
         }
@@ -751,6 +751,7 @@ namespace YaccLexCS.ycomplier.code.structure
 					 && node[8].GetType().IsAssignableFrom(typeof(StatementNode)))
 			{
 				$"entre for stat".PrintToConsole();
+				InterpreterHelper.EntreNewBlock(context);
 				var initExp = node[2];
 				var condNode = node[4];
 				var next = node[6];
@@ -760,7 +761,8 @@ namespace YaccLexCS.ycomplier.code.structure
 				object res = null;
 				while(cond != 0)
                 {
-					var bodyVal = body.Eval(context);
+
+					dynamic bodyVal = body[0].Eval(context);
 					if((bodyVal is SpecialValue v))
                     {
 						if (v == SpecialValue.BREAK) break;
@@ -768,6 +770,7 @@ namespace YaccLexCS.ycomplier.code.structure
                     }
 					next.Eval(context);
                 }
+				InterpreterHelper.LeaveBlock(context);
 				return res;
 			}
 			return null;

@@ -126,6 +126,7 @@ namespace YaccLexCS.ycomplier.automata
             CurrentStateCollection.Clear();
             foreach (var s in StartState)
                 CurrentStateCollection.Add(s);
+            ApplyClosure();
             return this;
         }
 

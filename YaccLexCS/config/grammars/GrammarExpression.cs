@@ -8,11 +8,13 @@ namespace YaccLexCS.config{
 
 		[GrammarDefinition("expression",
 			"assign_expression",
-			"define_var_expression", "lambda_expression", "RETURN expression"
+			"define_var_expression", "lambda_expression", "RETURN expression"	
 			)]
 		public static void expression(CompilerContext context){
 
 		}
+
+
 		//p0: = == -= throw <<= >>= *= &= /= |= ^=  ?:
 		[GrammarDefinition("assign_expression", "ID ASSIGN expression", "logical_or_expression")]
 		public static void assign_expression(CompilerContext context)
@@ -67,7 +69,7 @@ namespace YaccLexCS.config{
 
 		//p12: (call) (grupy) [] . -> ++ --ºós
 		[GrammarDefinition("access_expression", "primary_expression",
-			"ID LP RP", "ID LP augument_list RP", "LP expression RP")]
+			"ID LP RP", "ID LP augument_list RP", "LP expression RP", "native_expression")]
 		public static void access_expression(CompilerContext context)
 		{
 
@@ -87,11 +89,14 @@ namespace YaccLexCS.config{
 		}
 
 
-		
+		[GrammarDefinition("native_expression", "SHARP access_list LP augument_list RP")]
+		public static void native_expression(CompilerContext context)
+		{
+		}
 
-		
 
-		
+
+
 		[GrammarDefinition("lambda_expression", "LAMBDA LP params_list RP INTRODUCE statement")]
 		public static void lambda_expression()
 		{

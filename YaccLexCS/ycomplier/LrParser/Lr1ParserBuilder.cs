@@ -18,10 +18,10 @@ namespace YaccLexCS.ycomplier.LrParser
             YCompilerConfigurator.ScanGrammarConfiguration(packageNames)).ToList();
 
 
-            foreach (var valueTuple in gs)
+           /* foreach (var valueTuple in gs)
             {
                 valueTuple.PrintToConsole();
-            }
+            }*/
 
             var cfgDefSet = gs.Select(g => g.tokenDef.Name).ToHashSet();
             var tokenNames = terminationNames.ToList();

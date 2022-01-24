@@ -137,7 +137,8 @@ namespace YaccLexCS.ycomplier
                 var str = order.Where(e => 
                     !e.Key.UseRegex && (cur1 + c) == e.Key.SourcePattern);
                 var t = available.Where(e =>
-                            e.Key.UseRegex && e.Key.Automata!.IsCanTransWith(c)).Concat(str)
+                            e.Key.UseRegex && 
+                            e.Key.Automata!.IsCanTransWith(c)).Concat(str)
                     .OrderBy(e => e.Key.Priority).ToArray();
                        
                

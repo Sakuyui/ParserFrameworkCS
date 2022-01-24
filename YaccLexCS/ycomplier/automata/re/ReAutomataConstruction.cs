@@ -281,21 +281,68 @@ namespace YaccLexCS.ycomplier.automata.re
             var desc = (string)context["v_charRange_desc"];
             List<(char f, char e)> ranges = new();
             HashSet<char> singleChar = new();
+            var reverse = false;
             for (var i = 0; i < desc.Length;)
             {
+                if (desc[i] == '^')
+                {
+                    if (reverse != true)
+                    {
+                        reverse = true;
+                        i++;
+                        continue;
+                    }
+                }
+
                 if (i == desc.Length - 1)
                 {
-                    singleChar.Add(desc[i++]);
-                }else if (i < desc.Length - 1 && desc[i + 1] != '-')
+                    //singleChar.Add(desc[i++]);
+                    if (!reverse)
+                    {
+                        singleChar.Add(desc[i++]);
+                    }
+                    else
+                    {
+                        var ascii = desc[i++] + 0;
+                        ranges.Add(((char)0, (char)(ascii - 1)));
+                        ranges.Add(((char)(ascii + 1), (char)255));
+                        reverse = false;
+                    }
+                }
+                else if (i < desc.Length - 1 && desc[i + 1] != '-')
                 {
-                    singleChar.Add(desc[i++]);
+                    if (!reverse)
+                    {
+                        singleChar.Add(desc[i++]);
+                    }
+                    else
+                    {
+                        var ascii = desc[i++] + 0;
+                        ranges.Add(((char)0, (char)(ascii - 1)));
+                        ranges.Add(((char)(ascii + 1), (char)255));
+                        reverse = false;
+                    }
+                    
                 }
                 else
                 {
-                    if (!(i < desc.Length - 2))
-                        throw new Exception("error format in [...]");
-                    ranges.Add((desc[i], desc[i + 2]));
-                    i += 3;
+                    if (!reverse)
+                    {
+                        if (!(i < desc.Length - 2))
+                            throw new Exception("error format in [...]");
+                        ranges.Add((desc[i], desc[i + 2]));
+                        i += 3;
+                    }
+                    else
+                    {
+                        if (!(i < desc.Length - 2))
+                            throw new Exception("error format in [...]");
+                        ranges.Add(((char)0, (char)(desc[i] - 1)));
+                        ranges.Add(((char)(desc[i] + 1), (char)255));
+                        i += 3;
+                        reverse = false;
+                    }
+                   
                 }
             }
             
@@ -322,10 +369,11 @@ namespace YaccLexCS.ycomplier.automata.re
                 }
             }
             //创建迁移判断策略
-            var customTrans = new CommonTransitionStrategy.CustomTrans(delegate(AutomataContext? ctx, object? item, object[] objects)
+            var customTrans = new CommonTransitionStrategy
+                .CustomTrans(delegate(AutomataContext? ctx, object? item, object[] objects)
                 {
                     if (item == null) return false;
-                    return singleChar.Contains((char) item) || targetRange.Any(r => (char) item >= r.start && (char) item <= r.end);
+                    return singleChar.Contains((char) item) || (targetRange.Any(r => (char) item >= r.start && (char) item <= r.end));
                 }, type: $"Range trans : [{targetRange.GetMultiDimensionString()}]");
             
 #if DELTAILMODE

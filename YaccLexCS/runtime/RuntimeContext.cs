@@ -56,7 +56,8 @@ namespace YaccLexCS.runtime
             }
             public Dictionary<string, object> CreateNewStorageBlockForNewCodeBlock()
             {
-               var s = new Dictionary<string, object>();
+                var s = new Dictionary<string, object>();
+                s["lexical_base_memory"] = new List<object>();
                 _linkedLocalStorage.Push(s);
                 return s;
             }
@@ -65,6 +66,27 @@ namespace YaccLexCS.runtime
                 if (!_linkedLocalStorage.Any()) 
                     throw new Exception();
                 _linkedLocalStorage.Pop();
+            }
+
+            public object? GetLocalVarLexical(int traceBackDepth, int order)
+            {
+                var frame = _linkedLocalStorage.Skip(traceBackDepth).First();
+                var lexivalMemory = frame["lexical_base_memory"] as List<object>;
+                if(order < lexivalMemory!.Count())
+                {
+                    return lexivalMemory[order];
+                }
+                return null;
+            }
+            public void SetLocalVarLexival(int traceBackDepth, int order, object val)
+            {
+                var frame = _linkedLocalStorage.Skip(traceBackDepth).First();
+                var lexivalMemory = frame["lexival_base_memory"] as List<object>;
+                if (order < lexivalMemory!.Count())
+                {
+                    lexivalMemory[order] = val;
+                }
+                return;
             }
             public object? GetLocalVar(string name)
             {

@@ -17,7 +17,7 @@ namespace YaccLexCS.config
        
         public static void Operator(CompilerContext content)
         {
-            $"meet operator {content.TokenText}".PrintToConsole();
+            //$"meet operator {content.TokenText}".PrintToConsole();
         }
         [TokenDefinition("LOGICAL_OR", @"\|\|", true)]
         [TokenDefinition("LOGICAL_AND", "&&")]
@@ -41,7 +41,7 @@ namespace YaccLexCS.config
         [TokenDefinition("EQ", "==")]
         public static void Eq(CompilerContext content)
         {
-            $"meet operator {content.TokenText}".PrintToConsole();
+           // $"meet operator {content.TokenText}".PrintToConsole();
         }
         [TokenDefinition("INTRODUCE", "=>")]
         public static void Introduce(CompilerContext context)
@@ -51,9 +51,9 @@ namespace YaccLexCS.config
         [TokenDefinition("ASSIGN", "=")]
         public static void Assign(CompilerContext content)
         {
-            $"meet operator {content.TokenText}".PrintToConsole();
+            //$"meet operator {content.TokenText}".PrintToConsole();
         }
-        [TokenDefinition("STRING", "\".*\"", true)]
+        [TokenDefinition("STRING", "\"[^\"]*\"", true)]
         public static void StringType(CompilerContext context)
         {
             var v = context.TokenText;
@@ -68,9 +68,11 @@ namespace YaccLexCS.config
         [TokenDefinition("LC", "{")]
         [TokenDefinition("RC", "}")]
         [TokenDefinition("SEMICOLON", ";")]
+        [TokenDefinition("SHARP", "#")]
+        [TokenDefinition("POINT", ".")]
         public static void SpecialCharacter()
         {
-            $"meet special character".PrintToConsole();
+            //$"meet special character".PrintToConsole();
         }
         
         [TokenDefinition("Skip", @"[ \r\t]", true)]
@@ -105,7 +107,7 @@ namespace YaccLexCS.config
         [TokenDefinition("DOUBLE_LITERAL", @"[0-9]+\.[0-9]+|[1-9][0-9]*|0", true)]
         public static void DoubleLiteral(CompilerContext context)
         {
-            $"DOUBLE_LITERAL with val = {context.TokenText}".PrintToConsole();
+            //$"DOUBLE_LITERAL with val = {context.TokenText}".PrintToConsole();
             var val = double.Parse(context.TokenText);
             context.TokenVal = val;
         }

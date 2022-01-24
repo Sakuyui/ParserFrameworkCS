@@ -9,6 +9,16 @@ namespace YaccLexCS.config
     [GrammarConfiguration]
     public static class GrammarFunction
     {
+        [GrammarDefinition("access_list", "access_list POINT access_name", "access_name")]
+        public static void access_list()
+        {
+        }
+
+        [GrammarDefinition("access_name", "ID")]
+        public static void access_name()
+        {
+        }
+
         [GrammarDefinition("augument_list", "augument_list COMMA augument", "augument")]
         public static void augument_list()
         {

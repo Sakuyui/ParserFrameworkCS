@@ -160,7 +160,7 @@ namespace YaccLexCS.ycomplier
                 "================== ACC!!! =================".PrintToConsole();
                 return;
             }
-            token.PrintToConsole();
+            //token.PrintToConsole();
             if (t[0] == 's') //如果开头是s就移进 = 新状态压栈 + 新符号从输入队列弹出压栈
             {
                 //shift
@@ -168,15 +168,15 @@ namespace YaccLexCS.ycomplier
                 $"shift to {nextState}".DebugOutPut();
                 _stateStack.Push(nextState);
                 _codeStack.Push(new ASTTerminalNode(token));
-                $"code Stack = {_codeStack.ToEnumerationString()}".PrintToConsole();
-                $"state Stack = {_stateStack.GetMultiDimensionString()}".PrintToConsole();
+                //$"code Stack = {_codeStack.ToEnumerationString()}".PrintToConsole();
+                //$"state Stack = {_stateStack.GetMultiDimensionString()}".PrintToConsole();
                 return;
             }
             if (t[0] == 'r')
             {
                 //reduction 规约后一定对应一个新状态
                 var grammarID = int.Parse(t[1..]);
-                $"reduction by ({grammarID}) : {Definitions.Grammars[grammarID]}".PrintToConsole();
+                //$"reduction by ({grammarID}) : {Definitions.Grammars[grammarID]}".PrintToConsole();
 
                 //callback
                 if (_methodMap != null && _methodMap.ContainsKey(grammarID))
@@ -197,7 +197,7 @@ namespace YaccLexCS.ycomplier
                     
                
                 var itemList = g.ProduceItem.Split(" ").ToList();
-                itemList.PrintEnumerationToConsole();
+                //itemList.PrintEnumerationToConsole();
 
                 var nodeList = new List<ASTNode>();
                 foreach (var node in itemList.Select(_ => _codeStack.Pop()))
@@ -214,7 +214,7 @@ namespace YaccLexCS.ycomplier
                 var gotoNext = Lr1Table?.Goto[_stateStack.Peek()][_codeStack.Peek().NodeName];
                 do
                 {
-                    $"goto => {_stateStack.Peek()}".PrintToConsole();
+                    //$"goto => {_stateStack.Peek()}".PrintToConsole();
                     _stateStack.Push(int.Parse(gotoNext.ToString()));
                     gotoNext = Lr1Table?.Goto[_stateStack.Peek()][_codeStack.Peek().NodeName];
                 } while (gotoNext != null);
@@ -222,8 +222,8 @@ namespace YaccLexCS.ycomplier
 
 
 
-                $"code Stack = {_codeStack.ToEnumerationString()}".PrintToConsole();
-                $"state Stack = {_stateStack.GetMultiDimensionString()}".PrintToConsole();
+               // $"code Stack = {_codeStack.ToEnumerationString()}".PrintToConsole();
+               // $"state Stack = {_stateStack.GetMultiDimensionString()}".PrintToConsole();
                 ParseFromCurrentState(token);
             }
 
