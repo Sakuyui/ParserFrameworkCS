@@ -2,7 +2,7 @@
 {
     public class Token
     {
-        public readonly string SourceText;
+        public string SourceText;
         public (int depth, int order) LexivalDistance = (-1, -1);
         public string Type { get; }
         public int LineNum;

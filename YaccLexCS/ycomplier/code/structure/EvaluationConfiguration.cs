@@ -189,7 +189,6 @@ namespace YaccLexCS.ycomplier.code.structure
 
 		public static dynamic IfStatementNode(IfStatementNode node, RuntimeContext context)
 		{
-			"enter if stat".PrintToConsole();
 			/*IF LP expression RP statement*/
 			if (node.Count() == 5
 					 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
@@ -569,6 +568,12 @@ namespace YaccLexCS.ycomplier.code.structure
 			{
 				return node[1].Eval(context);
 			}
+			/*native_expression*/
+			if (node.Count() == 1
+				 && node[0].GetType().IsAssignableFrom(typeof(NativeExpressionNode)))
+			{
+				return node[0].Eval(context);
+			}
 			return null;
 		}
 
@@ -890,6 +895,75 @@ namespace YaccLexCS.ycomplier.code.structure
 				return null;
 			}
 		}
-
+		public static dynamic AccessListNode(AccessListNode node, RuntimeContext context)
+		{
+			/*access_list POINT access_name*/
+			if (node.Count() == 3
+				 && node[0].GetType().IsAssignableFrom(typeof(AccessListNode))
+				 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+				 && node[2].GetType().IsAssignableFrom(typeof(AccessNameNode)))
+			{
+				var ls = node[0].Eval(context);
+				ls.Add(node[2].Eval(context));
+				return ls;
+			}
+			/*access_name*/
+			if (node.Count() == 1
+				 && node[0].GetType().IsAssignableFrom(typeof(AccessNameNode)))
+			{
+				return new List<string> { node[0].Eval(context) };
+			}
+			return null;
+		}
+		public static dynamic AccessNameNode(AccessNameNode node, RuntimeContext context)
+		{
+			/*ID*/
+			if (node.Count() == 1
+				 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode)))
+			{
+				return  (node[0] as ASTTerminalNode).Token.SourceText;
+			}
+			return null;
+		}
+		public static dynamic NativeExpressionNode(NativeExpressionNode node, RuntimeContext context)
+		{
+			/*SHARP access_list LP augument_list RP*/
+			if (node.Count() == 5
+				 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+				 && node[1].GetType().IsAssignableFrom(typeof(AccessListNode))
+				 && node[2].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
+				 && node[3].GetType().IsAssignableFrom(typeof(AugumentListNode))
+				 && node[4].GetType().IsAssignableFrom(typeof(ASTTerminalNode)))
+			{
+				string[] namespaces = new[] { "System" };
+				var accessList = node[1].Eval(context) as List<string>;
+				var fullAccessName = accessList.Aggregate("", (a, b) => a + "." + b).Trim('.');
+				$"try call {fullAccessName}".PrintToConsole();
+				var aList = (node[3].Eval(context) as List<ASTNode>).Select(node => node.Eval(context))
+					.Select(o => (object)o).ToArray();
+				var ts = AppDomain.CurrentDomain.GetAssemblies()
+					   .SelectMany(t => t.GetTypes()).Where(t => namespaces.Contains(t.Namespace));
+				foreach(var a in accessList.SkipLast(1))
+                {
+					ts = ts.Where(t => t.Name == a);
+                }
+                if (ts.Any())
+                {
+					var c = ts.First();
+					var mName = accessList.Last();
+					var m = c.GetMethods().Where(t => t.Name == mName)
+						.Where(t => t.GetParameters().Length == aList.Length)
+						.Where(t => t.GetParameters().Zip(aList).All(t => t.First.ParameterType.IsAssignableFrom(t.Second.GetType())));
+						
+                    if (m.Any())
+                    {
+						
+						m.First().Invoke(null, aList as object?[]);
+					}
+				}
+				return null;
+			}
+			return null;
+		}
 	}
 }

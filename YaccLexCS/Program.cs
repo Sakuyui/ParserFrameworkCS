@@ -298,6 +298,10 @@ namespace YaccLexCS
             lexer.ParseInStream(r, token =>  //callback function
             {
                 if (token.Type == "Skip") return;
+                if(token.Type == "STRING")
+                {
+                    token.SourceText = token.SourceText.Trim('\"');
+                }
                 tokenList.Add(token);
                 parser.ParseFromCurrentState(token);
             });
@@ -310,7 +314,7 @@ namespace YaccLexCS
 
             //root.GetTreeShapeDescribe().PrintToConsole();
             root.Eval(runtimeContext);
-            root.GetTreeShapeDescribe().PrintToConsole();
+            //root.GetTreeShapeDescribe().PrintToConsole();
             // return;
 
 
