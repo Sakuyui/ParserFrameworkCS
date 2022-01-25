@@ -95,21 +95,23 @@ namespace YaccLexCS.ycomplier.code.structure
 				 && node[4].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 				 && node[5].GetType().IsAssignableFrom(typeof(BlockNode)))
 			{
-				var id = (node[1] as ASTTerminalNode).Token.SourceText;
+				var t = (node[1] as ASTTerminalNode).Token;
+				var id = t.SourceText;
 				var placeHolderList = node[3].Eval(context) as List<string>;
 				$"try define function {id}({placeHolderList.Aggregate("",(a, b) => a + "," +b ).Trim(',')})".PrintToConsole();
 				var func = new FunctionThunk(id, placeHolderList, node[5]!);
-				if((context.RuntimeStatus & RuntimeStatusCode.DefinGlobalFunction) == 0)
+				context.GetCurrentCommonFrame().SetLocalVarLexical(t.LexivalDistance.depth, t.LexivalDistance.order, func);
+				/*if((context.RuntimeStatus & RuntimeStatusCode.DefinGlobalFunction) == 0)
                 {
 					$"define local function {id}".PrintCollectionToConsole();
-					context.GetCurrentCommonFrame().SetLocalVar(id, func);
+					
                 }
                 else
                 {
 					$"define global function {id}".PrintToConsole();
 					context.DefineGlobalFunction(func);
-				}
-				
+				}*/
+
 				return null;
 			}
 			return null;
@@ -369,11 +371,12 @@ namespace YaccLexCS.ycomplier.code.structure
 								 && node[1].GetType().IsAssignableFrom(typeof(ASTTerminalNode))
 								 && node[2].GetType().IsAssignableFrom(typeof(ExpressionNode)))
             {
-				var id = ((ASTTerminalNode)node[0]).Token.SourceText;
+				var t = ((ASTTerminalNode)node[0]).Token;
+				var id = t.SourceText;
 				var exp = node[2];
 				var val = exp.Eval(context); //right side
 														 //put variable to memory
-				context.GetCurrentCommonFrame().FindAndSetVar(id, val);
+				context.GetCurrentCommonFrame().FindAndSetVarLexical(t.LexivalDistance.depth,t.LexivalDistance.order, val);
 				$"set {id} = {val}".PrintToConsole();
 				return val;
             }
@@ -528,14 +531,15 @@ namespace YaccLexCS.ycomplier.code.structure
 				 && node[2].GetType().IsAssignableFrom(typeof(AugumentListNode))
 				 && node[3].GetType().IsAssignableFrom(typeof(ASTTerminalNode)))
 			{
-				var id = (node[0] as ASTTerminalNode).Token.SourceText;
+				var t = (node[0] as ASTTerminalNode).Token;
+				var id = t.SourceText;
 				var list = node[2].Eval(context) as List<ASTNode>;
 				
 				dynamic func = InterpreterHelper.BasicTypesValueExtract(node[0] as ASTTerminalNode, context);
-				if(func == null)
+				/*if(func == null)
                 {
 					func = context.GetGlobalFunction(id, paramsCount: list.Count);
-                }
+                }*/
 				if (func == null)
 				{
 					throw new Exception("Not define variable or func " + (node[0] as ASTTerminalNode).Token.SourceText);
@@ -731,11 +735,11 @@ namespace YaccLexCS.ycomplier.code.structure
 					 && node[3].GetType().IsAssignableFrom(typeof(ExpressionNode)))
 			{
 				//still need to complete
-				
-				var id = (node[1] as ASTTerminalNode).Token.SourceText;
+				var t = (node[1] as ASTTerminalNode).Token;
+				var id = t.SourceText;
 				var expVal = node[3].Eval(context);
 				$"create {id} = {expVal}".PrintToConsole();
-				context.GetCurrentCommonFrame().SetLocalVar(id, expVal);
+				context.GetCurrentCommonFrame().SetLocalVarLexical(t.LexivalDistance.depth,t.LexivalDistance.order, expVal);
 				return expVal;
 			}
 			return null;

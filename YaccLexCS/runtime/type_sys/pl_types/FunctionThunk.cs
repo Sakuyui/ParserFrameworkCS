@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YaccLexCS.code.structure;
 using YaccLexCS.ycomplier.code;
 
 namespace YaccLexCS.runtime.types
@@ -37,10 +38,17 @@ namespace YaccLexCS.runtime.types
             frame.SetLocalVar(FunctionName, this);
             for(var i = 0; i < ParamsCount && i < paramsVal.Count; i++)
             {
-                frame.SetLocalVar(ParamsPlaceHold[i], paramsVal[i]);
+                frame.SetLocalVarLexical(0, i, paramsVal[i]);
             }
-
-            var v = Ast.Eval(context);
+            dynamic v = null;
+            if(Ast[0] is BlockNode)
+            {
+                v = Ast[0].Eval(context);
+            }
+            else
+            {
+                v = Ast.Eval(context);
+            }
             context.PopStackFrame();
             return v;
 

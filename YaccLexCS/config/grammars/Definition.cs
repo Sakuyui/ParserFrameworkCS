@@ -15,7 +15,7 @@ namespace YaccLexCS.config
         {
         }
 
-        [GrammarDefinition("function_definition",  "DYFN ID LP params_list RP block")]
+        [GrammarDefinition("function_definition",  "DYFN ID LP params_list RP block", "DYFN ID LP RP block")]
         public static void function_definition()
         {
         }

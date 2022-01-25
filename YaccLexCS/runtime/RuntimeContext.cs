@@ -18,7 +18,7 @@ namespace YaccLexCS.runtime
 
         }
         public Dictionary<string, HashSet<FunctionThunk>> globalFunction = new Dictionary<string, HashSet<FunctionThunk>>();
-
+        public readonly CommonStackFrame ModuleGlobalFrame = null;
         public int RuntimeStatus = 0x0;
         public void DefineGlobalFunction(FunctionThunk function)
         {
@@ -38,7 +38,7 @@ namespace YaccLexCS.runtime
 
         public CommonStackFrame CreateNewStackFrame()
         {
-            var frame = new CommonStackFrame();
+            var frame = new CommonStackFrame(ModuleGlobalFrame);
             _stackFrames.Push(frame);
             return frame;
         }
@@ -49,10 +49,15 @@ namespace YaccLexCS.runtime
         public class CommonStackFrame : LinkedFrame
         {
             public Stack<Dictionary<string, object>> _linkedLocalStorage = new();
-            
+            public CommonStackFrame GlobalFrame = null;
             public CommonStackFrame()
             {
                 CreateNewStorageBlockForNewCodeBlock();
+            }
+            public CommonStackFrame(CommonStackFrame gFrame)
+            {
+                CreateNewStorageBlockForNewCodeBlock();
+                GlobalFrame = gFrame;
             }
             public Dictionary<string, object> CreateNewStorageBlockForNewCodeBlock()
             {
@@ -70,24 +75,51 @@ namespace YaccLexCS.runtime
 
             public object? GetLocalVarLexical(int traceBackDepth, int order)
             {
-                var frame = _linkedLocalStorage.Skip(traceBackDepth).First();
-                var lexivalMemory = frame["lexical_base_memory"] as List<object>;
-                if(order < lexivalMemory!.Count())
+                //Console.WriteLine($"Try get {(traceBackDepth, order)}, cur block stack depth = {_linkedLocalStorage.Count}");
+                Dictionary<string, object> memory = null;
+                if (traceBackDepth == _linkedLocalStorage.Count())
                 {
-                    return lexivalMemory[order];
+                    //need to find in global area
+                    memory = GlobalFrame._linkedLocalStorage.Last();
+                }
+                else
+                {
+                    memory = _linkedLocalStorage.Skip(traceBackDepth).First();
+                }
+                var lexicalMemory = memory["lexical_base_memory"] as List<object>;
+                if(order < lexicalMemory!.Count())
+                {
+                    return lexicalMemory[order];
                 }
                 return null;
             }
-            public void SetLocalVarLexival(int traceBackDepth, int order, object val)
+            public void SetLocalVarLexical(int traceBackDepth, int order, object val)
             {
-                var frame = _linkedLocalStorage.Skip(traceBackDepth).First();
-                var lexivalMemory = frame["lexival_base_memory"] as List<object>;
-                if (order < lexivalMemory!.Count())
+                //Console.WriteLine($"process dis={(traceBackDepth, order)} = {val},cur block stack depth = {_linkedLocalStorage.Count}");
+                Dictionary<string, object> memory = null;
+                if (traceBackDepth == _linkedLocalStorage.Count())
                 {
-                    lexivalMemory[order] = val;
+                    //need to find in global area
+                    memory = GlobalFrame._linkedLocalStorage.Last();
                 }
+                else
+                {
+                    memory = _linkedLocalStorage.Skip(traceBackDepth).First();
+                }
+                
+                var lexivalMemory = memory["lexical_base_memory"] as List<object>;
+                while (order >= lexivalMemory!.Count())
+                    lexivalMemory!.Add(new());
+                
+                lexivalMemory[order] = val;
+                
                 return;
             }
+            public void FindAndSetVarLexical(int depth, int order, object val)
+            {
+                SetLocalVarLexical(depth, order, val);
+            }
+
             public object? GetLocalVar(string name)
             {
                 var d = 0;
@@ -152,6 +184,8 @@ namespace YaccLexCS.runtime
             this["v_tokenSourceText"] = "";
             this["v_tokenVal"] = null!;
             _stackFrames.Push(new ());
+            ModuleGlobalFrame = _stackFrames.First();
+            ModuleGlobalFrame.GlobalFrame = ModuleGlobalFrame;
         }
 
         public CommonStackFrame GetCurrentCommonFrame()

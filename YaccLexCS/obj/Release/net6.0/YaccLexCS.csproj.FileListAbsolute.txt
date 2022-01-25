@@ -1,0 +1,17 @@
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\bin\Release\net6.0\YaccLexCS.exe
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\bin\Release\net6.0\YaccLexCS.deps.json
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\bin\Release\net6.0\YaccLexCS.runtimeconfig.json
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\bin\Release\net6.0\YaccLexCS.dll
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\bin\Release\net6.0\YaccLexCS.pdb
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\bin\Release\net6.0\System.CodeDom.dll
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\obj\Release\net6.0\YaccLexCS.csproj.AssemblyReference.cache
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\obj\Release\net6.0\YaccLexCS.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\obj\Release\net6.0\YaccLexCS.AssemblyInfoInputs.cache
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\obj\Release\net6.0\YaccLexCS.AssemblyInfo.cs
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\obj\Release\net6.0\YaccLexCS.csproj.CoreCompileInputs.cache
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\obj\Release\net6.0\YaccLexCS.csproj.CopyComplete
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\obj\Release\net6.0\YaccLexCS.dll
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\obj\Release\net6.0\refint\YaccLexCS.dll
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\obj\Release\net6.0\YaccLexCS.pdb
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\obj\Release\net6.0\YaccLexCS.genruntimeconfig.cache
+C:\Users\Sakuyui39\RiderProjects\YaccLexCS\YaccLexCS\obj\Release\net6.0\ref\YaccLexCS.dll

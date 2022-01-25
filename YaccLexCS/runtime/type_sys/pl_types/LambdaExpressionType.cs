@@ -24,9 +24,18 @@ namespace YaccLexCS.runtime.types
             rc.GetCurrentCommonFrame().CreateNewStorageBlockForNewCodeBlock();
             for(var i = 0; i < _placeHold.Count && i < inputs.Count; i++)
             {
-                rc.GetCurrentCommonFrame().SetLocalVar(_placeHold[i], inputs[i]);
+                rc.GetCurrentCommonFrame().SetLocalVarLexical(0, i, inputs[i]);
             }
-            var r = _body.Eval(rc);
+            dynamic r = null;
+            if(_body[0] is BlockNode)
+            {
+                r = _body[0].Eval(rc);
+            }
+            else
+            {
+                r = _body.Eval(rc);
+            }
+            
             rc.GetCurrentCommonFrame().RemoveNewestStorageBlock();
             return r;
         }

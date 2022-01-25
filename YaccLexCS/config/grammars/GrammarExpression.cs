@@ -89,7 +89,7 @@ namespace YaccLexCS.config{
 		}
 
 
-		[GrammarDefinition("native_expression", "SHARP access_list LP augument_list RP")]
+		[GrammarDefinition("native_expression", "SHARP access_list LP augument_list RP", "SHARP access_list LP RP")]
 		public static void native_expression(CompilerContext context)
 		{
 		}
