@@ -26,7 +26,7 @@ namespace YaccLexCS.runtime
 				case "ID":
 				{
 					var t = terminalNode.Token;
-					var v = context.GetCurrentCommonFrame().GetLocalVarLexical(t.LexivalDistance.depth, t.LexivalDistance.order);
+					var v = context.GetCurrentCommonFrame().GetLocalVarLexical(t.LexicalDistance.depth, t.LexicalDistance.order);
 					
 					return v;
 				}
@@ -59,7 +59,7 @@ namespace YaccLexCS.runtime
                     {
                         var dis = (t.waitDepth - 1, order);
                         $"****** change {t}'s lexical represent = {dis}".PrintToConsole();
-                        t.token.LexivalDistance = dis;
+                        t.token.LexicalDistance = dis;
                     }
                     waitList.Remove(defineID);
                 }
@@ -80,23 +80,19 @@ namespace YaccLexCS.runtime
                         {
                             var res = (find, sFrame[id].order);
 
-                            $">>>represent {id} with {res}\r\n".PrintToConsole();
-                            t.LexivalDistance = res;
+                            //$">>>represent {id} with {res}\r\n".PrintToConsole();
+                            t.LexicalDistance = res;
                             return (find, sFrame[id].order);
                         }
                         find++;
                     }
-                    $"not found {id}, it may in global area, put into wait list".PrintToConsole();
-                    if (waitList.ContainsKey(id))
-                    {
-                        waitList[id].Add((t, s.Count));
-                    }
-                    else
+                    //$"not found {id}, it may in global area, put into wait list".PrintToConsole();
+                    if (!waitList.ContainsKey(id))
                     {
                         waitList[id] = new List<(Token token, int waitDepth)>();
-                        waitList[id].Add((t, s.Count));
                     }
-                    t.LexivalDistance = (-1, -1);
+                    waitList[id].Add((t, s.Count));
+                    t.LexicalDistance = (-1, -1);
                     return (-1, -1);
                 }
                 List<string> DfsGetParamsList(ASTNode pNode, List<string> ls = null)
@@ -104,11 +100,11 @@ namespace YaccLexCS.runtime
                     ls ??= new();
                     if (pNode is TypelessParamNode typelessParamNode)
                     {
-                        ls.Add(((ASTTerminalNode)typelessParamNode[0]).Token.SourceText);
+                        ls.Add(((ASTTerminalNode)typelessParamNode[0]!).Token.SourceText);
                     }
                     else if (pNode is TypedParamNode typedParamNode)
                     {
-                        ls.Add(((ASTTerminalNode)typedParamNode[1]).Token.SourceText);
+                        ls.Add(((ASTTerminalNode)typedParamNode[1]!).Token.SourceText);
                     }
                     else
                     {
@@ -117,14 +113,15 @@ namespace YaccLexCS.runtime
                     }
                     return ls;
                 }
-                if (node is CompileUnitNode cNode)
+                if (node.NodeName == "compile_unit")
                 {
+                    var cNode = node as CompileUnitNode;
                     if (cNode.Count() == 1)
-                        dfs(cNode[0], s, d);
+                        dfs(cNode[0]!, s, d);
                     else
                     {
                         var l = node[0];
-                        var r = node[1][0]; //希望提前暴露定义
+                        var r = node[1]![0]; //希望提前暴露定义
                         if (r is DefinitionNode)
                         {
                             //global definition
@@ -139,13 +136,13 @@ namespace YaccLexCS.runtime
                         }
                     }
                 }
-                else if (node is AssignExpressionNode tNode)
+                else if (node.NodeName == "assign_expression")
                 {
+                    var tNode = node as AssignExpressionNode;
                     if (tNode.Count() == 3)
                     {
                         var token = (tNode[0] as ASTTerminalNode).Token;
-                        $"ID in left Assignment {token}".PrintToConsole();
-                        var find = 0;
+                        //$"ID in left Assignment {token}".PrintToConsole();
                         TrackBack(token);
                         dfs(tNode[2], s, d);
                     }
@@ -155,44 +152,48 @@ namespace YaccLexCS.runtime
                     }
 
                 }
-                else if (node is DefineVarExpressionNode tNode2)
+                else if (node.NodeName == "define_var_expression")
                 {
+                    var tNode2 = node as DefineVarExpressionNode;
                     var token = (tNode2[1] as ASTTerminalNode).Token;
-                    $"ID in Definition {token}".PrintToConsole();
-                    $"define {token.SourceText} in depth {d}".PrintToConsole();
+                    /*  $"ID in Definition {token}".PrintToConsole();
+                    $"define {token.SourceText} in depth {d}".PrintToConsole();*/
                     var top = s.Peek();
-                    var l = top.Count();
+                    var l = top.Count;
                     top[token.SourceText] = (0, l);
-                    token.LexivalDistance = (0, l);
-                    $">>>represent {token} with {top[token.SourceText]}\r\n".PrintToConsole();
+                    token.LexicalDistance = (0, l);
+                    //$">>>represent {token} with {top[token.SourceText]}\r\n".PrintToConsole();
                     if (s.Count == 1)
                         NotifyGlobalDefinitionForWaitList(token.SourceText, l);
                     dfs(tNode2.Last(), s, d);
                 }
-                else if (node is PrimaryExpressionNode tNode3)
+                else if (node.NodeName == "primary_expression")
                 {
+                    var tNode3 = node as PrimaryExpressionNode;
                     if ((tNode3[0] as ASTTerminalNode).Token.Type == "ID")
                     {
                         var token = (tNode3[0] as ASTTerminalNode).Token;
-                        $"ID in read {token}".PrintToConsole();
+                       // $"ID in read {token}".PrintToConsole();
                         TrackBack(token);
                     }
 
                 }
-                else if (node is BlockNode tNode4)
+                else if (node.NodeName == "block")
                 {
-                    "!!depth++".PrintToConsole();
+                    var tNode4 = node as BlockNode;
+                    // "!!depth++".PrintToConsole();
                     s.Push(new Dictionary<string, (int depth, int order)>());
                     foreach (var c in tNode4)
                     {
                         dfs(c, s, d + 1);
                     }
                     s.Pop();
-                    "depth--".PrintToConsole();
+                    //"depth--".PrintToConsole();
                 }
-                else if (node is ForStatementNode tNode5)
+                else if (node.NodeName == "for_statement")
                 {
-                    "!!depth++ in for".PrintToConsole();
+                    var tNode5 = node as ForStatementNode;
+                    //"!!depth++ in for".PrintToConsole();
                     s.Push(new Dictionary<string, (int depth, int order)>());
                     foreach (var c in tNode5.SkipLast(1))
                     {
@@ -203,51 +204,57 @@ namespace YaccLexCS.runtime
                         foreach (var c in bNode) dfs(c, s, d + 1);
                     }
                     s.Pop();
-                    "depth--".PrintToConsole();
+                    //"depth--".PrintToConsole();
                 }
-                else if (node is AccessExpressionNode node6)
+                else if (node.NodeName == "access_expression")
                 {
-                    if (node6.Count() == 4)
-                    {
-                        $"call".PrintToConsole();
-                        TrackBack((node6[0] as ASTTerminalNode).Token);
-                        foreach (var c in node6.Skip(1))
-                        {
-                            dfs(c, s, d);
-                        }
-                    }
-                    else if (node6.Count() == 3)
-                    {
-                        if (node6[1] is ExpressionNode)
-                            dfs(node6[1], s, d);
-                        else if (node6[0] is ASTTerminalNode)
-                        {
-                            TrackBack((node6[0] as ASTTerminalNode).Token);
-                        }
-                    }
-                    else if (node6.Count() == 1)
-                    {
-                        dfs(node6[0], s, d);
-                    }
-                }
-                else if (node is FunctionDefinitionNode node7)
-                {
+                    var node6 = node as AccessExpressionNode;
 
-                    $"new function".PrintToConsole();
+                    switch (node6.Count())
+                    {
+                        case 4:
+                            {
+                                // $"call".PrintToConsole();
+                                TrackBack((node6[0] as ASTTerminalNode).Token);
+                                foreach (var c in node6.Skip(1))
+                                {
+                                    dfs(c, s, d);
+                                }
+
+                                break;
+                            }
+
+                        case 3:
+                            if (node6[1] is ExpressionNode)
+                                dfs(node6[1], s, d);
+                            else if (node6[0] is ASTTerminalNode)
+                            {
+                                TrackBack((node6[0] as ASTTerminalNode).Token);
+                            }
+                            break;
+                        case 1:
+                            dfs(node6[0], s, d);
+                            break;
+                    }
+                }
+                else if (node.NodeName == "function_definition")
+                {
+                    var node7 = node as FunctionDefinitionNode;
+                   // $"new function".PrintToConsole();
                     var t = (node7[1] as ASTTerminalNode).Token;
                     var id = t.SourceText;
-                    $"ID in Definition {id}".PrintToConsole();
-                    $"define {id} in depth {d}".PrintToConsole();
-                    t.LexivalDistance = (0, s.Peek().Count());
+                   // $"ID in Definition {id}".PrintToConsole();
+                    //$"define {id} in depth {d}".PrintToConsole();
+                    t.LexicalDistance = (0, s.Peek().Count());
                     if (s.Count == 1)
-                        NotifyGlobalDefinitionForWaitList(id, t.LexivalDistance.order);
+                        NotifyGlobalDefinitionForWaitList(id, t.LexicalDistance.order);
                     s.Peek()[id] = (0, s.Peek().Count());
                     var ls = DfsGetParamsList(node7[3]);
                     s.Push(new());
                     foreach (var p in ls)
                     {
                         var r = (0, s.Peek().Count());
-                        $"define param {p} in {r}".PrintToConsole();
+                     //   $"define param {p} in {r}".PrintToConsole();
                         s.Peek()[p] = r;
                     }
                     foreach (var c in node7.Last())
@@ -256,14 +263,15 @@ namespace YaccLexCS.runtime
                     }
                     s.Pop();
                 }
-                else if (node is LambdaExpressionNode node8)
+                else if (node.NodeName == "lambda_expression")
                 {
+                    var node8 = node as LambdaExpressionNode;
                     var ls = DfsGetParamsList(node8[2]);
                     s.Push(new());
                     foreach (var p in ls)
                     {
                         var r = (0, s.Peek().Count());
-                        $"define param {p} in {r}".PrintToConsole();
+                     //   $"define param {p} in {r}".PrintToConsole();
                         s.Peek()[p] = r;
                     }
                     foreach (var c in node8.Last())
@@ -291,6 +299,7 @@ namespace YaccLexCS.runtime
             var stack = new Stack<Dictionary<string, (int, int)>>();
             stack.Push(new());
             dfs(root, stack, 0);
+            $"=================convert lexical representation finsh=====================".PrintToConsole();
             return root;
         }
     }

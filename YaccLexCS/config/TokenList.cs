@@ -65,11 +65,15 @@ namespace YaccLexCS.config
         [TokenDefinition("CR", "\n")]
         [TokenDefinition("LP", "(")]
         [TokenDefinition("RP", ")")]
+        [TokenDefinition("LM", "[")]
+        [TokenDefinition("RM", "]")]
         [TokenDefinition("LC", "{")]
         [TokenDefinition("RC", "}")]
+        [TokenDefinition("COLON", ":")]
         [TokenDefinition("SEMICOLON", ";")]
         [TokenDefinition("SHARP", "#")]
         [TokenDefinition("POINT", ".")]
+        
         public static void SpecialCharacter()
         {
             //$"meet special character".PrintToConsole();
@@ -94,6 +98,12 @@ namespace YaccLexCS.config
         [TokenDefinition("VAR", "var")]
         [TokenDefinition("LAMBDA", "lambda")]
         [TokenDefinition("DYFN", "dyfn")]
+        [TokenDefinition("NEW", "new")]
+        [TokenDefinition("CLASS", "class")]
+        [TokenDefinition("PRIVATE", "private")]
+        [TokenDefinition("PROTECTED", "protected")]
+        [TokenDefinition("PUBLIC", "public")]
+        [TokenDefinition("STATIC", "static")]
         public static void KeyWord()
         {
             

@@ -18,6 +18,11 @@ namespace YaccLexCS.config
         public static void access_name()
         {
         }
+       
+        [GrammarDefinition("id_list", "id_list COMMA ID", "ID")]
+        public static void id_list()
+        {
+        }
 
         [GrammarDefinition("augument_list", "augument_list COMMA augument", "augument")]
         public static void augument_list()

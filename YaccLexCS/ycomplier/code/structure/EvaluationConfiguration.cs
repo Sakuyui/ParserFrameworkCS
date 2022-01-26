@@ -100,7 +100,7 @@ namespace YaccLexCS.ycomplier.code.structure
 				var placeHolderList = node[3].Eval(context) as List<string>;
 				$"try define function {id}({placeHolderList.Aggregate("",(a, b) => a + "," +b ).Trim(',')})".PrintToConsole();
 				var func = new FunctionThunk(id, placeHolderList, node[5]!);
-				context.GetCurrentCommonFrame().SetLocalVarLexical(t.LexivalDistance.depth, t.LexivalDistance.order, func);
+				context.GetCurrentCommonFrame().SetLocalVarLexical(t.LexicalDistance.depth, t.LexicalDistance.order, func);
 				/*if((context.RuntimeStatus & RuntimeStatusCode.DefinGlobalFunction) == 0)
                 {
 					$"define local function {id}".PrintCollectionToConsole();
@@ -376,7 +376,7 @@ namespace YaccLexCS.ycomplier.code.structure
 				var exp = node[2];
 				var val = exp.Eval(context); //right side
 														 //put variable to memory
-				context.GetCurrentCommonFrame().FindAndSetVarLexical(t.LexivalDistance.depth,t.LexivalDistance.order, val);
+				context.GetCurrentCommonFrame().FindAndSetVarLexical(t.LexicalDistance.depth,t.LexicalDistance.order, val);
 				$"set {id} = {val}".PrintToConsole();
 				return val;
             }
@@ -739,7 +739,7 @@ namespace YaccLexCS.ycomplier.code.structure
 				var id = t.SourceText;
 				var expVal = node[3].Eval(context);
 				$"create {id} = {expVal}".PrintToConsole();
-				context.GetCurrentCommonFrame().SetLocalVarLexical(t.LexivalDistance.depth,t.LexivalDistance.order, expVal);
+				context.GetCurrentCommonFrame().SetLocalVarLexical(t.LexicalDistance.depth,t.LexicalDistance.order, expVal);
 				return expVal;
 			}
 			return null;

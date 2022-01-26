@@ -57,6 +57,7 @@ namespace YaccLexCS
                 "       let a = l(sum, i);" + //l(0,0) sum:(2,3) i(2,4) a:(0,1)
                 "       #Console.WriteLine(\"output by native function : \" + sum + i);" + //call c# native function
                 "       a = fact(5);" + //a:(0,1) fact(2,2)
+                "       new []{1, 2, 3, 4};" +
                 "       break;" +
                 "   }" +
                 "   sum = sum + i;" +//sum(1,3), i(1,4)
@@ -73,27 +74,36 @@ namespace YaccLexCS
                 "}" +
                 "dyfn f2(){" + //f2=(0,0)
                 "   return f1();" + //f1=(1,1)
+                "}" +
+                "" +
+                "class A{" +
+                "   public a = 0;" +
+                "   private b = 5;" + 
+                "   private sA = 12;" + 
+                "   A(){" +
+                "       #Console.WriteLine(\"in A's Constructor\");" +
+                "   }" +
+                "   public static StaticFunc1(){" +
+                "       return sA;" +
+                "   }" +
+                "   public GetB(){" +
+                "       return b;" +
+                "   }" +  
                 "}" + 
                 ""); 
              
             var tokenList = new List<Token>();
 
             //create parser
-        /*    Lr1Parser parser = Lr1ParserBuilder.ConfigureFromPackages(lexer.TokenNames, new[] { "YaccLexCS.config" });
-            parser.InitParser().SetContext(compilerContext);
-            if (File.Exists("1.bin")) File.Delete("1.bin");
-            parser.Serialize("1.bin");
-*/
+            /* Lr1Parser parser = Lr1ParserBuilder.ConfigureFromPackages(lexer.TokenNames, new[] { "YaccLexCS.config" });
+             parser.InitParser().SetContext(compilerContext);
+             if (File.Exists("1.bin")) File.Delete("1.bin");
+             parser.Serialize("1.bin");
+ */
 
             Lr1Parser parser = Lr1ParserBuilder
                 .DeSerializeFromFile("1.bin", lexer.TokenNames, new[] { "YaccLexCS.config" });
             parser.SetContext(compilerContext);
-            // parser.Lr1Table.OutputToFilesAsCsv("D:\\goto.csv", "D:\\trans.csv");
-
-            /*
-             问题：生成器。对于非终结字符，要多一个类型判断
-
-             */
 
             //在流中词法分析。
             lexer.ParseInStream(r, token =>  //callback function
@@ -104,27 +114,26 @@ namespace YaccLexCS
                     token.SourceText = token.SourceText.Trim('\"');
                 }
                 tokenList.Add(token);
+                token.PrintToConsole();
                 parser.ParseFromCurrentState(token);
             });
            
-            tokenList.PrintEnumerationToConsole();
-            //return;
+           // tokenList.PrintEnumerationToConsole();
             parser.ParseFromCurrentState(new Token("$", "$"));
             
             var root = parser.GetCurrentStack().Peek();
 
             //root.GetTreeShapeDescribe().PrintToConsole();
-            //root.Eval(runtimeContext);
-            //root.GetTreeShapeDescribe().PrintToConsole();
-            // return;
 
 
+            var t = DateTime.Now;
+            var lexicalAST = InterpreterHelper.ToLexivalRepresentAst(root); //减少反射后，时间提升约为100ms(debug下)
+            $"{DateTime.Now - t}".PrintToConsole();
+            t = DateTime.Now;
+            lexicalAST.Eval(runtimeContext); //998ms
+            $"{DateTime.Now - t}".PrintToConsole();
 
-            var lexicalAST = InterpreterHelper.ToLexivalRepresentAst(root);
-            lexicalAST.Eval(runtimeContext);
 
-
-            $"=================convert lexical representation finsh=====================".PrintToConsole();
         }
 
        

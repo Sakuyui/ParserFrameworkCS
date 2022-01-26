@@ -61,8 +61,20 @@ namespace YaccLexCS.config{
 
 		//p11: + - ++ --(front) ! &*÷∏’Î new
 
-		[GrammarDefinition("unary_expression", "access_expression",  "SUB unary_expression")]
+		[GrammarDefinition("unary_expression", "access_expression",  "SUB unary_expression", "NEW object_new_expreesion",
+			"NEW array_new_expression")]
 		public static void unary_expression(CompilerContext context)
+		{
+
+		}
+		[GrammarDefinition("object_new_expreesion", "ID LP augument_list RP", "ID LP RP")]
+		public static void object_new_expreesion(CompilerContext context)
+		{
+
+		}
+		//new []{xx, xx, xx}
+		[GrammarDefinition("array_new_expression", "LM RM LC augument_list RC", "LM DOUBLE_LITERAL RM LC augument_list RC")]
+		public static void array_new_expression(CompilerContext context)
 		{
 
 		}
