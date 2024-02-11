@@ -12,6 +12,7 @@ using System.Timers;
 using System.Xml.Serialization;
 using YaccLexCS.code.structure;
 using YaccLexCS.runtime;
+using YaccLexCS.utils;
 using YaccLexCS.ycomplier;
 using YaccLexCS.ycomplier.automata;
 using YaccLexCS.ycomplier.automata.re;
@@ -35,7 +36,7 @@ namespace YaccLexCS
         {
             public static string serializeParserToFile = "parser.lr1";
             public static string deserializeParserFromFile = "parser.lr1";
-            public static bool isSerializeParserToFile = false;
+            public static bool isSerializeParserToFile = true;
             public static bool isDdeserializeParserFromFile = true;
             public static bool enableOverwriteExistLr1File = true;
         }
@@ -103,20 +104,6 @@ namespace YaccLexCS
                 "");
 
 
-            var r2 = (TextReader)new StringReader("" +
-                "// naming task\r\n" + 
-                "def_task batch_query(<!int[]> K, ::G T)->::G{\r\n" +
-                "\t<!int[]> result =\r\n" +
-                "\t\t::eval(\r\n" +
-                "\t\t\tfrom k in K\r\n" +
-                "\t\t\tselect\r\n" +
-                "\t\t\t  from t is <!TreeNode> in T\r\n" +
-                "\t\t\t  where t.key == k\r\n" +
-                "\t\t          select t.value\r\n" +
-                "\t\t);\r\n\treturn result" +
-                "\r\n}" +
-                "");
-
             var tokenList = new List<Token>();
 
             //create parser
@@ -128,7 +115,8 @@ namespace YaccLexCS
                 parser = Lr1ParserBuilder.ConfigureFromPackages(lexer.TokenNames, new[] { "YaccLexCS.config" });
                 parser.InitParser().SetContext(compilerContext);
                 "Build parser end ...".PrintToConsole();
-                if (File.Exists(ProgramConfiguration.serializeParserToFile)) {
+                if (File.Exists(ProgramConfiguration.serializeParserToFile))
+                {
                     "[Warining] ${ProgramConfiguration.serializeParserToFile} is existed".PrintToConsole();
                     if (!ProgramConfiguration.enableOverwriteExistLr1File)
                     {
@@ -140,7 +128,6 @@ namespace YaccLexCS
                 "Serialize parser to file ${ProgramConfiguration.serializeParserToFile}".PrintToConsole();
                 parser.Serialize(ProgramConfiguration.serializeParserToFile);
             }
-
 
             if (ProgramConfiguration.isDdeserializeParserFromFile)
             {
@@ -154,36 +141,39 @@ namespace YaccLexCS
                 throw new Exception("Build parser failed.");
             }
 
+            var r2 = (TextReader)new StringReader("" +
+                "// naming task\r\n" +
+                "def_task batch_query(<@int[]> K, ::G T)->::G{\r\n" +
+                    /*"\t<@int[]> result =\r\n" +
+                    "\t\t::eval(\r\n" +
+                    "\t\t\tfrom k in K\r\n" +
+                    "\t\t\tselect\r\n" +
+                    "\t\t\t  from t is <@TreeNode> in T\r\n" +
+                    "\t\t\t  where t.key == k\r\n" +
+                    "\t\t          select t.value\r\n" +
+                    "\t\t);\r\n\treturn result;" +*/
+                "\r\n}" +
+            "");
+
             lexer.ParseInStream(r2, token =>
             {
-                token.PrintToConsole();
+                if (token.Type.Equals("Skip"))
+                    return;
                 tokenList.Add(token);
-            });
-
-            return;
-            //在流中词法分析。
-            lexer.ParseInStream(r, token =>  //callback function
-            {
-                if (token.Type == "Skip") return;
-                if(token.Type == "STRING")
-                {
-                    token.SourceText = token.SourceText.Trim('\"');
-                }
-                tokenList.Add(token);
-                token.PrintToConsole();
                 parser.ParseFromCurrentState(token);
             });
-           
-           // tokenList.PrintEnumerationToConsole();
             parser.ParseFromCurrentState(new Token("$", "$"));
-            
+
+            tokenList.PrintEnumerationToConsole();
             var root = parser.GetCurrentStack().Peek();
 
-            //root.GetTreeShapeDescribe().PrintToConsole();
+            GraphUtils.DrawAST("./ast.png", root);
 
 
             var t = DateTime.Now;
-            // var lexicalAST = InterpreterHelper.ToLexivalRepresentAst(root); //减少反射后，时间提升约为100ms(debug下)
+
+
+            root.PrintCollectionToConsole();
             $"{DateTime.Now - t}".PrintToConsole();
             t = DateTime.Now;
             //lexicalAST.Eval(runtimeContext); //998ms

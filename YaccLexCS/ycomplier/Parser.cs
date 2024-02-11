@@ -137,6 +137,7 @@ namespace YaccLexCS.ycomplier
             var xs = new BinaryFormatter();
             FileStream fs = File.Open(path, FileMode.OpenOrCreate);
             xs.Serialize(fs, this);
+            fs.Close();
         }
         public override void Parse()
         {
@@ -152,6 +153,7 @@ namespace YaccLexCS.ycomplier
             "".DebugOutPut();
             
             ("code peek = " + _codeStack.Peek() + " , state = " + _stateStack.Peek() + ", input = " + token).DebugOutPut();
+            
             //根据状态栈顶，和当前输入确定。
             var t = Lr1Table?.Transition[_stateStack.Peek()][token.Type] + "";
             
@@ -161,7 +163,7 @@ namespace YaccLexCS.ycomplier
                 return;
             }
             //token.PrintToConsole();
-            if (t[0] == 's') //如果开头是s就移进 = 新状态压栈 + 新符号从输入队列弹出压栈
+            if (t[0] == 's') // 开头是s的情况下进行移进 ==> 新状态压栈 + 新符号从输入队列弹出压栈
             {
                 //shift
                 var nextState = int.Parse(t[1..]);
@@ -328,7 +330,7 @@ namespace YaccLexCS.ycomplier
             //
             // Lr1Table.Goto.DebugOutPut();
             // Lr1Table.Transition.DebugOutPut();
-            // Lr1Table.OutputToFilesAsCsv("d:\\pl\\goto.csv", "d:\\pl\\trans.csv");
+            Lr1Table.OutputToFilesAsCsv("./goto.csv", "./trans.csv");
             
             "=================================Init Finish, Goto and transition Table Generated===============================".PrintToConsole();
             "==============================Project sets===================".PrintToConsole();
@@ -341,13 +343,14 @@ namespace YaccLexCS.ycomplier
              projects.ElementInvoke((p, i) =>
              {
                  var ps = p.GetProjectItemsDesc();
+                 
                  f.Write($"I({i}): {ps}".ToCharArray().Select(e => (byte)e).Append((byte)'\n').ToArray());
              });
             
              f.Close();
 
 
-            "==============================Project sets Out to File===================".PrintToConsole();
+            "============================== Project sets Out to File ===================".PrintToConsole();
 
 
             InitStatus();

@@ -6,8 +6,6 @@ using YaccLexCS.ycomplier.code;
 namespace YaccLexCS.runtime
 {
 
-
-
     public static class InterpreterHelper
     {
 		/*public static Dictionary<string, object> EntreNewBlock(RuntimeContext context)
@@ -68,6 +66,7 @@ namespace YaccLexCS.runtime
                     $"****** No tokens are waiting for this id".PrintToConsole();
                 }
             }
+
             void dfs(ASTNode node, Stack<Dictionary<string, (int depth, int order)>> s, int d)
             {
                 (int depth, int order) TrackBack(Token t)

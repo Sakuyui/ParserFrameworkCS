@@ -42,7 +42,7 @@ namespace YaccLexCS.ycomplier.automata.re
             var orExpAutomata = (List<Automata>) context["orExpAutomata"];
             var orExpStack =  (Stack<List<string>>) context["tmp_OrExpStack"];
             var orExp = (List<string>) context["tmp_OrExp"];
-            $"======= Try End Parse ====".PrintToConsole();
+            $"======= Try End Parse ====".DebugOutPut();
             var a = orExpAutomata.Append(curAutomata);
             var finalAutomata = ReAutomataConstruction.OrMergeAutomata(a);
             return finalAutomata;

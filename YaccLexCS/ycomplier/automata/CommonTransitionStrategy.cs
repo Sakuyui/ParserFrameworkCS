@@ -106,7 +106,7 @@ namespace YaccLexCS.ycomplier.automata
         public class NormalCharacterTrans : ITransCondition
         {
             private static readonly 
-                ExclusionElementsTrans<char> Trans = new(new []{'(', ')', '|', '*', '\\', '.', '[', ']', '{', '}', '+', '^'});
+                ExclusionElementsTrans<char> Trans = new(new []{'(', ')', '|', '*', '\\', '.', '[', ']', '{', '}', '+', '^', '?'});
             
             public static readonly NormalCharacterTrans Instance = 
                 new Lazy<NormalCharacterTrans>(() => new NormalCharacterTrans()).Value;

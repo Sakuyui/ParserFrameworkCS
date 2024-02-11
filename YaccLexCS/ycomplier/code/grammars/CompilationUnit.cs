@@ -10,13 +10,18 @@ namespace YaccLexCS.config
     public static class GrammarCompilationUnit
     {
 
-        [BeginningGrammarDefinition("compilation_unit",  "definition compilation_unit")]
+        [BeginningGrammarDefinition("compilation_unit", "compilation_unit definition_or_comment", "definition_or_comment")]
         public static void compilation_unit()
         {
         }
 
-        [GrammarDefinition("definition",  "task_definition_statement")]
-        public static void definition()
+        [GrammarDefinition("definition_or_comment",  "task_definition_statement", "comment")]
+        public static void definition_or_comment()
+        {
+        }
+
+        [GrammarDefinition("comment",  "SINGLE_LINE_COMMENT")]
+        public static void comment()
         {
         }
 

@@ -10,23 +10,23 @@ namespace YaccLexCS.config
     public static class GrammarDsl
     {
 
-        [GrammarDefinition("block",  "LB statements RB")]
-        public static void block(CompilerContext context)
+        [GrammarDefinition("block",  "LB statements RB", "LB RB")]
+        public static void block()
         {
         }
 
         [GrammarDefinition("statements",  "statement statements")]
-        public static void statements(CompilerContext context)
+        public static void statements()
         {
         }
 
         [GrammarDefinition("statement",  "expression SEMICOLON")]
-        public static void statement(CompilerContext context)
+        public static void statement()
         {
         }
 
         [GrammarDefinition("expression",  "bracket_expression", "query_expression", "host_expression")]
-        public static void expression(CompilerContext context)
+        public static void expression()
         {
         }
 

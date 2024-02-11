@@ -52,8 +52,6 @@ namespace YaccLexCS.ycomplier.automata.re
             var e20 = new ReEdge(node0, node0, ReAutomataConstruction.ProcessOr, new CommonTransitionStrategy.EqualJudgeTrans<char>('|'));
 
             var e21 = new ReEdge(node0, node0, ReAutomataConstruction.EnterQuestionChar, new CommonTransitionStrategy.EqualJudgeTrans<char>('?'));
-            //var e15 = new ReEdge(node4, node0, CommonTransitionStrategy.EpsilonTrans.Instance);
-
             
             a.AddNodes(new []{node0, node1, node2, node3, node4});
             a.AddEdges(new []{e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13, e14, e15, e16,e17, e18, e19, e20, e21});

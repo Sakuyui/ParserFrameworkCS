@@ -35,7 +35,6 @@ public class Program
             configurationClassesNamespace = args[2];
         }
         var gfc = new ConfigurationFileConfigurator(configFilePath, configurationClassesNamespace);
-        
 
         gfc.GenTokenConfigFile(outPath);
         gfc.GenGrammarConfigFiles(outPath + "/grammars\\");
@@ -45,8 +44,7 @@ public class Program
         /*//var nodes = ConfigurationFileConfigurator.GenAstNodes(ts, gs);
         var eval = EvaluationListFileGen.GenFileContentString(ConfigurationFileConfigurator.GetCFGList(ts, gs));
         var res = ConfigurationFileConfigurator.GenAstNodes(ts, gs);*/
-        
-       
+
 /*
         foreach (var r in res)
         {
@@ -74,6 +72,9 @@ public class Program
         {
             GrammarConfigFileGen.GenFileContentString(g);
             break;
-        }*/
+        }
+*/
+
+
     }
 }

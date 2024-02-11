@@ -12,6 +12,9 @@ namespace YaccLexCS.ycomplier.util
         public List<string> ColumnNames => DataMap.Keys.ToList();
         public List<object> Values => DataMap.Values.ToList();
 
+        public override string ToString() => ColumnNames.Zip(Values).Select((x, y) => "(col:" + x + "val:" + y + ")")
+                .Aggregate((e1, e2) => e1 + "," + e2);
+
         public IEnumerable<Tuple<string, object>> Tuples => 
             (from e in DataMap.Keys select new Tuple<string, object>(e, DataMap[e])).ToList();
 

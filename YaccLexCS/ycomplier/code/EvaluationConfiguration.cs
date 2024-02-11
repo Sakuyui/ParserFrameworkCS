@@ -22,9 +22,9 @@ namespace YaccLexCS.ycomplier.code.structure
         public static dynamic CompilationUnitNode(CompilationUnitNode node, RuntimeContext context)
         {
             throw new NotImplementedException();
-            /*definition compilation_unit*/
+            /*definition_or_comment compilation_unit*/
             if(node.Count() == 2 
-                 && node[0].GetType().IsAssignableFrom(typeof(DefinitionNode))
+                 && node[0].GetType().IsAssignableFrom(typeof(DefinitionOrCommentNode))
                  && node[1].GetType().IsAssignableFrom(typeof(CompilationUnitNode)))
             {
                 return null;
@@ -32,12 +32,30 @@ namespace YaccLexCS.ycomplier.code.structure
         }
 
 
-        public static dynamic DefinitionNode(DefinitionNode node, RuntimeContext context)
+        public static dynamic DefinitionOrCommentNode(DefinitionOrCommentNode node, RuntimeContext context)
         {
             throw new NotImplementedException();
             /*task_definition_statement*/
             if(node.Count() == 1 
                  && node[0].GetType().IsAssignableFrom(typeof(TaskDefinitionStatementNode)))
+            {
+                return null;
+            }
+            /*comment*/
+            if(node.Count() == 1 
+                 && node[0].GetType().IsAssignableFrom(typeof(CommentNode)))
+            {
+                return null;
+            }
+        }
+
+
+        public static dynamic CommentNode(CommentNode node, RuntimeContext context)
+        {
+            throw new NotImplementedException();
+            /*SINGLE_LINE_COMMENT*/
+            if(node.Count() == 1 
+                 && node[0].GetType().IsAssignableFrom(typeof(ASTTerminalNode)))
             {
                 return null;
             }

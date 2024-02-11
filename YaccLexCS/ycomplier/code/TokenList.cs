@@ -6,8 +6,7 @@ namespace YaccLexCS.config
 {
     [TokenConfiguration]
     public static class TokenList
-    {
-
+    { 
         [TokenDefinition("FROM", "from", false, 0)]
         public static void From(CompilerContext content)
         {
@@ -20,6 +19,17 @@ namespace YaccLexCS.config
 
         [TokenDefinition("IN", "in", false, 0)]
         public static void In(CompilerContext content)
+        {
+        }
+
+        [TokenDefinition("RETURN", "return", false, 0)]
+        public static void Return(CompilerContext content)
+        {
+        }
+
+
+        [TokenDefinition("DOT", ".", false, 0)]
+        public static void Dot(CompilerContext content)
         {
         }
 
@@ -88,6 +98,18 @@ namespace YaccLexCS.config
         {
         }
 
+
+        [TokenDefinition("ASSIGN", "=", false, 0)]
+        public static void Assign(CompilerContext content)
+        {
+        }
+
+
+        [TokenDefinition("EQ", "==", false, 0)]
+        public static void Eq(CompilerContext content)
+        {
+        }
+
         [TokenDefinition("HOST_BLOCK", @"<\%\%(.)*\%\%>", true, 0)]
         public static void HostBlock(CompilerContext content)
         {
@@ -98,7 +120,7 @@ namespace YaccLexCS.config
         {
         }
 
-        [TokenDefinition("HOST_TYPE", @"<@_*[a-zA-Z][_a-zA-Z0-9]*>", true, 0)]
+        [TokenDefinition("HOST_TYPE", @"<@_*[a-zA-Z][_a-zA-Z0-9]*(\[\])?>", true, 0)]
         public static void HostType(CompilerContext content)
         {
         }
@@ -143,6 +165,13 @@ namespace YaccLexCS.config
         public static void RightArrow(CompilerContext content)
         {
         }
+
+
+        [TokenDefinition("COMMA", ",", false, 0)]
+        public static void Comma(CompilerContext content)
+        {
+        }
+
 
         [TokenDefinition("ERR", ".", true, 255)]
         public static void Error(CompilerContext content)

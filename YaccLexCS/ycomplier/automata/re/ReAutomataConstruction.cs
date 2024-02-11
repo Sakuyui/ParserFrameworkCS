@@ -8,6 +8,8 @@ namespace YaccLexCS.ycomplier.automata.re
 {
     public static class ReAutomataConstruction
     {
+
+
         public static object? EnterQuestionChar(object input, object[] objs)
         {
             var context = (AutomataContext)objs[0];
@@ -19,8 +21,9 @@ namespace YaccLexCS.ycomplier.automata.re
 
             var cur = (string)context["tmp_cur"];
             var curAutomata = (Automata)context["automata"];
+
 #if DELTAILMODE
-            $"meet +, cur automata = \n {curAutomata}".PrintToConsole();
+            $"meet *, cur automata = \n {curAutomata}".PrintToConsole();
 #endif
 
             var orExpAutomataStack = (Stack<List<Automata>>)context["stack_OrAutomata"];
@@ -31,23 +34,20 @@ namespace YaccLexCS.ycomplier.automata.re
             var lastNode = (AutomataNode)context["lastNode"];
 
             var lastResult = (AutomataNode)context["preResultNode"];
-
 #if DELTAILMODE
-            $"lastResult Node = {lastResult.NodeId}".PrintToConsole();
+            $"lastResult Node = {lastResult?.NodeId??""}".PrintToConsole();
             $"last Node = {lastNode.NodeId}".PrintToConsole();
 #endif
-
             curAutomata.AddEdge(new ReEdge(lastResult, lastNode, CommonTransitionStrategy.EpsilonTrans.Instance));
-
 #if DELTAILMODE
             curAutomata.PrintToConsole();
 #endif
-
             context["preResultNode"] = lastNode;
 
-            context["tmp_cur"] = (string) context["tmp_cur"] + (char) input;
+            context["tmp_cur"] = (string)context["tmp_cur"] + (char)input;
             return null;
         }
+
 
         public static object? EnterStarChar(object input, object[] objs)
         {

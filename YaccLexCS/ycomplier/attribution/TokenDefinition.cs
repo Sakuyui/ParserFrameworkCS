@@ -20,6 +20,8 @@ namespace YaccLexCS.ycomplier.attribution
 
         public TokenDefinition(string tokenName, string patternDesc, bool useRegex = false, int priority = 0)
         {
+
+            
             TokenName = tokenName;
             Pattern = useRegex ? new Regex(patternDesc) : StringProcess.StringToRegex(patternDesc);
             Automata = useRegex ? ReAutomata.BuildAutomataFromExp(patternDesc) : null; 

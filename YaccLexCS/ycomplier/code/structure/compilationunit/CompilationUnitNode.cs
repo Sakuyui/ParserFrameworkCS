@@ -12,10 +12,12 @@ namespace YaccLexCS.code.structure
     {
         public override dynamic Eval(RuntimeContext context)
         {
-            return EvaluationConfiguration.ClassNameMapping[GetType().Name].Invoke(null, new object[]{this, context});
+            return EvaluationConfiguration.ClassNameMapping[GetType().Name]
+                .Invoke(null, new object[]{this, context});
         }
         public CompilationUnitNode(IEnumerable<ASTNode> child) : base(child, "compilation_unit")
         {
+            
         }
     }
 }

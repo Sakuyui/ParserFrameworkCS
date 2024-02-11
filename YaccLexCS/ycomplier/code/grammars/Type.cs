@@ -10,7 +10,7 @@ namespace YaccLexCS.config
     public static class GrammarType
     {
 
-        [GrammarDefinition("task_param_list",  "task_param", "task_param_list task_param")]
+        [GrammarDefinition("task_param_list",  "task_param", "task_param_list COMMA task_param")]
         public static void task_param_list()
         {
         }

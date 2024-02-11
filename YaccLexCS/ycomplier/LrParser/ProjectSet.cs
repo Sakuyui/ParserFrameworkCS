@@ -115,12 +115,12 @@ namespace YaccLexCS.ycomplier.LrParser
 
         public string GetProjectItemsDesc()
         {
-            var s = "";
+            var s = "\r\n";
             foreach (var i in _items)
             {
                 var s1 = i.ProduceItems.Take(i.DotPos).Aggregate("", (a, b) => a +" " + b);
                 s1 += "." + i.ProduceItems.Skip(i.DotPos).Aggregate("", (a, b) => a +" " + b);
-                s += "+ " + i.StartWord + " --> " + s1  + "  " + i.SearchWordList.ToEnumerationString();
+                s += "* " + i.StartWord + " --> " + s1  + "  " + i.SearchWordList.ToEnumerationString();
                 s += "\r\n";
             }
 
