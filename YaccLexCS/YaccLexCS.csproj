@@ -12,6 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="config\" />
       <Folder Include="ycomplier\exception" />
     </ItemGroup>
 

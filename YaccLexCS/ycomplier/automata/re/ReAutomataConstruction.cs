@@ -8,20 +8,59 @@ namespace YaccLexCS.ycomplier.automata.re
 {
     public static class ReAutomataConstruction
     {
-   
+        public static object? EnterQuestionChar(object input, object[] objs)
+        {
+            var context = (AutomataContext)objs[0];
+
+            var bStack = (Stack<char>)context["stack_Brace"];
+
+            var strStack = (Stack<string>)context["tmp_strStack"];
+            var andStack = (Stack<Automata>)context["stack_AndAutomata"];
+
+            var cur = (string)context["tmp_cur"];
+            var curAutomata = (Automata)context["automata"];
+#if DELTAILMODE
+            $"meet +, cur automata = \n {curAutomata}".PrintToConsole();
+#endif
+
+            var orExpAutomataStack = (Stack<List<Automata>>)context["stack_OrAutomata"];
+            var orExpAutomata = (List<Automata>)context["orExpAutomata"];
+            var orExpStack = (Stack<List<string>>)context["tmp_OrExpStack"];
+            var orExp = (List<string>)context["tmp_OrExp"];
+            var lastNodeStack = (Stack<AutomataNode>)context["stack_lastNode"];
+            var lastNode = (AutomataNode)context["lastNode"];
+
+            var lastResult = (AutomataNode)context["preResultNode"];
+
+#if DELTAILMODE
+            $"lastResult Node = {lastResult.NodeId}".PrintToConsole();
+            $"last Node = {lastNode.NodeId}".PrintToConsole();
+#endif
+
+            curAutomata.AddEdge(new ReEdge(lastResult, lastNode, CommonTransitionStrategy.EpsilonTrans.Instance));
+
+#if DELTAILMODE
+            curAutomata.PrintToConsole();
+#endif
+
+            context["preResultNode"] = lastNode;
+
+            context["tmp_cur"] = (string) context["tmp_cur"] + (char) input;
+            return null;
+        }
+
         public static object? EnterStarChar(object input, object[] objs)
         {
             var context = (AutomataContext) objs[0];
          
-            var bStack = (Stack<char>)context["stack_Brace"];
+            var bStack = (Stack<char>) context["stack_Brace"];
             
-            
-            var strStack = (Stack<string>)context["tmp_strStack"];
+            var strStack = (Stack<string>) context["tmp_strStack"];
             var andStack = (Stack<Automata>) context["stack_AndAutomata"];
             
             var cur = (string) context["tmp_cur"];
             var curAutomata = (Automata) context["automata"];
-            
+
 #if DELTAILMODE
             $"meet *, cur automata = \n {curAutomata}".PrintToConsole();
 #endif
@@ -39,7 +78,7 @@ namespace YaccLexCS.ycomplier.automata.re
             $"last Node = {lastNode.NodeId}".PrintToConsole();
 #endif
             curAutomata.AddEdge(new ReEdge(lastResult, lastNode, CommonTransitionStrategy.EpsilonTrans.Instance));
-            curAutomata.AddEdge(new ReEdge(lastNode,lastResult, CommonTransitionStrategy.EpsilonTrans.Instance));
+            curAutomata.AddEdge(new ReEdge(lastNode, lastResult, CommonTransitionStrategy.EpsilonTrans.Instance));
 #if DELTAILMODE
             curAutomata.PrintToConsole();
 #endif
@@ -55,7 +94,7 @@ namespace YaccLexCS.ycomplier.automata.re
             var bStack = (Stack<char>)context["stack_Brace"];
             
             
-            var strStack = (Stack<string>)context["tmp_strStack"];
+            var strStack = (Stack<string>) context["tmp_strStack"];
             var andStack = (Stack<Automata>) context["stack_AndAutomata"];
             
             var cur = (string) context["tmp_cur"];

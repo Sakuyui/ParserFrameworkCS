@@ -12,6 +12,7 @@ namespace ConfigFileGenerator.configurator.CongFileGen
         private string _startWord = "";
         private readonly List<string> _tokensDesc = new();
         private readonly List<string> _grammarsDesc = new();
+
         public ConfigFileParser(string path)
         {
             _filePath = path;
@@ -23,12 +24,15 @@ namespace ConfigFileGenerator.configurator.CongFileGen
             var externalBlockName = "";
             TokenMethod currMethod = new TokenMethod("");
             var methodList = new List<TokenMethod>();
+
+            // merge all token description lines
             var all = _tokensDesc.Aggregate("", (a, b) => a + "\r\n" + b);
 
             static string FormalizeName(string s) => 
                 s.Split("_").Select(w => w.Substring(0, 1).ToUpper() + w[1..].ToLower())
                     .Aggregate("", (a, b) => a + b);
 
+            // get all lines that length > 0
             foreach (var l in _tokensDesc.Where(l => l.Length > 0))
             {
                 if (level == 0)
@@ -36,18 +40,24 @@ namespace ConfigFileGenerator.configurator.CongFileGen
                     switch (l[0])
                     {
                         case '.':
+                            // get the 1~ part of this line
                             externalBlockName = l.Replace("{","")[1..];
                             $"to {externalBlockName}".PrintToConsole();
+                            // temporary record the token
                             currMethod = new TokenMethod(FormalizeName(externalBlockName));
+                            // add level
                             level = 1;
                             break;
                         case '$':
+                            // Use regex. Use specific priority
                             if (l[1] == '!')
                             {
+                                // $! leftSymbol rightExp p
+
                                 var sp = l.Split(" ");
-                                var leftSymbol = sp[1];
+                                var leftSymbol = sp[1]; 
                                 var rightExp = sp.Skip(2).SkipLast(1).Aggregate("", (a, b) => a + b).Trim();
-                                var p = int.Parse(sp[^1]);
+                                var p = int.Parse(sp[^1]); // Priority
                                 (leftSymbol, rightExp).PrintToConsole();
                                 var m = new TokenMethod(FormalizeName(leftSymbol))
                                     .AddTokenAttr(leftSymbol, rightExp, true, p);
@@ -55,6 +65,8 @@ namespace ConfigFileGenerator.configurator.CongFileGen
                             }
                             else
                             {
+                                // Use regex. Use specific priority.
+                                // $! leftSymbol rightExp
                                 var leftSymbol = l.Split(" ")[1];
                                 var rightExp = l.Split(" ").Skip(2).Aggregate("", (a, b) => a + b).Trim();
                                 (leftSymbol, rightExp).PrintToConsole();
@@ -98,13 +110,12 @@ namespace ConfigFileGenerator.configurator.CongFileGen
                                 var m = new TokenMethod(FormalizeName(leftSymbol));
                                 methodList.Add(m.AddTokenAttr(leftSymbol, rightExp.Trim(), false , 0));
                             }
-
                             break;
                         }
                     }
                 }
                 else
-                {
+                { 
                     switch (l[0])
                     {
                         case '$':
@@ -173,7 +184,6 @@ namespace ConfigFileGenerator.configurator.CongFileGen
             var level = 0;
             var externalBlockName = "";
             GrammarFileStrut currStrut = new ("");
-           
             var grammarFileList = new List<GrammarFileStrut>();
            
             static string FormalizeName(string s) => 
@@ -210,29 +220,36 @@ namespace ConfigFileGenerator.configurator.CongFileGen
                         $"close {externalBlockName}".PrintToConsole();
                         continue;
                     }
+                    // leftSymbol:a|b|c
                     var sp = l.Split(":").Select(e => e.Trim());
                     var leftSymbol = sp.First();
                     var rightExps = sp.Skip(1).Aggregate("", (a, b) => a + b).Trim().Split("|").Select(e => e.Trim());
-                    ((leftSymbol, rightExps.Aggregate("" , (a, b) => a + " :: " + b)) + $" in {externalBlockName}").PrintToConsole();
+
+                    ((leftSymbol, rightExps.Aggregate("" , (a, b) => a + " :: " + b)) + $" in {externalBlockName}")
+                        .PrintToConsole();
                     if (timesMemo.ContainsKey(leftSymbol))
                         timesMemo[leftSymbol]++;
                     else
                         timesMemo[leftSymbol] = 0;
                     var methodName = timesMemo[leftSymbol] == 0 ? leftSymbol : leftSymbol + "_" + timesMemo[leftSymbol];
-                    currStrut.AddMethod(methodName, rightExps , leftSymbol,leftSymbol == _startWord);
+                    currStrut.AddMethod(methodName, rightExps , leftSymbol, leftSymbol == _startWord);
                 }
             }
 
             return grammarFileList;
         }
+
         public ConfigFileParser Init()
         {
             var lines = File.ReadAllLines(path: _filePath);
             var s1 = 0;
+
+            // analyze each line
             foreach (var l in lines)
             {
+                // trim the line
                 var tl = l.Trim();
-                if (tl.Length <= 0) continue; 
+                if (tl.Length <= 0) continue;
                 switch (tl[0])
                 {
                     case '#':
@@ -253,10 +270,11 @@ namespace ConfigFileGenerator.configurator.CongFileGen
                         }
                         switch (s1)
                         {
-                            //tokens
+                            // tokens
                             case 1:
                                 _tokensDesc.Add(tl);
                                 break;
+                            // grammar
                             case 2:
                                 _grammarsDesc.Add(tl);
                                 break;
@@ -265,7 +283,6 @@ namespace ConfigFileGenerator.configurator.CongFileGen
                         break;
                 }
             }
-
             return this;
         }
     }

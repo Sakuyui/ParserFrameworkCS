@@ -25,15 +25,20 @@ namespace ConfigFileGenerator.configurator.CongFileGen
         private static string MethodGen(TokenMethod method)
         {
             var sb = new StringBuilder();
-           
+            string FormalDescription(string desc, bool isRegex = false)
+            {
+                return (isRegex ? "@" : "") + "\"" + desc.Replace("\"","\\\"") + "\"";
+            }
+
             void AddAttrLine(TokenMethod.TokenAttributeDesc desc) => 
-                sb.Append($"{T4}[TokenDefinition(\"{desc.Name}\", {desc.Desc}, {(desc.IsRegex + "").ToLower()}, {desc.Priority})]{LE}");
+                sb.Append($"{T4}[TokenDefinition(\"{desc.Name}\", {FormalDescription(desc.Desc, desc.IsRegex)}, {(desc.IsRegex + "").ToLower()}, {desc.Priority})]{LE}");
 
             foreach (var d in method.Descs) AddAttrLine(d);
 
             sb.Append($"{T4}public static void {method.MethodName}(CompilerContext content){LE}" + T4 + "{" + $"{LE}{T4}" + "}");
             return sb + "";
         }
+        
         public static string GenFileContentString(List<TokenMethod> methods)
         {
             var sb = new StringBuilder();

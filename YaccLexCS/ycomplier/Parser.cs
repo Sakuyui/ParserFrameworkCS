@@ -135,7 +135,7 @@ namespace YaccLexCS.ycomplier
         public void Serialize(string path)
         {
             var xs = new BinaryFormatter();
-            FileStream fs = File.Open("1.bin", FileMode.OpenOrCreate);
+            FileStream fs = File.Open(path, FileMode.OpenOrCreate);
             xs.Serialize(fs, this);
         }
         public override void Parse()
@@ -335,9 +335,9 @@ namespace YaccLexCS.ycomplier
             $"count = {projects.Count}".DebugOutPut();
             Iset += $"count = {projects.Count}\r\n";
 
-             if(File.Exists("d:\\pl\\projects.txt"))
-                 File.Delete("d:\\pl\\projects.txt");
-             var f = File.Open("d:\\pl\\projects.txt", FileMode.OpenOrCreate);
+             if(File.Exists("./projects.txt"))
+                 File.Delete("./projects.txt");
+             var f = File.Open("./projects.txt", FileMode.OpenOrCreate);
              projects.ElementInvoke((p, i) =>
              {
                  var ps = p.GetProjectItemsDesc();

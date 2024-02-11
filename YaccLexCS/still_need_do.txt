@@ -3,12 +3,12 @@
 变量存储使用去名化
 完全引用方式设计
 
-
-//execute
+// execute
 f1(){
 	f2();
 }
 
 f2(){
-	f1(); //f1 not found, expose f2 in advance, but wait for global function f1();
+	f1(); 
+	// f1 not found, expose f2 in advance, but wait for global function f1();
 }

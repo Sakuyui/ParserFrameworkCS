@@ -10,21 +10,29 @@ namespace ConfigFileGenerator.configurator.CongFileGen
         private readonly ConfigFileParser _configFileParser;
         private readonly List<TokenMethod> _ts;
         private readonly List<GrammarFileStrut> _gs;
-
+        private readonly string _configurationNamespace;
 
         public string GenEvaluationHelperFile(string outPath = null)
         {
+
             var res = EvaluationListFileGen.GenFileContentString(ConfigurationFileConfigurator.GetCFGList(_ts, _gs));
-            if(outPath != null)
-                File.WriteAllText(outPath + "EvaluationConfiguration.cs", res);
+
+            if (outPath != null)
+            {
+                if (!Directory.Exists(outPath)) Directory.CreateDirectory(outPath);
+                File.WriteAllText(outPath + "/EvaluationConfiguration.cs", res);
+
+            }
+
             return res;
         }
-        public ConfigurationFileConfigurator(string filePath)
+        public ConfigurationFileConfigurator(string filePath, string configurationNamespace)
         {
             _configFileParser = new ConfigFileParser(filePath);
             _configFileParser.Init();
             _ts = _configFileParser.ParseTokensConfig();
             _gs = _configFileParser.ParseTokensGrammar();
+            _configurationNamespace = configurationNamespace;
         }
 
         public string GenTokenConfigFile(string outPath = null)

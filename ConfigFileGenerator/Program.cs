@@ -22,14 +22,25 @@ public class Program
     
     public static void Main(string[] args)
     {
-        //var configParser = new ConfigFileParser("d:\\d.txt").Init();
-        var gfc = new ConfigurationFileConfigurator("d:\\d.txt");
-        var outPath = "D:\\pl\\out\\";
+        var configFilePath = "./meta_config.txt";
+        var outPath = "./out/";
+        var configurationClassesNamespace = "YaccLexCS.config";
+        if (args.Length >= 2)
+        {
+            configFilePath = args[0];
+            outPath = args[1];
+        }
+        if (args.Length >= 3)
+        {
+            configurationClassesNamespace = args[2];
+        }
+        var gfc = new ConfigurationFileConfigurator(configFilePath, configurationClassesNamespace);
+        
 
         gfc.GenTokenConfigFile(outPath);
-        gfc.GenGrammarConfigFiles(outPath + "grammars\\");
+        gfc.GenGrammarConfigFiles(outPath + "/grammars\\");
         gfc.GenASTFiles(outPath);
-        gfc.GenEvaluationHelperFile(outPath + "structure\\");
+        gfc.GenEvaluationHelperFile(outPath + "/structure\\");
 
         /*//var nodes = ConfigurationFileConfigurator.GenAstNodes(ts, gs);
         var eval = EvaluationListFileGen.GenFileContentString(ConfigurationFileConfigurator.GetCFGList(ts, gs));

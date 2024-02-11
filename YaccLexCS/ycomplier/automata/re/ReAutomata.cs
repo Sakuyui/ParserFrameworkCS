@@ -47,11 +47,11 @@ namespace YaccLexCS.ycomplier.automata.re
             var finalAutomata = ReAutomataConstruction.OrMergeAutomata(a);
             return finalAutomata;
         }
+
          public static Automata BuildAutomataFromExp(string exp)
          {
-             var sb = new StringBuilder(exp);
-            
-            
+            var sb = new StringBuilder(exp);
+
             var regexBuilderAutomata = RegexAutomata;
             regexBuilderAutomata.ResetAutomata();
              
@@ -91,8 +91,7 @@ namespace YaccLexCS.ycomplier.automata.re
             return result;
          }
         public ReAutomata()
-        {
-           
+        {  
             // AddNode(new AutomataNode(0));
             // AddNode(new AutomataNode(1));
             // SetStartState(0).InitState();

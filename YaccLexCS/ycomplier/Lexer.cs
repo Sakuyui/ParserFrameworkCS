@@ -81,20 +81,21 @@ namespace YaccLexCS.ycomplier
                 var peek = (char) stream.Peek();
                 var str = order.Where(e => 
                     !e.Key.UseRegex && cur + peek == e.Key.SourcePattern);
+
+
+                // filtering token recognizaztion rule candidates
                 var t = available.Where(e =>
                         e.Key.UseRegex && e.Key.Automata!.IsCanTransWith(peek)).Concat(str)
                     .OrderBy(e => e.Key.Priority).ToArray();
-                       
-               
+
+
                 if (!t.Any()) {
-                    
-                    CompilerContext.TokenText = text;
-                    
+                    CompilerContext.CurrentRecognizedTokenName = text;
+
                     text = "";
-                          
-                            
+     
                     InvokeTokenCallBackMethod(available.First().Value);
-                    callBack?.Invoke(new Token(CompilerContext.TokenText,available.First().Key.TokenName));
+                    callBack?.Invoke(new Token(CompilerContext.CurrentRecognizedTokenName,available.First().Key.TokenName));
                     available = order.ToArray();
                     InitAutomata();
                 }else {
@@ -112,10 +113,10 @@ namespace YaccLexCS.ycomplier
             if (!available.Any())
                 return;
             
-            CompilerContext.TokenText = text;
+            CompilerContext.CurrentRecognizedTokenName = text;
             InvokeTokenCallBackMethod(available.First().Value);
             
-            callBack?.Invoke(new Token(CompilerContext.TokenText,available.First().Key.TokenName));
+            callBack?.Invoke(new Token(CompilerContext.CurrentRecognizedTokenName,available.First().Key.TokenName));
         }
         public IEnumerable<Token> ParseWholeText(string s) {
             var sb = new StringBuilder(s);
@@ -145,13 +146,13 @@ namespace YaccLexCS.ycomplier
                 if (!t.Any()) {
                             
                     //$"get token {cur}".PrintToConsole();
-                    CompilerContext.TokenText = cur;
+                    CompilerContext.CurrentRecognizedTokenName = cur;
                             
                     cur = "";
                           
                             
                     InvokeTokenCallBackMethod(available.First().Value);
-                    yield return new Token(CompilerContext.TokenText,available.First().Key.TokenName);
+                    yield return new Token(CompilerContext.CurrentRecognizedTokenName,available.First().Key.TokenName);
                     available = order.ToArray();
                     InitAutomata();
                 }else {
@@ -169,9 +170,9 @@ namespace YaccLexCS.ycomplier
             if (!available.Any()) 
                 yield break;
             $"get token {cur}".PrintToConsole();
-            CompilerContext.TokenText = cur;
+            CompilerContext.CurrentRecognizedTokenName = cur;
             InvokeTokenCallBackMethod(available.First().Value);
-            yield return new Token(CompilerContext.TokenText,available.First().Key.TokenName);
+            yield return new Token(CompilerContext.CurrentRecognizedTokenName,available.First().Key.TokenName);
         }
     }
 }

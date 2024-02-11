@@ -26,12 +26,22 @@ namespace YaccLexCS
 {
     
     
+
+  
+
     public class Program
     {
-   
-        public static void Main()
+        static class ProgramConfiguration
         {
-            
+            public static string serializeParserToFile = "parser.lr1";
+            public static string deserializeParserFromFile = "parser.lr1";
+            public static bool isSerializeParserToFile = false;
+            public static bool isDdeserializeParserFromFile = true;
+            public static bool enableOverwriteExistLr1File = true;
+        }
+        public static void Main(string[] args)
+        {
+            // parseParameters(args);
             var compilerContext = new CompilerContext();
             var runtimeContext = new RuntimeContext();
 
@@ -90,21 +100,67 @@ namespace YaccLexCS
                 "       return b;" +
                 "   }" +  
                 "}" + 
-                ""); 
-             
+                "");
+
+
+            var r2 = (TextReader)new StringReader("" +
+                "// naming task\r\n" + 
+                "def_task batch_query(<!int[]> K, ::G T)->::G{\r\n" +
+                "\t<!int[]> result =\r\n" +
+                "\t\t::eval(\r\n" +
+                "\t\t\tfrom k in K\r\n" +
+                "\t\t\tselect\r\n" +
+                "\t\t\t  from t is <!TreeNode> in T\r\n" +
+                "\t\t\t  where t.key == k\r\n" +
+                "\t\t          select t.value\r\n" +
+                "\t\t);\r\n\treturn result" +
+                "\r\n}" +
+                "");
+
             var tokenList = new List<Token>();
 
             //create parser
-            /* Lr1Parser parser = Lr1ParserBuilder.ConfigureFromPackages(lexer.TokenNames, new[] { "YaccLexCS.config" });
-             parser.InitParser().SetContext(compilerContext);
-             if (File.Exists("1.bin")) File.Delete("1.bin");
-             parser.Serialize("1.bin");
- */
+            Lr1Parser parser = null;
 
-            Lr1Parser parser = Lr1ParserBuilder
-                .DeSerializeFromFile("1.bin", lexer.TokenNames, new[] { "YaccLexCS.config" });
-            parser.SetContext(compilerContext);
+            if (ProgramConfiguration.isSerializeParserToFile)
+            {
+                "Build parser ...".PrintToConsole();
+                parser = Lr1ParserBuilder.ConfigureFromPackages(lexer.TokenNames, new[] { "YaccLexCS.config" });
+                parser.InitParser().SetContext(compilerContext);
+                "Build parser end ...".PrintToConsole();
+                if (File.Exists(ProgramConfiguration.serializeParserToFile)) {
+                    "[Warining] ${ProgramConfiguration.serializeParserToFile} is existed".PrintToConsole();
+                    if (!ProgramConfiguration.enableOverwriteExistLr1File)
+                    {
+                        throw new IOException("${ProgramConfiguration.serializeParserToFile} is existed. It may attach 'ENABLE_OVERWRITE_LR1_FILE' option to program arguments to allow overwrite");
+                    }
 
+                    File.Delete(ProgramConfiguration.serializeParserToFile);
+                }
+                "Serialize parser to file ${ProgramConfiguration.serializeParserToFile}".PrintToConsole();
+                parser.Serialize(ProgramConfiguration.serializeParserToFile);
+            }
+
+
+            if (ProgramConfiguration.isDdeserializeParserFromFile)
+            {
+                parser = Lr1ParserBuilder
+                    .DeSerializeFromFile(ProgramConfiguration.deserializeParserFromFile, lexer.TokenNames, new[] { "YaccLexCS.config" });
+                parser.SetContext(compilerContext);
+            }
+
+            if(parser == null)
+            {
+                throw new Exception("Build parser failed.");
+            }
+
+            lexer.ParseInStream(r2, token =>
+            {
+                token.PrintToConsole();
+                tokenList.Add(token);
+            });
+
+            return;
             //在流中词法分析。
             lexer.ParseInStream(r, token =>  //callback function
             {
@@ -127,15 +183,59 @@ namespace YaccLexCS
 
 
             var t = DateTime.Now;
-            var lexicalAST = InterpreterHelper.ToLexivalRepresentAst(root); //减少反射后，时间提升约为100ms(debug下)
+            // var lexicalAST = InterpreterHelper.ToLexivalRepresentAst(root); //减少反射后，时间提升约为100ms(debug下)
             $"{DateTime.Now - t}".PrintToConsole();
             t = DateTime.Now;
-            lexicalAST.Eval(runtimeContext); //998ms
+            //lexicalAST.Eval(runtimeContext); //998ms
             $"{DateTime.Now - t}".PrintToConsole();
 
 
         }
 
-       
+        private static void parseParameters(string[] args)
+        {
+            foreach(string str in args)
+            {
+                if (str.Length == 0) continue;
+                string[] strings = str.Trim().Split("=");
+                if(strings.Length == 0) continue;
+                if (strings.Length == 1)
+                {
+                    processParameter(strings[0], null);
+                    continue;
+                }
+                var (key, value) = (strings[0], strings[1..].Aggregate((a,b)=>a + b));
+                processParameter(key, value);
+            }
+        }
+
+        private static void processParameter(string key, string? value)
+        {
+            switch(key)
+            {
+                case "SERIALIZE_PARSER":
+                    if(value == null)
+                    {
+                        "[Warning] Use default output lr1 file's serialzation path './parser.lr1'".PrintToConsole();
+                        "--> [Usage] SERIALIZE_PARSER=output_lr1_file_path".PrintToConsole();
+                    }
+                    ProgramConfiguration.serializeParserToFile = value ?? "./parser.lr1";
+                    ProgramConfiguration.isSerializeParserToFile = true;
+                    break;
+                case "DESERIALIZE_PARSER":
+                    if (value == null)
+                    {
+                        "[Warning] Use default output lr1 file './parser.lr1'".PrintToConsole();
+                        "--> [Usage] DESERIALIZE_PARSER=input_lr1_file_path".PrintToConsole();
+                    }
+                    ProgramConfiguration.deserializeParserFromFile = value ?? "./parser.lr1";
+                    ProgramConfiguration.isDdeserializeParserFromFile = true;
+                    break;
+                case "ENABLE_OVERWRITE_LR1_FILE":
+                    ProgramConfiguration.enableOverwriteExistLr1File = true;
+                    break;
+
+            }
+        }
     }
 }

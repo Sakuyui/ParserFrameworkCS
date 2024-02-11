@@ -20,14 +20,14 @@ namespace YaccLexCS.ycomplier
             get => _kvMemory.ContainsKey(key) ? _kvMemory[key] : null;
             set => _kvMemory[key] = value;
         }
-        public string TokenText
+        public string CurrentRecognizedTokenName
         {
             get => (string) this["v_tokenSourceText"];
             set => this["v_tokenSourceText"] = value;
         }
           
 
-        public dynamic TokenVal
+        public dynamic CurrentRecognizedTokenValue
         {
             get => this["v_tokenVal"];
             set => this["v_tokenVal"] = value;

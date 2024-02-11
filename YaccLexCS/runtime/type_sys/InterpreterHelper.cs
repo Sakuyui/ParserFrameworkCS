@@ -10,7 +10,7 @@ namespace YaccLexCS.runtime
 
     public static class InterpreterHelper
     {
-		public static Dictionary<string, object> EntreNewBlock(RuntimeContext context)
+		/*public static Dictionary<string, object> EntreNewBlock(RuntimeContext context)
         {
 			return context.GetCurrentCommonFrame().CreateNewStorageBlockForNewCodeBlock();
         }
@@ -121,7 +121,7 @@ namespace YaccLexCS.runtime
                     else
                     {
                         var l = node[0];
-                        var r = node[1]![0]; //希望提前暴露定义
+                        var r = node[1]![0]; // hope exposure definition in advance.
                         if (r is DefinitionNode)
                         {
                             //global definition
@@ -156,8 +156,8 @@ namespace YaccLexCS.runtime
                 {
                     var tNode2 = node as DefineVarExpressionNode;
                     var token = (tNode2[1] as ASTTerminalNode).Token;
-                    /*  $"ID in Definition {token}".PrintToConsole();
-                    $"define {token.SourceText} in depth {d}".PrintToConsole();*/
+                    *//*  $"ID in Definition {token}".PrintToConsole();
+                    $"define {token.SourceText} in depth {d}".PrintToConsole();*//*
                     var top = s.Peek();
                     var l = top.Count;
                     top[token.SourceText] = (0, l);
@@ -301,6 +301,6 @@ namespace YaccLexCS.runtime
             dfs(root, stack, 0);
             $"=================convert lexical representation finsh=====================".PrintToConsole();
             return root;
-        }
+        }*/
     }
 }
