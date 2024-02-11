@@ -168,6 +168,10 @@ namespace YaccLexCS.ycomplier
                 //shift
                 var nextState = int.Parse(t[1..]);
                 $"shift to {nextState}".DebugOutPut();
+                if(nextState == 52)
+                {
+                    "".PrintCollectionToConsole();
+                }
                 _stateStack.Push(nextState);
                 _codeStack.Push(new ASTTerminalNode(token));
                 //$"code Stack = {_codeStack.ToEnumerationString()}".PrintToConsole();

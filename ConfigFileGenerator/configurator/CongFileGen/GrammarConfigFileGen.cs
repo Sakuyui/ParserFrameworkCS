@@ -39,7 +39,7 @@ namespace ConfigFileGenerator.configurator.CongFileGen
 
             AddAttrLine(method);
 
-            sb.Append($"{T4}public static void {method.Name}(){LE}" + T4 + "{" + $"{LE}{T4}" + "}");
+            sb.Append($"{T4}public static void {method.Name}(CompilerContext ctx){LE}" + T4 + "{" + $"{LE}{T4}" + "}");
             
             return sb + "";
         }

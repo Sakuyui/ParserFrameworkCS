@@ -144,14 +144,15 @@ namespace YaccLexCS
             var r2 = (TextReader)new StringReader("" +
                 "// naming task\r\n" +
                 "def_task batch_query(<@int[]> K, ::G T)->::G{\r\n" +
-                    /*"\t<@int[]> result =\r\n" +
+                    "\t<@int[]> result =\r\n" +
                     "\t\t::eval(\r\n" +
                     "\t\t\tfrom k in K\r\n" +
                     "\t\t\tselect\r\n" +
                     "\t\t\t  from t is <@TreeNode> in T\r\n" +
                     "\t\t\t  where t.key == k\r\n" +
                     "\t\t          select t.value\r\n" +
-                    "\t\t);\r\n\treturn result;" +*/
+                    "\t\t);\r\n" +
+                    "\treturn result;" +
                 "\r\n}" +
             "");
 
