@@ -33,5 +33,10 @@ namespace YaccLexCS.ycomplier.code
         {
             return $"at line {Token.LineNum}";
         }
+
+        public override string GetSourceText()
+        {
+            return Token.SourceText;
+        }
     }
 }

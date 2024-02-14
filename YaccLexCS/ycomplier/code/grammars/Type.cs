@@ -30,7 +30,7 @@ namespace YaccLexCS.config
         {
         }
 
-        [GrammarDefinition("dsl_type",  "DSL_ACCESSOR IDENTIFIER")]
+        [GrammarDefinition("dsl_type",  "DSL_ACCESSOR IDENTIFIER", "DSL_ACCESSOR IDENTIFIER LSquareB RSquareB", "DSL_ACCESSOR IDENTIFIER LSquareB INTEGER_LITERAL RSquareB")]
         public static void dsl_type()
         {
         }

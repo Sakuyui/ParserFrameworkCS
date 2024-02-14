@@ -152,7 +152,8 @@ namespace YaccLexCS.ycomplier
                     "parser should have a Context, may use SetContext(new ParserContext()) to solve this problem.");
             "".DebugOutPut();
             
-            ("code peek = " + _codeStack.Peek() + " , state = " + _stateStack.Peek() + ", input = " + token).DebugOutPut();
+            ("code peek = " + _codeStack.Peek() + " , state = " + _stateStack.Peek() + ", input = " + token)
+                .DebugOutPut();
             
             //根据状态栈顶，和当前输入确定。
             var t = Lr1Table?.Transition[_stateStack.Peek()][token.Type] + "";

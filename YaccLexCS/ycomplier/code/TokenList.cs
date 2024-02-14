@@ -83,10 +83,20 @@ namespace YaccLexCS.config
         {
         }
 
+        [TokenDefinition("LSquareB", "[", false, 0)]
+        public static void LSquareB(CompilerContext content)
+        {
+        }
+
+        [TokenDefinition("RSquareB", "]", false, 0)]
+        public static void RSquareB(CompilerContext content)
+        {
+        }
         [TokenDefinition("LB", "{", false, 0)]
         public static void Lb(CompilerContext content)
         {
         }
+
 
         [TokenDefinition("RB", "}", false, 0)]
         public static void Rb(CompilerContext content)
@@ -136,17 +146,17 @@ namespace YaccLexCS.config
             $"[lexer] Encounter identifier {content.CurrentRecognizedTokenName}".PrintToConsole();
         }
 
-        [TokenDefinition("HEX_INTEGER_LITERAL", @"0[xX]('_'*[0-9a-fA-F])+([lL]?[uU]|[uU]?[lL])?", true, 0)]
+        [TokenDefinition("HEX_INTEGER_LITERAL", @"0[xX](_*[0-9a-fA-F])+([lL]?[uU]|[uU]?[lL])?", true, 0)]
         public static void HexIntegerLiteral(CompilerContext content)
         {
         }
 
-        [TokenDefinition("BIN_INTEGER_LITERAL", @"0[bB]('_'*[01])+([lL]?[uU]|[uU]?[lL])?", true, 0)]
+        [TokenDefinition("BIN_INTEGER_LITERAL", @"0[bB](_*[01])+([lL]?[uU]|[uU]?[lL])?", true, 0)]
         public static void BinIntegerLiteral(CompilerContext content)
         {
         }
 
-        [TokenDefinition("INTEGER_LITERAL", @"[0-9]('_'*[0-9])*([lL]?[uU]|[uU]?[lL])?", true, 0)]
+        [TokenDefinition("INTEGER_LITERAL", @"[0-9](_*[0-9])*([lL]?[uU]|[uU]?[lL])?", true, 0)]
         public static void IntegerLiteral(CompilerContext content)
         {
         }

@@ -46,6 +46,7 @@ namespace YaccLexCS.ycomplier.code
             return $"({NodeName}:{ChildrenCount})";
         }
 
+        public abstract string GetSourceText();
         public string GetTreeShapeDescribe()
         {
             StringBuilder r = new();

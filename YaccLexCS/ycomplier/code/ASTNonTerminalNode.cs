@@ -31,5 +31,10 @@ namespace YaccLexCS.ycomplier.code
             var w = _children.Where(c => c.Location() != "");
             return w.Any() ? w.First().Location() : "";
         }
+
+        public override string GetSourceText()
+        {
+            return _children.Select(c => c.GetSourceText()).Aggregate((a, b) => a + b);
+        }
     }
 }

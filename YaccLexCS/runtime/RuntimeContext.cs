@@ -174,6 +174,8 @@ namespace YaccLexCS.runtime
  
                 set => _kvComp[key] = value;
             }
+
+
            
         }
         private readonly RuntimeMemory _runtimeMemory = new();
@@ -196,6 +198,12 @@ namespace YaccLexCS.runtime
         {
             get => _runtimeMemory[key];
             set => _runtimeMemory[key] = value;
+        }
+
+
+        public Boolean RuntimeMemoryContains(string key)
+        {
+            return _runtimeMemory[key] != null;
         }
         public string TokenText
         {

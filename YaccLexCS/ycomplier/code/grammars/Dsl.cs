@@ -44,7 +44,7 @@ namespace YaccLexCS.config
         public static void dsl_func_call()
         {
         }
-        [GrammarDefinition("call_params", "call_params COMMA expression", "expression")]
+        [GrammarDefinition("call_params", "call_params COMMA expression", "call_param")]
         public static void call_params()
         {
         }
@@ -52,12 +52,11 @@ namespace YaccLexCS.config
         public static void call_param()
         {
         }
+
         [GrammarDefinition("primitive_expression", "IDENTIFIER", "member_access", "RETURN primitive_expression")]
         public static void primitive_expression()
         {
         }
-
-
 
         [GrammarDefinition("bracket_expression",  "LP expression RP")]
         public static void bracket_expression()

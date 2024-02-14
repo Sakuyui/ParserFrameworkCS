@@ -17,7 +17,7 @@ using YaccLexCS.ycomplier;
 using YaccLexCS.ycomplier.automata;
 using YaccLexCS.ycomplier.automata.re;
 using YaccLexCS.ycomplier.code;
-
+using YaccLexCS.ycomplier.code.structure;
 using YaccLexCS.ycomplier.LrParser;
 using YaccLexCS.ycomplier.util;
 
@@ -143,8 +143,8 @@ namespace YaccLexCS
 
             var r2 = (TextReader)new StringReader("" +
                 "// naming task\r\n" +
-                "def_task batch_query(<@int[]> K, ::G T)->::G{\r\n" +
-                    "\t<@int[]> result =\r\n" +
+                "def_task batch_query(::int[200] K, ::G T)->::int[200]{\r\n" +
+                    "\t::int[200] result =\r\n" +
                     "\t\t::eval(\r\n" +
                     "\t\t\tfrom k in K\r\n" +
                     "\t\t\tselect\r\n" +
@@ -173,8 +173,9 @@ namespace YaccLexCS
 
             var t = DateTime.Now;
 
-
+            
             root.PrintCollectionToConsole();
+            root.Eval(runtimeContext);
             $"{DateTime.Now - t}".PrintToConsole();
             t = DateTime.Now;
             //lexicalAST.Eval(runtimeContext); //998ms
